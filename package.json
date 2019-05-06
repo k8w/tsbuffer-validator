@@ -1,0 +1,31 @@
+{
+  "name": "tsbuffer-validator",
+  "version": "0.0.1",
+  "description": "Validator for TSBuffer values",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/k8w/tsbuffer-validator.git"
+  },
+  "keywords": [
+    "k8w",
+    "tsbuffer",
+    "typescript",
+    "validator",
+    "interface",
+    "protobuf",
+    "buffer",
+    "json",
+    "schema",
+    "validate"
+  ],
+  "author": "k8w",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/k8w/tsbuffer-validator/issues"
+  },
+  "homepage": "https://github.com/k8w/tsbuffer-validator#readme"
+}
