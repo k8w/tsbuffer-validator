@@ -31,5 +31,40 @@
   "homepage": "https://github.com/k8w/tsbuffer-validator#readme",
   "dependencies": {
     "tsbuffer-schema": "^0.4.0"
+  },
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "coverage",
+      "test"
+    ],
+    "reporter": [
+      "html"
+    ],
+    "all": true
+  },
+  "devDependencies": {
+    "@types/mocha": "^5.2.6",
+    "mocha": "^6.1.4",
+    "nyc": "^14.1.0",
+    "ts-node": "^8.1.0"
+  },
+  "nyc": {
+    "extension": [
+      ".ts",
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "coverage",
+      "test"
+    ],
+    "reporter": [
+      "html"
+    ],
+    "all": true
   }
 }

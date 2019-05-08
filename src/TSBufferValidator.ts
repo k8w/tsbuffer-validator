@@ -18,8 +18,7 @@ import { PickTypeSchema } from 'tsbuffer-schema/src/schemas/PickTypeSchema';
 import { PartialTypeSchema } from 'tsbuffer-schema/src/schemas/PartialTypeSchema';
 import { OmitTypeSchema } from 'tsbuffer-schema/src/schemas/OmitTypeSchema';
 import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
-
-export type ValidateResult = { isSucc: true } | { isSucc: false, errMsg: string };
+import { ValidateResult } from './ValidateResult';
 
 export class TSBufferValidator {
 
