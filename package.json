@@ -4,7 +4,8 @@
   "description": "Validator for TSBuffer values",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "us": "npm i tsbuffer-schema@*"
   },
   "repository": {
     "type": "git",
@@ -27,5 +28,8 @@
   "bugs": {
     "url": "https://github.com/k8w/tsbuffer-validator/issues"
   },
-  "homepage": "https://github.com/k8w/tsbuffer-validator#readme"
+  "homepage": "https://github.com/k8w/tsbuffer-validator#readme",
+  "dependencies": {
+    "tsbuffer-schema": "^0.4.0"
+  }
 }
