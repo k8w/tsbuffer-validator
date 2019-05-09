@@ -1,18 +1,15 @@
 export enum ValidateErrorCode {
     Succ = 0,
-    NullOnRequired,
-    LogicFalse,
-    NotArray,
-    NotNumber,
-    NotString,
-    NotBoolean,
-    NotObject,
-    NotNull,
-    NotUndefined,
-    InvalidStrLiteral,
-    ArrayNotMatch,
-    InterfaceNotMatch,
-    FieldNotAllowed
+    WrongType,
+    InvalidUnsignedNumber,
+    InvalidInteger,
+    InvalidArrayElement,
+    TupleOverlength,
+    InvalidTupleElement,
+    InvalidEnumValue,
+    AnyTypeCannotBeArrayBuffer,
+    AnyTypeCannotBeTypedArray,
+
 }
 
 export class ValidateResult {
@@ -53,31 +50,32 @@ export class ValidateResult {
 
     private static _errorMessages = {
         [ValidateErrorCode.Succ]: 'Success',
-        [ValidateErrorCode.NullOnRequired]: 'Required field cannot be null',
-        [ValidateErrorCode.LogicFalse]: 'Logic conditions are not satisfied',
-        [ValidateErrorCode.NotArray]: 'Field must be Array',
-        [ValidateErrorCode.NotNumber]: 'Field must be number',
-        [ValidateErrorCode.NotString]: 'Field must be string',
-        [ValidateErrorCode.NotBoolean]: 'Field must be boolean',
-        [ValidateErrorCode.NotObject]: 'Field must be object',
-        [ValidateErrorCode.NotNull]: 'Field must be null',
-        [ValidateErrorCode.NotUndefined]: 'Field must be undefined',
-        [ValidateErrorCode.InvalidStrLiteral]: 'Invalid string literal value',
-        [ValidateErrorCode.ArrayNotMatch]: 'Array elements not match',
-        [ValidateErrorCode.InterfaceNotMatch]: 'Interface not match',
-        [ValidateErrorCode.FieldNotAllowed]: 'Disallowed field'
+        [ValidateErrorCode.WrongType]: 'Value has a wrong type',
+        [ValidateErrorCode.InvalidUnsignedNumber]: 'Invalid unsigned number',
+        [ValidateErrorCode.InvalidInteger]: 'Invalid integer',
+        [ValidateErrorCode.InvalidArrayElement]: 'Invalid array element',
+        [ValidateErrorCode.TupleOverlength]: 'Tuple length out of range',
+        [ValidateErrorCode.InvalidTupleElement]: 'Invalid tuple element',
+        [ValidateErrorCode.InvalidEnumValue]: 'Value does not exist in enum',
+        [ValidateErrorCode.AnyTypeCannotBeArrayBuffer]: 'Any type cannot be ArrayBuffer',
+        [ValidateErrorCode.AnyTypeCannotBeTypedArray]: 'Any type cannot be TypedArray'
+
     };
 
-    //重载检测 fieldName和innerError要传必须一起
-    constructor(errcode: ValidateErrorCode);
-    constructor(errcode: ValidateErrorCode, fieldName: string, innerError: ValidateResult);
-    constructor(errcode: ValidateErrorCode = 0, fieldName?: string, innerError?: ValidateResult) {
+    private constructor(errcode: ValidateErrorCode = 0, fieldName?: string, innerError?: ValidateResult) {
         this.errcode = errcode;
         this.fieldName = fieldName;
         this.innerError = innerError;
     }
 
     static readonly success = new ValidateResult(ValidateErrorCode.Succ);
+
+    //重载检测 fieldName和innerError要传必须一起
+    static error(errcode: ValidateErrorCode): ValidateResult;
+    static error(errcode: ValidateErrorCode, fieldName: string, innerError: ValidateResult): ValidateResult;
+    static error(errcode: ValidateErrorCode, fieldName?: string, innerError?: ValidateResult) {
+        return new ValidateResult(errcode, fieldName, innerError);
+    }
 
     /**
      * 最里面的错误，如对上面 {a:{b:{c:"Wrong"}}} 的例子
