@@ -20,11 +20,22 @@ import { OmitTypeSchema } from 'tsbuffer-schema/src/schemas/OmitTypeSchema';
 import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
 import { ValidateResult, ValidateErrorCode } from './ValidateResult';
 
+export interface TSBufferValidatorOptions {
+    strictNullChecks: boolean
+}
+
 export class TSBufferValidator {
 
+    _options: TSBufferValidatorOptions = {
+        strictNullChecks: true
+    }
+
     private _proto: TSBufferProto;
-    constructor(proto: TSBufferProto) {
+    constructor(proto: TSBufferProto, options?: Partial<TSBufferValidatorOptions>) {
         this._proto = proto;
+        if (options) {
+            Object.assign(this._options, options);
+        }
     }
 
     validate(value: any, path: string, symbolName: string): ValidateResult {
@@ -53,13 +64,13 @@ export class TSBufferValidator {
             case 'Tuple':
                 return this.validateTupleType(value, schema, path);
             case 'Enum':
-                return this.validateEnumType(value, schema, path);
+                return this.validateEnumType(value, schema);
             case 'Any':
-                return this.validateAnyType(value, schema, path);
+                return this.validateAnyType(value);
             case 'Literal':
-                return this.validateLiteralType(value, schema, path);
+                return this.validateLiteralType(value, schema);
             case 'NonPrimitive':
-                return this.validateNonPrimitiveType(value, schema, path);
+                return this.validateNonPrimitiveType(value);
             case 'Interface':
                 return this.validateInterfaceType(value, schema, path);
             case 'Buffer':
@@ -110,8 +121,12 @@ export class TSBufferValidator {
                 return ValidateResult.error(ValidateErrorCode.InvalidUnsignedNumber);
             }
             // 整形却为小数
-            if (schema.scalarType !== 'float' && schema.scalarType !== 'double' && value !== (value | 0)) {
+            if (schema.scalarType !== 'float' && schema.scalarType !== 'double' && typeof value === 'number' && value !== (value | 0)) {
                 return ValidateResult.error(ValidateErrorCode.InvalidInteger);
+            }
+            // 不是bigint却为bigint
+            if (schema.scalarType.indexOf('64') === -1 && typeof value === 'bigint') {
+                return ValidateResult.error(ValidateErrorCode.CantBeBigInt);
             }
         }
 
@@ -161,7 +176,7 @@ export class TSBufferValidator {
         return ValidateResult.success;
     }
 
-    validateEnumType(value: any, schema: EnumTypeSchema, path: string): ValidateResult {
+    validateEnumType(value: any, schema: EnumTypeSchema): ValidateResult {
         // must be string or number
         if (typeof value !== 'string' || typeof value !== 'number') {
             return ValidateResult.error(ValidateErrorCode.WrongType);
@@ -176,30 +191,171 @@ export class TSBufferValidator {
         }
     }
 
-    validateAnyType(value: any, schema: AnyTypeSchema, path: string): ValidateResult {
-        // 不能是ArrayBuffer或function
-        if (value instanceof ArrayBuffer || typeof value === 'function') {
-            return ValidateResult.error(ValidateErrorCode.AnyTypeCannotBeArrayBuffer);
+    validateAnyType(value: any): ValidateResult {
+        return ValidateResult.success;
+    }
+
+    validateLiteralType(value: any, schema: LiteralTypeSchema): ValidateResult {
+        return value === schema.literal ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.InvalidLiteralValue);
+    }
+
+    validateNonPrimitiveType(value: any): ValidateResult {
+        return typeof value === 'object' ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
+    }
+
+    validateInterfaceType(value: any, schema: InterfaceTypeSchema, path: string): ValidateResult {
+        if (typeof value !== 'object') {
+            return ValidateResult.error(ValidateErrorCode.WrongType);
         }
 
-        // 不能是TypedArray
-        if (value && value.buffer && value.buffer instanceof ArrayBuffer) {
-            return ValidateResult.error(ValidateErrorCode.AnyTypeCannotBeTypedArray);
+        // interfaceSignature强制了key必须是数字的情况
+        if (schema.indexSignature && schema.indexSignature.keyType === 'Number') {
+            for (let key in value) {
+                if (!/\d+/.test(key)) {
+                    return ValidateResult.error(ValidateErrorCode.InvalidInterfaceMember, key, ValidateResult.error(ValidateErrorCode.InvalidNumberKey))
+                }
+            }
+        }
+
+        // 确保每个字段不重复检测
+        // 作为一个透传的参数在各个方法间共享传递
+        let skipFields: string[] = [];
+
+        // 先校验properties
+        if (schema.properties) {
+            let vRes = this._validateInterfaceProperties(value, schema.properties, path, skipFields);
+            if (!vRes.isSucc) {
+                return vRes;
+            }
+        }
+
+        // 再检测extends
+        if (schema.extends) {
+            for (let i = 0; i < schema.extends.length; ++i) {
+                // extends检测 允许未知的 跳过已检测的字段
+                let vRes = this._validateInterfaceExtends(value, schema.extends[i], path, skipFields);
+                if (!vRes.isSucc) {
+                    return vRes;
+                }
+            }
+        }
+
+        // 最后检测indexSignature
+        return this._validateInterfaceIndexSignature(value, schema.indexSignature, path, skipFields);
+    }
+
+    /**
+     * 检测value中的字段是否满足properties
+     * 注意：这个方法允许properties中未定义的字段存在！
+     * @return interface的error
+     */
+    private _validateInterfaceProperties(value: any, properties: NonNullable<InterfaceTypeSchema['properties']>, path: string, skipFields: string[]): ValidateResult {
+        for (let property of properties) {
+            // skipFields
+            if (skipFields.indexOf(property.name) > -1) {
+                continue;
+            }
+            skipFields.push(property.name);
+
+            // optional
+            if (property.optional && value[property.name] === undefined) {
+                continue;
+            }
+
+            let vRes = this.validateBySchema(value[property.name], property.type, path);
+            if (!vRes) {
+                return ValidateResult.error(ValidateErrorCode.InvalidInterfaceMember, property.name, vRes)
+            }
         }
 
         return ValidateResult.success;
     }
 
-    validateLiteralType(value: any, schema: LiteralTypeSchema, path: string): ValidateResult {
-        throw new Error('TODO');
+    /**
+     * 递归检测extends
+     * 不检测额外超出的字段
+     * @reutrn interface的error
+     */
+    private _validateInterfaceExtends(value: any, extendsSchema: ReferenceTypeSchema, path: string, skipFields: string[]): ValidateResult {
+        // 解析引用
+        let parsedSchema = this._parseReference(extendsSchema, path);
+        let schema = parsedSchema.schema;
+        let schemaPath = parsedSchema.path;
+        if (schema.type !== 'Interface') {
+            return ValidateResult.error(ValidateErrorCode.ExtendsMustBeInterface);
+        }
+
+        // 递归检查extends的extends
+        if (schema.extends) {
+            for (let exSchema of schema.extends) {
+                let vRes = this._validateInterfaceExtends(value, exSchema, schemaPath, skipFields);
+                if (!vRes) {
+                    return vRes;
+                }
+            }
+        }
+
+        // 检查本extends的properties
+        if (schema.properties) {
+            let vRes = this._validateInterfaceProperties(value, schema.properties, schemaPath, skipFields);
+            if (!vRes) {
+                return vRes;
+            }
+        }
+
+        return this._validateInterfaceIndexSignature(value, schema.indexSignature, schemaPath, skipFields);
     }
 
-    validateNonPrimitiveType(value: any, schema: NonPrimitiveTypeSchema, path: string): ValidateResult {
-        throw new Error('TODO');
+    private _validateInterfaceIndexSignature(value: any, indexSignature: InterfaceTypeSchema['indexSignature'], path: string, skipFields: string[]) {
+        let remainedFields = Object.keys(value).remove(v => skipFields.indexOf(v) > -1);
+        if (remainedFields.length) {
+            if (indexSignature) {
+                for (let field of remainedFields) {
+                    // skipFields
+                    if (skipFields.indexOf(field) > -1) {
+                        continue;
+                    }
+                    skipFields.push(field);
+
+                    // validate each field
+                    let vRes = this.validateBySchema(value[field], indexSignature.type, path);
+                    if (!vRes.isSucc) {
+                        return ValidateResult.error(ValidateErrorCode.InvalidInterfaceMember, vRes.fieldName || '', vRes);
+                    }
+                }
+            }
+            // Unexpected field
+            else {
+                return ValidateResult.error(ValidateErrorCode.InvalidInterfaceMember, remainedFields[0], ValidateResult.error(ValidateErrorCode.UnexpectedField))
+            }
+        }
+
+        return ValidateResult.success;
     }
 
-    validateInterfaceType(value: any, schema: InterfaceTypeSchema, path: string): ValidateResult {
-        throw new Error('TODO');
+    /** 将ReferenceTYpeSchema层层转换为它最终实际引用的类型 */
+    private _parseReference(schema: ReferenceTypeSchema, path: string): {
+        schema: Exclude<TSBufferSchema, ReferenceTypeSchema>, path: string
+    } {
+        path = schema.path || path;
+        if (path && !this._proto[path]) {
+            throw new Error('Cannot find path: ' + path);
+        }
+
+        let parsedSchema = this._proto[path][schema.targetName];
+        if (!parsedSchema) {
+            throw new Error(`Cannot find [${schema.targetName}] at ${path}`);
+        }
+
+        if (parsedSchema.type === 'Reference') {
+            return this._parseReference(parsedSchema, path);
+        }
+        else {
+            return {
+                schema: parsedSchema,
+                path: path
+            }
+        }
     }
 
     validateBufferType(value: any, schema: BufferTypeSchema, path: string): ValidateResult {
