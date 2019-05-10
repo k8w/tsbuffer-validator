@@ -112,22 +112,23 @@ export class TSBufferValidator {
             return ValidateResult.error(ValidateErrorCode.WrongType);
         }
 
+        // 默认为double
+        let scalarType = schema.scalarType || 'double';
+
         // scalarType类型检测
-        if (schema.scalarType) {
-            // 无符号数字却为负数
-            if ((schema.scalarType.indexOf('uint') === 0 || schema.scalarType.indexOf('fixed') === 0)
-                && value < 0
-            ) {
-                return ValidateResult.error(ValidateErrorCode.InvalidUnsignedNumber);
-            }
-            // 整形却为小数
-            if (schema.scalarType !== 'float' && schema.scalarType !== 'double' && typeof value === 'number' && value !== (value | 0)) {
-                return ValidateResult.error(ValidateErrorCode.InvalidInteger);
-            }
-            // 不是bigint却为bigint
-            if (schema.scalarType.indexOf('64') === -1 && typeof value === 'bigint') {
-                return ValidateResult.error(ValidateErrorCode.CantBeBigInt);
-            }
+        // 整形却为小数
+        if (scalarType !== 'float' && scalarType !== 'double' && typeof value === 'number' && value !== (value | 0)) {
+            return ValidateResult.error(ValidateErrorCode.InvalidInteger);
+        }
+        // 无符号整形却为负数
+        if ((scalarType.indexOf('uint') === 0 || scalarType.indexOf('fixed') === 0)
+            && value < 0
+        ) {
+            return ValidateResult.error(ValidateErrorCode.InvalidUnsignedNumber);
+        }
+        // 不是bigint却为bigint
+        if (scalarType.indexOf('64') === -1 && typeof value === 'bigint') {
+            return ValidateResult.error(ValidateErrorCode.CantBeBigInt);
         }
 
         return ValidateResult.success;
