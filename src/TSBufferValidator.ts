@@ -428,7 +428,15 @@ export class TSBufferValidator {
     }
 
     // 展平interface
-    private _getFlatInterfaceTypeSchema(schema: TSBufferSchema, path: string): InterfaceTypeSchema {
+    getFlatInterfaceTypeSchema(schema: TSBufferSchema, path: string): InterfaceTypeSchema {
         throw new Error('TODO');
+
+        // Not interface
+
+        // Mapped Type
+
+        // Referenced
+
+        // extends
     }
 }
