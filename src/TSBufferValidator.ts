@@ -24,6 +24,19 @@ export interface TSBufferValidatorOptions {
     strictNullChecks: boolean
 }
 
+const typedArrays = {
+    Int8Array: Int8Array,
+    Int16Array: Int16Array,
+    Int32Array: Int32Array,
+    BigInt64Array: BigInt64Array,
+    Uint8Array: Uint8Array,
+    Uint16Array: Uint16Array,
+    Uint32Array: Uint32Array,
+    BigUint64Array: BigUint64Array,
+    Float32Array: Float32Array,
+    Float64Array: Float64Array
+}
+
 export class TSBufferValidator {
 
     _options: TSBufferValidatorOptions = {
@@ -179,7 +192,7 @@ export class TSBufferValidator {
 
     validateEnumType(value: any, schema: EnumTypeSchema): ValidateResult {
         // must be string or number
-        if (typeof value !== 'string' || typeof value !== 'number') {
+        if (typeof value !== 'string' && typeof value !== 'number') {
             return ValidateResult.error(ValidateErrorCode.WrongType);
         }
 
@@ -201,7 +214,7 @@ export class TSBufferValidator {
     }
 
     validateNonPrimitiveType(value: any): ValidateResult {
-        return typeof value === 'object' ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
+        return typeof value === 'object' && value !== null ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
     }
 
     validateInterfaceType(value: any, schema: InterfaceTypeSchema, path: string): ValidateResult {
@@ -360,7 +373,15 @@ export class TSBufferValidator {
     }
 
     validateBufferType(value: any, schema: BufferTypeSchema, path: string): ValidateResult {
-        throw new Error('TODO');
+        if (schema.arrayType) {
+            if (!typedArrays[schema.arrayType]) {
+                return ValidateResult.error(ValidateErrorCode.WrongType);
+            }
+            return value instanceof typedArrays[schema.arrayType] ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType)
+        }
+        else {
+            return value instanceof ArrayBuffer ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
+        }
     }
 
     validateIndexedAccessType(value: any, schema: IndexedAccessTypeSchema, path: string): ValidateResult {

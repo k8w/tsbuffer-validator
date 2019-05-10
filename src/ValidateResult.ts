@@ -14,7 +14,8 @@ export enum ValidateErrorCode {
     InvalidInterfaceMember,
     UnexpectedField,
     InvalidNumberKey,
-    ExtendsMustBeInterface
+    ExtendsMustBeInterface,
+    InvalidBufferArrayType
 }
 
 export class ValidateResult {
@@ -69,7 +70,8 @@ export class ValidateResult {
         [ValidateErrorCode.InvalidInterfaceMember]: 'Invalid interface member',
         [ValidateErrorCode.UnexpectedField]: 'Unexpected field',
         [ValidateErrorCode.InvalidNumberKey]: 'Key should be number',
-        [ValidateErrorCode.ExtendsMustBeInterface]: 'Extends must from a interface'
+        [ValidateErrorCode.ExtendsMustBeInterface]: 'Extends must from a interface',
+        [ValidateErrorCode.InvalidBufferArrayType]: 'Invalid TypedArray type'
 
     };
 
