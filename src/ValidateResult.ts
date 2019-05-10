@@ -54,27 +54,6 @@ export class ValidateResult {
      */
     innerError?: ValidateResult;
 
-    private static _errorMessages = {
-        [ValidateErrorCode.Succ]: 'Success',
-        [ValidateErrorCode.WrongType]: 'Value has a wrong type',
-        [ValidateErrorCode.InvalidUnsignedNumber]: 'Invalid unsigned number',
-        [ValidateErrorCode.InvalidInteger]: 'Invalid integer',
-        [ValidateErrorCode.CantBeBigInt]: 'Can not be bigint',
-        [ValidateErrorCode.InvalidArrayElement]: 'Invalid array element',
-        [ValidateErrorCode.TupleOverlength]: 'Tuple length out of range',
-        [ValidateErrorCode.InvalidTupleElement]: 'Invalid tuple element',
-        [ValidateErrorCode.InvalidEnumValue]: 'Value does not exist in enum',
-        [ValidateErrorCode.AnyTypeCannotBeArrayBuffer]: 'Any type cannot be ArrayBuffer',
-        [ValidateErrorCode.AnyTypeCannotBeTypedArray]: 'Any type cannot be TypedArray',
-        [ValidateErrorCode.InvalidLiteralValue]: 'Invalid literal value',
-        [ValidateErrorCode.InvalidInterfaceMember]: 'Invalid interface member',
-        [ValidateErrorCode.UnexpectedField]: 'Unexpected field',
-        [ValidateErrorCode.InvalidNumberKey]: 'Key should be number',
-        [ValidateErrorCode.ExtendsMustBeInterface]: 'Extends must from a interface',
-        [ValidateErrorCode.InvalidBufferArrayType]: 'Invalid TypedArray type'
-
-    };
-
     private constructor(errcode: ValidateErrorCode = 0, fieldName?: string, innerError?: ValidateResult) {
         this.errcode = errcode;
         this.fieldName = fieldName;
@@ -118,7 +97,7 @@ export class ValidateResult {
     }
 
     get message(): string {
-        return ValidateResult._errorMessages[this.errcode] || 'Unknown error';
+        return ValidateErrorCode[this.errcode] || 'UnknownError';
     }
 
 }
