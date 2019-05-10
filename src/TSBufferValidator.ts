@@ -87,7 +87,7 @@ export class TSBufferValidator {
             case 'Interface':
                 return this.validateInterfaceType(value, schema, path);
             case 'Buffer':
-                return this.validateBufferType(value, schema, path);
+                return this.validateBufferType(value, schema);
             case 'IndexedAccess':
                 return this.validateIndexedAccessType(value, schema, path);
             case 'Reference':
@@ -372,7 +372,7 @@ export class TSBufferValidator {
         }
     }
 
-    validateBufferType(value: any, schema: BufferTypeSchema, path: string): ValidateResult {
+    validateBufferType(value: any, schema: BufferTypeSchema): ValidateResult {
         if (schema.arrayType) {
             if (!typedArrays[schema.arrayType]) {
                 return ValidateResult.error(ValidateErrorCode.WrongType);
@@ -386,10 +386,21 @@ export class TSBufferValidator {
 
     validateIndexedAccessType(value: any, schema: IndexedAccessTypeSchema, path: string): ValidateResult {
         throw new Error('TODO');
+
+        // schema.objectType.type
+
+        // property
+
+        // extends property
+
+        // indexSignature
+
+        // extends indexSignature
     }
 
     validateReferenceType(value: any, schema: ReferenceTypeSchema, path: string): ValidateResult {
-        throw new Error('TODO');
+        let parsedSchema = this._parseReference(schema, path);
+        return this.validateBySchema(value, parsedSchema.schema, parsedSchema.path);
     }
 
     validateUnionType(value: any, schema: UnionTypeSchema, path: string): ValidateResult {
@@ -416,4 +427,8 @@ export class TSBufferValidator {
         throw new Error('TODO');
     }
 
+    // 展平interface
+    private _getFlatInterfaceTypeSchema(schema: TSBufferSchema, path: string): InterfaceTypeSchema {
+        throw new Error('TODO');
+    }
 }
