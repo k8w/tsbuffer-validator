@@ -99,6 +99,8 @@ describe('ClassName', function () {
 
         assert.strictEqual(validator.validate(true, 'b', 'b1').isSucc, true);
         assert.deepStrictEqual(validator.validate(123, 'b', 'b1'), ValidateResult.error(ValidateErrorCode.WrongType));
+        assert.deepStrictEqual(validator.validate(null, 'b', 'b1'), ValidateResult.error(ValidateErrorCode.WrongType));
+        assert.deepStrictEqual(validator.validate(undefined, 'b', 'b1'), ValidateResult.error(ValidateErrorCode.WrongType));
     });
 
     // TODO optional 转为 | undefined
