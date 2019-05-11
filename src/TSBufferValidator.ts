@@ -1,13 +1,9 @@
 import { TSBufferSchema, TSBufferProto } from 'tsbuffer-schema';
-import { BooleanTypeSchema } from 'tsbuffer-schema/src/schemas/BooleanTypeSchema';
 import { NumberTypeSchema } from 'tsbuffer-schema/src/schemas/NumberTypeSchema';
-import { StringTypeSchema } from 'tsbuffer-schema/src/schemas/StringTypeSchema';
 import { ArrayTypeSchema } from 'tsbuffer-schema/src/schemas/ArrayTypeSchema';
 import { TupleTypeSchema } from 'tsbuffer-schema/src/schemas/TupleTypeSchema';
 import { EnumTypeSchema } from 'tsbuffer-schema/src/schemas/EnumTypeSchema';
-import { AnyTypeSchema } from 'tsbuffer-schema/src/schemas/AnyTypeSchema';
 import { LiteralTypeSchema } from 'tsbuffer-schema/src/schemas/LiteralTypeSchema';
-import { NonPrimitiveTypeSchema } from 'tsbuffer-schema/src/schemas/NonPrimitiveTypeSchema';
 import { InterfaceTypeSchema } from 'tsbuffer-schema/src/schemas/InterfaceTypeSchema';
 import { BufferTypeSchema } from 'tsbuffer-schema/src/schemas/BufferTypeSchema';
 import { IndexedAccessTypeSchema } from 'tsbuffer-schema/src/schemas/IndexedAccessTypeSchema';
@@ -19,6 +15,8 @@ import { PartialTypeSchema } from 'tsbuffer-schema/src/schemas/PartialTypeSchema
 import { OmitTypeSchema } from 'tsbuffer-schema/src/schemas/OmitTypeSchema';
 import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
 import { ValidateResult, ValidateErrorCode } from './ValidateResult';
+import { InterfaceReference } from 'tsbuffer-schema/src/InterfaceReference';
+import { TypeReference } from 'tsbuffer-schema/src/TypeReference';
 
 export interface TSBufferValidatorOptions {
     strictNullChecks: boolean
@@ -61,10 +59,10 @@ export class TSBufferValidator {
             throw new Error(`Cannot find schema [${symbolName}] at ${path}`);
         }
 
-        return this.validateBySchema(value, schema, path);
+        return this.validateBySchema(value, schema);
     }
 
-    validateBySchema(value: any, schema: TSBufferSchema, path: string): ValidateResult {
+    validateBySchema(value: any, schema: TSBufferSchema): ValidateResult {
         switch (schema.type) {
             case 'Boolean':
                 return this.validateBooleanType(value);
@@ -73,9 +71,9 @@ export class TSBufferValidator {
             case 'String':
                 return this.validateStringType(value);
             case 'Array':
-                return this.validateArrayType(value, schema, path);
+                return this.validateArrayType(value, schema);
             case 'Tuple':
-                return this.validateTupleType(value, schema, path);
+                return this.validateTupleType(value, schema);
             case 'Enum':
                 return this.validateEnumType(value, schema);
             case 'Any':
@@ -85,25 +83,25 @@ export class TSBufferValidator {
             case 'NonPrimitive':
                 return this.validateNonPrimitiveType(value);
             case 'Interface':
-                return this.validateInterfaceType(value, schema, path);
+                return this.validateInterfaceType(value, schema);
             case 'Buffer':
                 return this.validateBufferType(value, schema);
             case 'IndexedAccess':
-                return this.validateIndexedAccessType(value, schema, path);
+                return this.validateIndexedAccessType(value, schema);
             case 'Reference':
-                return this.validateReferenceType(value, schema, path);
+                return this.validateReferenceType(value, schema);
             case 'Union':
-                return this.validateUnionType(value, schema, path);
+                return this.validateUnionType(value, schema);
             case 'Intersection':
-                return this.validateIntersectionType(value, schema, path);
+                return this.validateIntersectionType(value, schema);
             case 'Pick':
-                return this.validatePickType(value, schema, path);
+                return this.validatePickType(value, schema);
             case 'Partial':
-                return this.validatePartialType(value, schema, path);
+                return this.validatePartialType(value, schema);
             case 'Omit':
-                return this.validateOmitType(value, schema, path);
+                return this.validateOmitType(value, schema);
             case 'Overwrite':
-                return this.validateOverwriteType(value, schema, path);
+                return this.validateOverwriteType(value, schema);
             // 错误的type
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
@@ -151,7 +149,7 @@ export class TSBufferValidator {
         return typeof value === 'string' ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
     }
 
-    validateArrayType(value: any, schema: ArrayTypeSchema, path: string): ValidateResult {
+    validateArrayType(value: any, schema: ArrayTypeSchema): ValidateResult {
         // is Array type
         if (!Array.isArray(value)) {
             return ValidateResult.error(ValidateErrorCode.WrongType);
@@ -159,7 +157,7 @@ export class TSBufferValidator {
 
         // validate elementType
         for (let i = 0; i < value.length; ++i) {
-            let elemValidateResult = this.validateBySchema(value[i], schema.elementType, path);
+            let elemValidateResult = this.validateBySchema(value[i], schema.elementType);
             if (!elemValidateResult.isSucc) {
                 return ValidateResult.error(ValidateErrorCode.InvalidArrayElement, '' + i, elemValidateResult);
             }
@@ -168,7 +166,7 @@ export class TSBufferValidator {
         return ValidateResult.success;
     }
 
-    validateTupleType(value: any, schema: TupleTypeSchema, path: string): ValidateResult {
+    validateTupleType(value: any, schema: TupleTypeSchema): ValidateResult {
         // is Array type
         if (!Array.isArray(value)) {
             return ValidateResult.error(ValidateErrorCode.WrongType);
@@ -181,7 +179,7 @@ export class TSBufferValidator {
 
         // validate elementType
         for (let i = 0; i < schema.elementTypes.length; ++i) {
-            let elemValidateResult = this.validateBySchema(value[i], schema.elementTypes[i], path);
+            let elemValidateResult = this.validateBySchema(value[i], schema.elementTypes[i]);
             if (!elemValidateResult.isSucc) {
                 return ValidateResult.error(ValidateErrorCode.InvalidTupleElement, '' + i, elemValidateResult);
             }
@@ -217,7 +215,7 @@ export class TSBufferValidator {
         return typeof value === 'object' && value !== null ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
     }
 
-    validateInterfaceType(value: any, schema: InterfaceTypeSchema, path: string): ValidateResult {
+    validateInterfaceType(value: any, schema: InterfaceTypeSchema): ValidateResult {
         if (typeof value !== 'object') {
             return ValidateResult.error(ValidateErrorCode.WrongType);
         }
@@ -237,7 +235,7 @@ export class TSBufferValidator {
 
         // 先校验properties
         if (schema.properties) {
-            let vRes = this._validateInterfaceProperties(value, schema.properties, path, skipFields);
+            let vRes = this._validateInterfaceProperties(value, schema.properties, skipFields);
             if (!vRes.isSucc) {
                 return vRes;
             }
@@ -247,7 +245,7 @@ export class TSBufferValidator {
         if (schema.extends) {
             for (let i = 0; i < schema.extends.length; ++i) {
                 // extends检测 允许未知的 跳过已检测的字段
-                let vRes = this._validateInterfaceExtends(value, schema.extends[i], path, skipFields);
+                let vRes = this._validateInterfaceExtends(value, schema.extends[i], skipFields);
                 if (!vRes.isSucc) {
                     return vRes;
                 }
@@ -255,7 +253,7 @@ export class TSBufferValidator {
         }
 
         // 最后检测indexSignature
-        return this._validateInterfaceIndexSignature(value, schema.indexSignature, path, skipFields);
+        return this._validateInterfaceIndexSignature(value, schema.indexSignature, skipFields);
     }
 
     /**
@@ -263,7 +261,7 @@ export class TSBufferValidator {
      * 注意：这个方法允许properties中未定义的字段存在！
      * @return interface的error
      */
-    private _validateInterfaceProperties(value: any, properties: NonNullable<InterfaceTypeSchema['properties']>, path: string, skipFields: string[]): ValidateResult {
+    private _validateInterfaceProperties(value: any, properties: NonNullable<InterfaceTypeSchema['properties']>, skipFields: string[]): ValidateResult {
         for (let property of properties) {
             // skipFields
             if (skipFields.indexOf(property.name) > -1) {
@@ -276,7 +274,7 @@ export class TSBufferValidator {
                 continue;
             }
 
-            let vRes = this.validateBySchema(value[property.name], property.type, path);
+            let vRes = this.validateBySchema(value[property.name], property.type);
             if (!vRes) {
                 return ValidateResult.error(ValidateErrorCode.InvalidInterfaceMember, property.name, vRes)
             }
@@ -290,11 +288,9 @@ export class TSBufferValidator {
      * 不检测额外超出的字段
      * @reutrn interface的error
      */
-    private _validateInterfaceExtends(value: any, extendsSchema: ReferenceTypeSchema, path: string, skipFields: string[]): ValidateResult {
+    private _validateInterfaceExtends(value: any, extendsSchema: ReferenceTypeSchema, skipFields: string[]): ValidateResult {
         // 解析引用
-        let parsedSchema = this._parseReference(extendsSchema, path);
-        let schema = parsedSchema.schema;
-        let schemaPath = parsedSchema.path;
+        let schema = this._parseReference(extendsSchema);
         if (schema.type !== 'Interface') {
             return ValidateResult.error(ValidateErrorCode.ExtendsMustBeInterface);
         }
@@ -302,7 +298,7 @@ export class TSBufferValidator {
         // 递归检查extends的extends
         if (schema.extends) {
             for (let exSchema of schema.extends) {
-                let vRes = this._validateInterfaceExtends(value, exSchema, schemaPath, skipFields);
+                let vRes = this._validateInterfaceExtends(value, exSchema, skipFields);
                 if (!vRes) {
                     return vRes;
                 }
@@ -311,16 +307,16 @@ export class TSBufferValidator {
 
         // 检查本extends的properties
         if (schema.properties) {
-            let vRes = this._validateInterfaceProperties(value, schema.properties, schemaPath, skipFields);
+            let vRes = this._validateInterfaceProperties(value, schema.properties, skipFields);
             if (!vRes) {
                 return vRes;
             }
         }
 
-        return this._validateInterfaceIndexSignature(value, schema.indexSignature, schemaPath, skipFields);
+        return this._validateInterfaceIndexSignature(value, schema.indexSignature, skipFields);
     }
 
-    private _validateInterfaceIndexSignature(value: any, indexSignature: InterfaceTypeSchema['indexSignature'], path: string, skipFields: string[]) {
+    private _validateInterfaceIndexSignature(value: any, indexSignature: InterfaceTypeSchema['indexSignature'], skipFields: string[]) {
         let remainedFields = Object.keys(value).remove(v => skipFields.indexOf(v) > -1);
         if (remainedFields.length) {
             if (indexSignature) {
@@ -332,7 +328,7 @@ export class TSBufferValidator {
                     skipFields.push(field);
 
                     // validate each field
-                    let vRes = this.validateBySchema(value[field], indexSignature.type, path);
+                    let vRes = this.validateBySchema(value[field], indexSignature.type);
                     if (!vRes.isSucc) {
                         return ValidateResult.error(ValidateErrorCode.InvalidInterfaceMember, vRes.fieldName || '', vRes);
                     }
@@ -348,28 +344,40 @@ export class TSBufferValidator {
     }
 
     /** 将ReferenceTYpeSchema层层转换为它最终实际引用的类型 */
-    private _parseReference(schema: ReferenceTypeSchema, path: string): {
-        schema: Exclude<TSBufferSchema, ReferenceTypeSchema>, path: string
-    } {
-        path = schema.path || path;
-        if (path && !this._proto[path]) {
-            throw new Error('Cannot find path: ' + path);
-        }
+    private _parseReference(schema: TypeReference): Exclude<TSBufferSchema, TypeReference> {
+        if (schema.type === 'Reference') {
+            if (!this._proto[schema.path]) {
+                throw new Error('Cannot find path: ' + schema.path);
+            }
 
-        let parsedSchema = this._proto[path][schema.targetName];
-        if (!parsedSchema) {
-            throw new Error(`Cannot find [${schema.targetName}] at ${path}`);
-        }
+            let parsedSchema = this._proto[schema.path][schema.targetName];
+            if (!parsedSchema) {
+                throw new Error(`Cannot find [${schema.targetName}] at ${schema.path}`);
+            }
 
-        if (parsedSchema.type === 'Reference') {
-            return this._parseReference(parsedSchema, path);
-        }
-        else {
-            return {
-                schema: parsedSchema,
-                path: path
+            if (this._isTypeReference(parsedSchema)) {
+                return this._parseReference(parsedSchema);
+            }
+            else {
+                return parsedSchema
             }
         }
+        else if (schema.type === 'IndexedAccess') {
+            if (!this._isInterfaceReference(schema.objectType)) {
+                throw new Error(`Error objectType: ${schema.objectType.type}`);
+            }
+
+            // find prop item
+            let flat = this.getFlatInterfaceSchema(schema.objectType);
+            let propItem = flat.properties!.find(v => v.name === schema.index);
+            if (!propItem) {
+                throw new Error(`Error index: ${schema.index}`);
+            }
+
+            return this._isTypeReference(propItem.type) ? this._parseReference(propItem.type) : propItem.type;
+        }
+
+        throw new Error(`Type ${(schema as any).type} is not reference`);
     }
 
     validateBufferType(value: any, schema: BufferTypeSchema): ValidateResult {
@@ -384,59 +392,220 @@ export class TSBufferValidator {
         }
     }
 
-    validateIndexedAccessType(value: any, schema: IndexedAccessTypeSchema, path: string): ValidateResult {
-        throw new Error('TODO');
-
-        // schema.objectType.type
-
-        // property
-
-        // extends property
-
-        // indexSignature
-
-        // extends indexSignature
+    validateIndexedAccessType(value: any, schema: IndexedAccessTypeSchema): ValidateResult {
+        return this.validateBySchema(value, this._parseReference(schema));
     }
 
-    validateReferenceType(value: any, schema: ReferenceTypeSchema, path: string): ValidateResult {
-        let parsedSchema = this._parseReference(schema, path);
-        return this.validateBySchema(value, parsedSchema.schema, parsedSchema.path);
+    validateReferenceType(value: any, schema: ReferenceTypeSchema): ValidateResult {
+        return this.validateBySchema(value, this._parseReference(schema));
     }
 
-    validateUnionType(value: any, schema: UnionTypeSchema, path: string): ValidateResult {
+    validateUnionType(value: any, schema: UnionTypeSchema): ValidateResult {
         throw new Error('TODO');
     }
 
-    validateIntersectionType(value: any, schema: IntersectionTypeSchema, path: string): ValidateResult {
+    validateIntersectionType(value: any, schema: IntersectionTypeSchema): ValidateResult {
         throw new Error('TODO');
     }
 
-    validatePickType(value: any, schema: PickTypeSchema, path: string): ValidateResult {
+    validatePickType(value: any, schema: PickTypeSchema): ValidateResult {
         throw new Error('TODO');
     }
 
-    validatePartialType(value: any, schema: PartialTypeSchema, path: string): ValidateResult {
+    validatePartialType(value: any, schema: PartialTypeSchema): ValidateResult {
         throw new Error('TODO');
     }
 
-    validateOmitType(value: any, schema: OmitTypeSchema, path: string): ValidateResult {
+    validateOmitType(value: any, schema: OmitTypeSchema): ValidateResult {
         throw new Error('TODO');
     }
 
-    validateOverwriteType(value: any, schema: OverwriteTypeSchema, path: string): ValidateResult {
+    validateOverwriteType(value: any, schema: OverwriteTypeSchema): ValidateResult {
         throw new Error('TODO');
+    }
+
+    private _isInterfaceReference(schema: TSBufferSchema): schema is InterfaceReference {
+        if (this._isTypeReference(schema)) {
+            let parsed = this._parseReference(schema);
+            return this._isInterfaceReference(parsed);
+        }
+        else {
+            return schema.type === 'Interface' ||
+                schema.type === 'Pick' ||
+                schema.type === 'Partial' ||
+                schema.type === 'Omit' ||
+                schema.type === 'Overwrite';
+        }
+    }
+
+    private _isTypeReference(schema: TSBufferSchema): schema is TypeReference {
+        return schema.type === 'Reference' || schema.type === 'IndexedAccess';
+    }
+
+    /**
+     * 将interface及其引用转换为展平的schema
+     */
+    getFlatInterfaceSchema(schema: InterfaceTypeSchema | InterfaceReference): InterfaceTypeSchema {
+        if (this._isTypeReference(schema)) {
+            let parsed = this._parseReference(schema);
+            if (parsed.type !== 'Interface') {
+                throw new Error(`Cannot flatten non interface type: ${parsed.type}`);
+            }
+            return this.getFlatInterfaceSchema(parsed);
+        }
+        else if (schema.type === 'Interface') {
+            return this._flattenInterface(schema);
+        }
+        else {
+            return this._flattenMappedType(schema);
+        }
     }
 
     // 展平interface
-    getFlatInterfaceTypeSchema(schema: TSBufferSchema, path: string): InterfaceTypeSchema {
-        throw new Error('TODO');
+    private _flattenInterface(schema: InterfaceTypeSchema): InterfaceTypeSchema {
+        let properties: {
+            [name: string]: {
+                optional?: boolean;
+                type: TSBufferSchema;
+            }
+        } = {};
+        let indexSignature: InterfaceTypeSchema['indexSignature'];
 
-        // Not interface
+        // 自身定义的properties和indexSignature优先级最高
+        if (schema.properties) {
+            for (let prop of schema.properties) {
+                properties[prop.name] = {
+                    optional: prop.optional,
+                    type: prop.type
+                }
+            }
+        }
+        if (schema.indexSignature) {
+            indexSignature = schema.indexSignature;
+        }
 
-        // Mapped Type
+        // extends的优先级次之，补全没有定义的字段
+        if (schema.extends) {
+            for (let extendsRef of schema.extends) {
+                // 解引用
+                let parsedExtRef = this._parseReference(extendsRef);
+                if (parsedExtRef.type !== 'Interface') {
+                    throw new Error('SchemaError: extends must from interface but from ' + parsedExtRef.type)
+                }
+                // 递归展平extends
+                let flatenExtendsSchema = this.getFlatInterfaceSchema(parsedExtRef);
 
-        // Referenced
+                // properties
+                if (flatenExtendsSchema.properties) {
+                    for (let prop of flatenExtendsSchema.properties) {
+                        if (!properties[prop.name]) {
+                            properties[prop.name] = {
+                                optional: prop.optional,
+                                type: prop.type
+                            }
+                        }
+                    }
+                }
 
-        // extends
+                // indexSignature
+                if (flatenExtendsSchema.indexSignature && !indexSignature) {
+                    indexSignature = flatenExtendsSchema.indexSignature;
+                }
+            }
+        }
+
+        return {
+            type: 'Interface',
+            properties: Object.entries(properties).map((v, i) => ({
+                id: i,
+                name: v[0],
+                optional: v[1].optional,
+                type: v[1].type
+            })),
+            indexSignature: indexSignature
+        }
     }
+
+    // 将MappedTypeSchema转换为展平的Interface
+    private _flattenMappedType(schema: PickTypeSchema | PartialTypeSchema | OverwriteTypeSchema | OmitTypeSchema): InterfaceTypeSchema {
+        // target 解引用
+        let target: Exclude<PickTypeSchema['target'], ReferenceTypeSchema>;
+        if (schema.target.type === 'Reference') {
+            let parsed = this._parseReference(schema.target);
+            target = parsed as typeof target;
+        }
+        else {
+            target = schema.target;
+        }
+
+        // 内层仍然为MappedType 递归之
+        if (target.type === 'Pick' || target.type === 'Partial' || target.type === 'Omit' || target.type === 'Overwrite') {
+            return this._flattenMappedType(target);
+        }
+        // interface 展平之
+        else if (target.type === 'Interface') {
+            // target已展平
+            target = this._flattenInterface(target);
+
+            // 开始执行Mapped逻辑
+            if (schema.type === 'Pick') {
+                let properties: NonNullable<InterfaceTypeSchema['properties']> = [];
+                for (let key of schema.keys) {
+                    let propItem = target.properties!.find(v => v.name === key);
+                    if (propItem) {
+                        properties.push({
+                            id: properties.length,
+                            name: key,
+                            optional: propItem.optional,
+                            type: propItem.type
+                        })
+                    }
+                    else if (target.indexSignature) {
+                        properties.push({
+                            id: properties.length,
+                            name: key,
+                            type: target.indexSignature.type
+                        })
+                    }
+                    else {
+                        throw new Error(`Cannot find pick key [${key}]`);
+                    }
+                }
+                return {
+                    type: 'Interface',
+                    properties: properties
+                }
+            }
+            else if (schema.type === 'Partial') {
+                for (let v of target.properties!) {
+                    v.optional = true;
+                }
+                return target;
+            }
+            else if (schema.type === 'Omit') {
+                for (let key in schema.keys) {
+                    target.properties!.removeOne(v => v.name === key);
+                }
+                return target;
+            }
+            else if (schema.type === 'Overwrite') {
+                let overwrite = this.getFlatInterfaceSchema(schema.overwrite);
+                if (overwrite.indexSignature) {
+                    target.indexSignature = overwrite.indexSignature;
+                }
+                for (let prop of overwrite.properties!) {
+                    target.properties!.removeOne(v => v.name === prop.name);
+                    target.properties!.push(prop);
+                }
+                return target;
+            }
+            else {
+                throw new Error(`Unknown type: ${(schema as any).type}`)
+            }
+        }
+        else {
+            throw new Error(`MappedType target cannot be ${(target as any).type} type`);
+        }
+    }
+
 }

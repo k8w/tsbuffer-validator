@@ -15,7 +15,8 @@ export enum ValidateErrorCode {
     UnexpectedField,
     InvalidNumberKey,
     ExtendsMustBeInterface,
-    InvalidBufferArrayType
+    InvalidBufferArrayType,
+    SchemaError
 }
 
 export class ValidateResult {
