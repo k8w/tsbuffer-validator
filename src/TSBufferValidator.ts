@@ -95,13 +95,10 @@ export class TSBufferValidator {
             case 'Intersection':
                 return this.validateIntersectionType(value, schema);
             case 'Pick':
-                return this.validatePickType(value, schema);
             case 'Partial':
-                return this.validatePartialType(value, schema);
             case 'Omit':
-                return this.validateOmitType(value, schema);
             case 'Overwrite':
-                return this.validateOverwriteType(value, schema);
+                return this.validateMappedType(value, schema);
             // 错误的type
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
@@ -159,7 +156,7 @@ export class TSBufferValidator {
         for (let i = 0; i < value.length; ++i) {
             let elemValidateResult = this.validateBySchema(value[i], schema.elementType);
             if (!elemValidateResult.isSucc) {
-                return ValidateResult.error(ValidateErrorCode.InvalidArrayElement, '' + i, elemValidateResult);
+                return ValidateResult.error(elemValidateResult.errcode, '' + i);
             }
         }
 
@@ -181,7 +178,7 @@ export class TSBufferValidator {
         for (let i = 0; i < schema.elementTypes.length; ++i) {
             let elemValidateResult = this.validateBySchema(value[i], schema.elementTypes[i]);
             if (!elemValidateResult.isSucc) {
-                return ValidateResult.error(ValidateErrorCode.InvalidTupleElement, '' + i, elemValidateResult);
+                return ValidateResult.error(elemValidateResult.errcode, '' + i);
             }
         }
 
@@ -220,11 +217,14 @@ export class TSBufferValidator {
             return ValidateResult.error(ValidateErrorCode.WrongType);
         }
 
+        // 先展平
+        schema = this._flattenInterface(schema);
+
         // interfaceSignature强制了key必须是数字的情况
         if (schema.indexSignature && schema.indexSignature.keyType === 'Number') {
             for (let key in value) {
                 if (!/\d+/.test(key)) {
-                    return ValidateResult.error(ValidateErrorCode.InvalidInterfaceMember, key, ValidateResult.error(ValidateErrorCode.InvalidNumberKey))
+                    return ValidateResult.error(ValidateErrorCode.InvalidNumberKey, key)
                 }
             }
         }
@@ -233,7 +233,7 @@ export class TSBufferValidator {
         // 作为一个透传的参数在各个方法间共享传递
         let skipFields: string[] = [];
 
-        // 先校验properties
+        // 校验properties
         if (schema.properties) {
             let vRes = this._validateInterfaceProperties(value, schema.properties, skipFields);
             if (!vRes.isSucc) {
@@ -241,19 +241,15 @@ export class TSBufferValidator {
             }
         }
 
-        // 再检测extends
-        if (schema.extends) {
-            for (let i = 0; i < schema.extends.length; ++i) {
-                // extends检测 允许未知的 跳过已检测的字段
-                let vRes = this._validateInterfaceExtends(value, schema.extends[i], skipFields);
-                if (!vRes.isSucc) {
-                    return vRes;
-                }
+        // 检测indexSignature
+        if (schema.indexSignature) {
+            let vRes = this._validateInterfaceIndexSignature(value, schema.indexSignature, skipFields);
+            if (!vRes.isSucc) {
+                return vRes;
             }
         }
 
-        // 最后检测indexSignature
-        return this._validateInterfaceIndexSignature(value, schema.indexSignature, skipFields);
+        return ValidateResult.success;
     }
 
     /**
@@ -274,46 +270,18 @@ export class TSBufferValidator {
                 continue;
             }
 
+            // required
+            if (!property.optional && value[property.name] === undefined) {
+                return ValidateResult.error(ValidateErrorCode.MissingRequiredMember, property.name)
+            }
+
             let vRes = this.validateBySchema(value[property.name], property.type);
-            if (!vRes) {
-                return ValidateResult.error(ValidateErrorCode.InvalidInterfaceMember, property.name, vRes)
+            if (!vRes.isSucc) {
+                return ValidateResult.error(vRes.errcode, property.name)
             }
         }
 
         return ValidateResult.success;
-    }
-
-    /**
-     * 递归检测extends
-     * 不检测额外超出的字段
-     * @reutrn interface的error
-     */
-    private _validateInterfaceExtends(value: any, extendsSchema: ReferenceTypeSchema, skipFields: string[]): ValidateResult {
-        // 解析引用
-        let schema = this._parseReference(extendsSchema);
-        if (schema.type !== 'Interface') {
-            return ValidateResult.error(ValidateErrorCode.ExtendsMustBeInterface);
-        }
-
-        // 递归检查extends的extends
-        if (schema.extends) {
-            for (let exSchema of schema.extends) {
-                let vRes = this._validateInterfaceExtends(value, exSchema, skipFields);
-                if (!vRes) {
-                    return vRes;
-                }
-            }
-        }
-
-        // 检查本extends的properties
-        if (schema.properties) {
-            let vRes = this._validateInterfaceProperties(value, schema.properties, skipFields);
-            if (!vRes) {
-                return vRes;
-            }
-        }
-
-        return this._validateInterfaceIndexSignature(value, schema.indexSignature, skipFields);
     }
 
     private _validateInterfaceIndexSignature(value: any, indexSignature: InterfaceTypeSchema['indexSignature'], skipFields: string[]) {
@@ -330,13 +298,13 @@ export class TSBufferValidator {
                     // validate each field
                     let vRes = this.validateBySchema(value[field], indexSignature.type);
                     if (!vRes.isSucc) {
-                        return ValidateResult.error(ValidateErrorCode.InvalidInterfaceMember, vRes.fieldName || '', vRes);
+                        return ValidateResult.error(vRes.errcode, vRes.fieldName || '');
                     }
                 }
             }
             // Unexpected field
             else {
-                return ValidateResult.error(ValidateErrorCode.InvalidInterfaceMember, remainedFields[0], ValidateResult.error(ValidateErrorCode.UnexpectedField))
+                return ValidateResult.error(ValidateErrorCode.UnexpectedField, remainedFields[0])
             }
         }
 
@@ -400,28 +368,48 @@ export class TSBufferValidator {
         return this.validateBySchema(value, this._parseReference(schema));
     }
 
+    validateMappedType(value: any, schema: PickTypeSchema | PartialTypeSchema | OmitTypeSchema | OverwriteTypeSchema): ValidateResult {
+        return this.validateInterfaceType(value, this._flattenMappedType(schema));
+    }
+
     validateUnionType(value: any, schema: UnionTypeSchema): ValidateResult {
         throw new Error('TODO');
+
+        // 对schema.members做处理，整理出field清单
+        // 对member进行依次检查，对interface及其ref检查时，对多出的字段，若在field清单内，则不报错
+
+        // for (let cond of schema.members) {
+        //     let vRes = this.validateBySchema(value, cond.type);
+        //     if (vRes) {
+        //         return ValidateResult.success;
+        //     }
+        // }
+
+        // return ValidateResult.error(ValidateErrorCode.NonConditionSatisfied);
     }
 
     validateIntersectionType(value: any, schema: IntersectionTypeSchema): ValidateResult {
         throw new Error('TODO');
-    }
 
-    validatePickType(value: any, schema: PickTypeSchema): ValidateResult {
-        throw new Error('TODO');
-    }
+        // for (let cond of schema.members) {
+        //     if (cond.type.type === 'Interface' || this._isInterfaceReference(cond.type)) {
+        //         let flat = this.getFlatInterfaceSchema(cond.type);
+        //         // Intersection 每个部分检查（如果是Interface的）允许额外的字段
+        //         if (!flat.indexSignature) {
+        //             flat.indexSignature = {
+        //                 keyType: 'String',
+        //                 type: {
+        //                     type: 'Any'
+        //                 }
+        //             }
+        //         }
+        //     }
 
-    validatePartialType(value: any, schema: PartialTypeSchema): ValidateResult {
-        throw new Error('TODO');
-    }
-
-    validateOmitType(value: any, schema: OmitTypeSchema): ValidateResult {
-        throw new Error('TODO');
-    }
-
-    validateOverwriteType(value: any, schema: OverwriteTypeSchema): ValidateResult {
-        throw new Error('TODO');
+        //     // let vRes = this.validateBySchema(value, cond.type);
+        //     // if (vRes) {
+        //     //     return ValidateResult.success;
+        //     // }
+        // }
     }
 
     private _isInterfaceReference(schema: TSBufferSchema): schema is InterfaceReference {

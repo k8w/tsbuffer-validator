@@ -4,19 +4,18 @@ export enum ValidateErrorCode {
     InvalidUnsignedNumber,
     InvalidInteger,
     CantBeBigInt,
-    InvalidArrayElement,
     TupleOverlength,
-    InvalidTupleElement,
     InvalidEnumValue,
     AnyTypeCannotBeArrayBuffer,
     AnyTypeCannotBeTypedArray,
     InvalidLiteralValue,
-    InvalidInterfaceMember,
+    MissingRequiredMember,
     UnexpectedField,
     InvalidNumberKey,
     ExtendsMustBeInterface,
     InvalidBufferArrayType,
-    SchemaError
+    SchemaError,
+    NonConditionSatisfied,
 }
 
 export class ValidateResult {
@@ -64,8 +63,6 @@ export class ValidateResult {
     static readonly success = new ValidateResult(ValidateErrorCode.Succ);
 
     //重载检测 fieldName和innerError要传必须一起
-    static error(errcode: ValidateErrorCode): ValidateResult;
-    static error(errcode: ValidateErrorCode, fieldName: string, innerError: ValidateResult): ValidateResult;
     static error(errcode: ValidateErrorCode, fieldName?: string, innerError?: ValidateResult) {
         return new ValidateResult(errcode, fieldName, innerError);
     }
