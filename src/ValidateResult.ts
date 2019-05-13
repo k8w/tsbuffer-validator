@@ -1,6 +1,7 @@
 export enum ValidateErrorCode {
     Succ = 0,
     WrongType,
+    InnerError,
     InvalidUnsignedNumber,
     InvalidInteger,
     CantBeBigInt,
@@ -63,6 +64,8 @@ export class ValidateResult {
     static readonly success = new ValidateResult(ValidateErrorCode.Succ);
 
     //重载检测 fieldName和innerError要传必须一起
+    static error(errcode: ValidateErrorCode): ValidateResult;
+    static error(errcode: ValidateErrorCode.InnerError, fieldName: string, innerError: ValidateResult): ValidateResult;
     static error(errcode: ValidateErrorCode, fieldName?: string, innerError?: ValidateResult) {
         return new ValidateResult(errcode, fieldName, innerError);
     }

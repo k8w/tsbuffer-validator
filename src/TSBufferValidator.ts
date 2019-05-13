@@ -156,7 +156,7 @@ export class TSBufferValidator {
         for (let i = 0; i < value.length; ++i) {
             let elemValidateResult = this.validateBySchema(value[i], schema.elementType);
             if (!elemValidateResult.isSucc) {
-                return ValidateResult.error(elemValidateResult.errcode, '' + i);
+                return ValidateResult.error(ValidateErrorCode.InnerError, '' + i, elemValidateResult);
             }
         }
 
@@ -178,7 +178,7 @@ export class TSBufferValidator {
         for (let i = 0; i < schema.elementTypes.length; ++i) {
             let elemValidateResult = this.validateBySchema(value[i], schema.elementTypes[i]);
             if (!elemValidateResult.isSucc) {
-                return ValidateResult.error(elemValidateResult.errcode, '' + i);
+                return ValidateResult.error(ValidateErrorCode.InnerError, '' + i, elemValidateResult);
             }
         }
 
@@ -224,7 +224,7 @@ export class TSBufferValidator {
         if (schema.indexSignature && schema.indexSignature.keyType === 'Number') {
             for (let key in value) {
                 if (!/\d+/.test(key)) {
-                    return ValidateResult.error(ValidateErrorCode.InvalidNumberKey, key)
+                    return ValidateResult.error(ValidateErrorCode.InnerError, key, ValidateResult.error(ValidateErrorCode.InvalidNumberKey))
                 }
             }
         }
@@ -272,12 +272,12 @@ export class TSBufferValidator {
 
             // required
             if (!property.optional && value[property.name] === undefined) {
-                return ValidateResult.error(ValidateErrorCode.MissingRequiredMember, property.name)
+                return ValidateResult.error(ValidateErrorCode.InnerError, property.name, ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
             }
 
             let vRes = this.validateBySchema(value[property.name], property.type);
             if (!vRes.isSucc) {
-                return ValidateResult.error(vRes.errcode, property.name)
+                return ValidateResult.error(ValidateErrorCode.InnerError, property.name, vRes);
             }
         }
 
@@ -298,13 +298,13 @@ export class TSBufferValidator {
                     // validate each field
                     let vRes = this.validateBySchema(value[field], indexSignature.type);
                     if (!vRes.isSucc) {
-                        return ValidateResult.error(vRes.errcode, vRes.fieldName || '');
+                        return ValidateResult.error(ValidateErrorCode.InnerError, vRes.fieldName || '', vRes);
                     }
                 }
             }
             // Unexpected field
             else {
-                return ValidateResult.error(ValidateErrorCode.UnexpectedField, remainedFields[0])
+                return ValidateResult.error(ValidateErrorCode.InnerError, remainedFields[0], ValidateResult.error(ValidateErrorCode.UnexpectedField))
             }
         }
 
