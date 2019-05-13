@@ -596,4 +596,14 @@ export class TSBufferValidator {
         }
     }
 
+    private _simplifyLogicSchema(schema: IntersectionTypeSchema | UnionTypeSchema) {
+        throw new Error('TODO');
+
+        // 合并interface
+
+        // 抽离非interface
+
+        // 整理interface fields
+    }
+
 }
