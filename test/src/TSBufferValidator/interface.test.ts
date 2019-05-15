@@ -45,12 +45,12 @@ describe('Interface Validate', function () {
 
     it('Interface: indexSignature: string key', function () {
         // 正常
-        assert.strictEqual(validator.validate({
+        assert.deepStrictEqual(validator.validate({
             a: 'aaa',
             b: 'bbbbb',
             name: 'test123',
             sex: 'm'
-        }, 'interface1', 'Interface2_1').isSucc, true);
+        }, 'interface1', 'Interface2_1'), ValidateResult.success);
 
         // 缺少必须字段
         assert.deepStrictEqual(
@@ -122,9 +122,84 @@ describe('Interface Validate', function () {
         ));
     });
 
-    it('Interface: extends', function () {
+    it('Interface: extends properties', function () {
+        // 成功
+        assert.deepStrictEqual(validator.validate({
+            value1: {
+                a: 'a',
+                b: 1
+            },
+            value2: {
+                c: false,
+                d: 'ddd'
+            },
+            value3: 'xxxxxx',
+            value4: { value: 0 }
+        }, 'interface2', 'Interface6'), ValidateResult.success);
 
+        // 缺少必要字段
+        ['value1', 'value2', 'value3', 'value4'].forEach(v => {
+            let value: any = {
+                value1: {
+                    a: 'a',
+                    b: 1
+                },
+                value2: {
+                    c: false,
+                    d: 'ddd'
+                },
+                value3: 'xxxxxx',
+                value4: { value: 0 }
+            };
+            delete value[v];
+            assert.deepStrictEqual(validator.validate(value, 'interface2', 'Interface6'), ValidateResult.error(
+                ValidateErrorCode.InnerError,
+                v,
+                ValidateResult.error(ValidateErrorCode.MissingRequiredMember)
+            ));
+        });
+
+        // 字段类型错误
+        assert.deepStrictEqual(validator.validate({
+            value1: {
+                a: 1,
+                b: 1
+            },
+            value2: {
+                c: false
+            },
+            value3: 'xxxxxx',
+            value4: { value: 0 }
+        }, 'interface2', 'Interface6'), ValidateResult.error(
+            ValidateErrorCode.InnerError,
+            'value1',
+            ValidateResult.error(ValidateErrorCode.InnerError, 'a', ValidateResult.error(ValidateErrorCode.WrongType))
+        ));
     });
+
+    it('Interface: extends indexSignature', function () {
+        // 成功
+        assert.deepStrictEqual(validator.validate({
+            value3: '1234',
+            value4: 'abcd',
+            is1: 'xxx',
+            is2: 'xxx'
+        }, 'interface2', 'Interface8'), ValidateResult.success);
+
+        // property内字段，property对，但indexSignature错误
+        assert.deepStrictEqual(validator.validate({
+            value3: 1234,
+            value4: 'abcd'
+        }, 'interface2', 'Interface8'), ValidateResult.error(ValidateErrorCode.InnerError, 'value3', ValidateResult.error(ValidateErrorCode.WrongType)));
+
+        // indexSignature错误
+        assert.deepStrictEqual(validator.validate({
+            value3: '1234',
+            value4: 'abcd',
+            aaaa: 1234
+        }, 'interface2', 'Interface8'), ValidateResult.error(ValidateErrorCode.InnerError, 'aaaa', ValidateResult.error(ValidateErrorCode.WrongType)));
+
+    })
 
     it('Interface: nested interface', function () {
 

@@ -194,9 +194,18 @@
           "id": 0,
           "name": "value4",
           "type": {
-            "type": "Reference",
-            "targetName": "TestEnum",
-            "path": "interface2"
+            "type": "Interface",
+            "properties": [
+              {
+                "id": 0,
+                "name": "value",
+                "type": {
+                  "type": "Reference",
+                  "targetName": "TestEnum",
+                  "path": "interface2"
+                }
+              }
+            ]
           }
         }
       ]
@@ -215,6 +224,39 @@
         {
           "id": 2,
           "value": 2
+        }
+      ]
+    },
+    "Interface7": {
+      "type": "Interface",
+      "indexSignature": {
+        "keyType": "String",
+        "type": {
+          "type": "String"
+        }
+      }
+    },
+    "Interface8": {
+      "type": "Interface",
+      "extends": [
+        {
+          "type": "Reference",
+          "targetName": "Interface5",
+          "path": "interface2"
+        },
+        {
+          "type": "Reference",
+          "targetName": "Interface7",
+          "path": "interface2"
+        }
+      ],
+      "properties": [
+        {
+          "id": 0,
+          "name": "value4",
+          "type": {
+            "type": "String"
+          }
         }
       ]
     }

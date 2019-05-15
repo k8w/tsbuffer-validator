@@ -238,17 +238,46 @@ export class TSBufferValidator {
 
         // 校验properties
         if (schema.properties) {
-            let vRes = this._validateInterfaceProperties(value, schema.properties, skipFields);
-            if (!vRes.isSucc) {
-                return vRes;
+            for (let property of schema.properties) {
+                // skipFields
+                if (skipFields.indexOf(property.name) > -1) {
+                    continue;
+                }
+                skipFields.push(property.name);
+
+                // optional
+                if (property.optional && value[property.name] === undefined) {
+                    continue;
+                }
+
+                // required
+                if (!property.optional && value[property.name] === undefined) {
+                    return ValidateResult.error(ValidateErrorCode.InnerError, property.name, ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
+                }
+
+                // property本身验证
+                let vRes = this.validateBySchema(value[property.name], property.type);
+                if (!vRes.isSucc) {
+                    return ValidateResult.error(ValidateErrorCode.InnerError, property.name, vRes);
+                }
             }
         }
 
         // 检测indexSignature
         if (schema.indexSignature) {
-            let vRes = this._validateInterfaceIndexSignature(value, schema.indexSignature, skipFields);
-            if (!vRes.isSucc) {
-                return vRes;
+            for (let key in value) {
+                // validate each field
+                let vRes = this.validateBySchema(value[key], schema.indexSignature.type);
+                if (!vRes.isSucc) {
+                    return ValidateResult.error(ValidateErrorCode.InnerError, key, vRes);
+                }
+            }
+        }
+        // 超出字段检测
+        else {
+            let remainedFields = Object.keys(value).remove(v => skipFields.indexOf(v) > -1);
+            if (remainedFields.length) {
+                return ValidateResult.error(ValidateErrorCode.InnerError, remainedFields[0], ValidateResult.error(ValidateErrorCode.UnexpectedField))
             }
         }
 
@@ -260,32 +289,11 @@ export class TSBufferValidator {
      * 注意：这个方法允许properties中未定义的字段存在！
      * @return interface的error
      */
-    private _validateInterfaceProperties(value: any, properties: NonNullable<InterfaceTypeSchema['properties']>, skipFields: string[]): ValidateResult {
-        for (let property of properties) {
-            // skipFields
-            if (skipFields.indexOf(property.name) > -1) {
-                continue;
-            }
-            skipFields.push(property.name);
+    // private _validateInterfaceProperties(value: any, properties: NonNullable<InterfaceTypeSchema['properties']>, indexSignature: InterfaceTypeSchema['indexSignature'], skipFields: string[]): ValidateResult {
 
-            // optional
-            if (property.optional && value[property.name] === undefined) {
-                continue;
-            }
 
-            // required
-            if (!property.optional && value[property.name] === undefined) {
-                return ValidateResult.error(ValidateErrorCode.InnerError, property.name, ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
-            }
-
-            let vRes = this.validateBySchema(value[property.name], property.type);
-            if (!vRes.isSucc) {
-                return ValidateResult.error(ValidateErrorCode.InnerError, property.name, vRes);
-            }
-        }
-
-        return ValidateResult.success;
-    }
+    //     return ValidateResult.success;
+    // }
 
     private _validateInterfaceIndexSignature(value: any, indexSignature: InterfaceTypeSchema['indexSignature'], skipFields: string[]) {
         let remainedFields = Object.keys(value).remove(v => skipFields.indexOf(v) > -1);

@@ -14,6 +14,14 @@ enum TestEnum {
     vc
 }
 
-export interface Interface6 extends Interface3, Interface5{
-    value4: TestEnum
+export interface Interface6 extends Interface3, Interface5 {
+    value4: { value: TestEnum }
+}
+
+export interface Interface7 {
+    [key: string]: string
+}
+
+export interface Interface8 extends Interface5, Interface7 {
+    value4: string;
 }
