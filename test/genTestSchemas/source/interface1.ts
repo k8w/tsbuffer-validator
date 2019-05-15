@@ -5,7 +5,17 @@ export default interface Interface1 {
 
 export interface Interface2 {
     c: boolean,
-    d: string
+    d?: string
+}
+
+export interface Interface2_1 {
+    name: string,
+    sex: 'm' | 'f',
+    [key: string]: string
+}
+
+export interface Interface2_2 {
+    [key: number]: string
 }
 
 export interface Interface3 {

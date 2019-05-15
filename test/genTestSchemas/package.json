@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "generate": "ts-node generate.ts",
-    "ug": "npm i tsbuffer-schema-generator@*"
+    "ug": "npm i tsbuffer-schema-generator@*",
+    "listen": "onchange -i -v source/**/*.ts -- ts-node generate.ts"
   },
   "author": "",
   "license": "ISC",

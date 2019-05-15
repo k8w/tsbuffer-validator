@@ -13,6 +13,6 @@ async function main() {
 
     fs.writeFileSync(path.resolve(__dirname, 'output.json'), JSON.stringify(result, null, 2));
 
-    console.log(result);
+    console.log(JSON.stringify(result, null, 2));
 }
 main();

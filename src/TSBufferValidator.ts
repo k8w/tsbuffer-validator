@@ -19,7 +19,6 @@ import { InterfaceReference } from 'tsbuffer-schema/src/InterfaceReference';
 import { TypeReference } from 'tsbuffer-schema/src/TypeReference';
 
 export interface TSBufferValidatorOptions {
-    strictNullChecks: boolean
 }
 
 const typedArrays = {
@@ -38,7 +37,6 @@ const typedArrays = {
 export class TSBufferValidator {
 
     _options: TSBufferValidatorOptions = {
-        strictNullChecks: true
     }
 
     private _proto: TSBufferProto;
@@ -227,7 +225,8 @@ export class TSBufferValidator {
         // interfaceSignature强制了key必须是数字的情况
         if (schema.indexSignature && schema.indexSignature.keyType === 'Number') {
             for (let key in value) {
-                if (!/\d+/.test(key)) {
+                let int = parseInt(key);
+                if (isNaN(int) || ('' + int) !== key) {
                     return ValidateResult.error(ValidateErrorCode.InnerError, key, ValidateResult.error(ValidateErrorCode.InvalidNumberKey))
                 }
             }
@@ -302,7 +301,7 @@ export class TSBufferValidator {
                     // validate each field
                     let vRes = this.validateBySchema(value[field], indexSignature.type);
                     if (!vRes.isSucc) {
-                        return ValidateResult.error(ValidateErrorCode.InnerError, vRes.fieldName || '', vRes);
+                        return ValidateResult.error(ValidateErrorCode.InnerError, field, vRes);
                     }
                 }
             }
