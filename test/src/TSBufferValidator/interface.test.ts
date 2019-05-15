@@ -202,6 +202,37 @@ describe('Interface Validate', function () {
     })
 
     it('Interface: nested interface', function () {
+        // 成功
+        assert.deepStrictEqual(validator.validate({
+            value1: {
+                value1: {
+                    a: 'a',
+                    b: 1
+                },
+                value2: {
+                    c: true
+                }
+            },
+            value2: 'b'
+        }, 'interface2', 'Interface4'), ValidateResult.success);
 
+        // 内部错误
+        // 成功
+        assert.deepStrictEqual(validator.validate({
+            value1: {
+                value1: {
+                    a: 1,
+                    b: 1
+                },
+                value2: {
+                    c: true
+                }
+            },
+            value2: 'b'
+        }, 'interface2', 'Interface4'), ValidateResult.error(ValidateErrorCode.InnerError, 'value1',
+            ValidateResult.error(ValidateErrorCode.InnerError, 'value1', ValidateResult.error(ValidateErrorCode.InnerError, 'a',
+                ValidateResult.error(ValidateErrorCode.WrongType)
+            ))
+        ));
     })
 })
