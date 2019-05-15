@@ -1,0 +1,171 @@
+{
+  "interface1": {
+    "default": {
+      "type": "Reference",
+      "targetName": "Interface1",
+      "path": "interface1"
+    },
+    "Interface1": {
+      "type": "Interface",
+      "properties": [
+        {
+          "id": 0,
+          "name": "a",
+          "type": {
+            "type": "String"
+          }
+        },
+        {
+          "id": 1,
+          "name": "b",
+          "type": {
+            "type": "Number"
+          }
+        }
+      ]
+    },
+    "Interface2": {
+      "type": "Interface",
+      "properties": [
+        {
+          "id": 0,
+          "name": "c",
+          "type": {
+            "type": "Boolean"
+          }
+        },
+        {
+          "id": 1,
+          "name": "d",
+          "type": {
+            "type": "String"
+          }
+        }
+      ]
+    },
+    "Interface3": {
+      "type": "Interface",
+      "properties": [
+        {
+          "id": 0,
+          "name": "value1",
+          "type": {
+            "type": "Reference",
+            "targetName": "Interface1",
+            "path": "interface1"
+          }
+        },
+        {
+          "id": 1,
+          "name": "value2",
+          "type": {
+            "type": "Reference",
+            "targetName": "Interface2",
+            "path": "interface1"
+          }
+        }
+      ]
+    }
+  },
+  "interface2": {
+    "Interface4": {
+      "type": "Interface",
+      "properties": [
+        {
+          "id": 0,
+          "name": "value1",
+          "type": {
+            "type": "Reference",
+            "path": "interface1",
+            "targetName": "Interface3"
+          }
+        },
+        {
+          "id": 1,
+          "name": "value2",
+          "type": {
+            "type": "Union",
+            "members": [
+              {
+                "id": 0,
+                "type": {
+                  "type": "Literal",
+                  "literal": "a"
+                }
+              },
+              {
+                "id": 1,
+                "type": {
+                  "type": "Literal",
+                  "literal": "b"
+                }
+              },
+              {
+                "id": 2,
+                "type": {
+                  "type": "Literal",
+                  "literal": "c"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "Interface5": {
+      "type": "Interface",
+      "properties": [
+        {
+          "id": 0,
+          "name": "value3",
+          "type": {
+            "type": "Any"
+          }
+        }
+      ]
+    },
+    "Interface6": {
+      "type": "Interface",
+      "extends": [
+        {
+          "type": "Reference",
+          "path": "interface1",
+          "targetName": "Interface3"
+        },
+        {
+          "type": "Reference",
+          "targetName": "Interface5",
+          "path": "interface2"
+        }
+      ],
+      "properties": [
+        {
+          "id": 0,
+          "name": "value4",
+          "type": {
+            "type": "Reference",
+            "targetName": "TestEnum",
+            "path": "interface2"
+          }
+        }
+      ]
+    },
+    "TestEnum": {
+      "type": "Enum",
+      "members": [
+        {
+          "id": 0,
+          "value": 0
+        },
+        {
+          "id": 1,
+          "value": 1
+        },
+        {
+          "id": 2,
+          "value": 2
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "gentestschemas",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "generate": "ts-node generate.ts",
+    "ug": "npm i tsbuffer-schema-generator@*"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/glob": "^7.1.1",
+    "glob": "^7.1.4",
+    "tsbuffer-schema-generator": "^1.0.2"
+  }
+}

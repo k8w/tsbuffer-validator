@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import { TSBufferValidator } from '../../..';
 import { ValidateResult, ValidateErrorCode } from '../../../src/ValidateResult';
 
-describe('ClassName', function () {
+describe('TypeReference Validate', function () {
     it('Reference', function () {
         let validator = new TSBufferValidator({
             a: {
