@@ -218,8 +218,12 @@ export class TSBufferValidator {
         }
 
         // 先展平
-        schema = this._flattenInterface(schema);
+        let flatSchema = this._flattenInterface(schema);
 
+        return this._validateFlatInterface(value, flatSchema);
+    }
+
+    private _validateFlatInterface(value: any, schema: FlatInterfaceTypeSchema) {
         // interfaceSignature强制了key必须是数字的情况
         if (schema.indexSignature && schema.indexSignature.keyType === 'Number') {
             for (let key in value) {
@@ -331,8 +335,8 @@ export class TSBufferValidator {
             }
         }
         else if (schema.type === 'IndexedAccess') {
-            if (!this._isInterfaceReference(schema.objectType)) {
-                throw new Error(`Error objectType: ${schema.objectType.type}`);
+            if (!this._isInterfaceOrReference(schema.objectType)) {
+                throw new Error(`Error objectType: ${(schema.objectType as any).type}`);
             }
 
             // find prop item
@@ -373,49 +377,61 @@ export class TSBufferValidator {
     }
 
     validateUnionType(value: any, schema: UnionTypeSchema): ValidateResult {
-        throw new Error('TODO');
+        let unionFields = this._getUnionFields(schema.members.map(v => v.type));
 
-        // 对schema.members做处理，整理出field清单
-        // 对member进行依次检查，对interface及其ref检查时，对多出的字段，若在field清单内，则不报错
+        // 有一成功则成功
+        for (let member of schema.members) {
+            let vRes: ValidateResult;
+            // interface 加入unionFIelds去validate
+            if (this._isInterfaceOrReference(member.type)) {
+                vRes = this._validateInterfaceOrReference(value, member.type, unionFields);
+            }
+            // 其它类型 直接validate
+            else {
+                vRes = this.validateBySchema(value, member.type);
+            }
 
-        // for (let cond of schema.members) {
-        //     let vRes = this.validateBySchema(value, cond.type);
-        //     if (vRes) {
-        //         return ValidateResult.success;
-        //     }
-        // }
+            // 有一成功则成功
+            if (vRes.isSucc) {
+                return ValidateResult.success;
+            }
+        }
 
-        // return ValidateResult.error(ValidateErrorCode.NonConditionSatisfied);
+        // 全失败，则失败
+        return ValidateResult.error(ValidateErrorCode.NonConditionMet);
     }
 
     validateIntersectionType(value: any, schema: IntersectionTypeSchema): ValidateResult {
-        throw new Error('TODO');
+        let unionFields = this._getUnionFields(schema.members.map(v => v.type));
 
-        // for (let cond of schema.members) {
-        //     if (cond.type.type === 'Interface' || this._isInterfaceReference(cond.type)) {
-        //         let flat = this.getFlatInterfaceSchema(cond.type);
-        //         // Intersection 每个部分检查（如果是Interface的）允许额外的字段
-        //         if (!flat.indexSignature) {
-        //             flat.indexSignature = {
-        //                 keyType: 'String',
-        //                 type: {
-        //                     type: 'Any'
-        //                 }
-        //             }
-        //         }
-        //     }
+        // 有一失败则失败
+        for (let i = 0, len = schema.members.length; i < len; ++i) {
+            // 验证member
+            let memberType = schema.members[i].type;
+            let vRes: ValidateResult;
+            // interface 加入unionFIelds去validate
+            if (this._isInterfaceOrReference(memberType)) {
+                vRes = this._validateInterfaceOrReference(value, memberType, unionFields);
+            }
+            // 其它类型 直接validate
+            else {
+                vRes = this.validateBySchema(value, memberType);
+            }
 
-        //     // let vRes = this.validateBySchema(value, cond.type);
-        //     // if (vRes) {
-        //     //     return ValidateResult.success;
-        //     // }
-        // }
+            // 有一失败则失败
+            if (!vRes.isSucc) {
+                return ValidateResult.error(ValidateErrorCode.InnerError, 'Condition' + i, vRes);
+            }
+        }
+
+        // 全成功则成功
+        return ValidateResult.success;
     }
 
-    private _isInterfaceReference(schema: TSBufferSchema): schema is InterfaceReference {
+    private _isInterfaceOrReference(schema: TSBufferSchema): schema is InterfaceTypeSchema | InterfaceReference {
         if (this._isTypeReference(schema)) {
             let parsed = this._parseReference(schema);
-            return this._isInterfaceReference(parsed);
+            return this._isInterfaceOrReference(parsed);
         }
         else {
             return schema.type === 'Interface' ||
@@ -433,7 +449,7 @@ export class TSBufferValidator {
     /**
      * 将interface及其引用转换为展平的schema
      */
-    getFlatInterfaceSchema(schema: InterfaceTypeSchema | InterfaceReference): InterfaceTypeSchema {
+    getFlatInterfaceSchema(schema: InterfaceTypeSchema | InterfaceReference): FlatInterfaceTypeSchema {
         if (this._isTypeReference(schema)) {
             let parsed = this._parseReference(schema);
             if (parsed.type !== 'Interface') {
@@ -450,7 +466,7 @@ export class TSBufferValidator {
     }
 
     // 展平interface
-    private _flattenInterface(schema: InterfaceTypeSchema): InterfaceTypeSchema {
+    private _flattenInterface(schema: InterfaceTypeSchema): FlatInterfaceTypeSchema {
         let properties: {
             [name: string]: {
                 optional?: boolean;
@@ -515,7 +531,7 @@ export class TSBufferValidator {
     }
 
     // 将MappedTypeSchema转换为展平的Interface
-    private _flattenMappedType(schema: PickTypeSchema | PartialTypeSchema | OverwriteTypeSchema | OmitTypeSchema): InterfaceTypeSchema {
+    private _flattenMappedType(schema: PickTypeSchema | PartialTypeSchema | OverwriteTypeSchema | OmitTypeSchema): FlatInterfaceTypeSchema {
         // target 解引用
         let target: Exclude<PickTypeSchema['target'], ReferenceTypeSchema>;
         if (schema.target.type === 'Reference') {
@@ -533,13 +549,13 @@ export class TSBufferValidator {
         // interface 展平之
         else if (target.type === 'Interface') {
             // target已展平
-            target = this._flattenInterface(target);
+            let flatTarget = this._flattenInterface(target);
 
             // 开始执行Mapped逻辑
             if (schema.type === 'Pick') {
                 let properties: NonNullable<InterfaceTypeSchema['properties']> = [];
                 for (let key of schema.keys) {
-                    let propItem = target.properties!.find(v => v.name === key);
+                    let propItem = flatTarget.properties!.find(v => v.name === key);
                     if (propItem) {
                         properties.push({
                             id: properties.length,
@@ -548,11 +564,11 @@ export class TSBufferValidator {
                             type: propItem.type
                         })
                     }
-                    else if (target.indexSignature) {
+                    else if (flatTarget.indexSignature) {
                         properties.push({
                             id: properties.length,
                             name: key,
-                            type: target.indexSignature.type
+                            type: flatTarget.indexSignature.type
                         })
                     }
                     else {
@@ -565,27 +581,27 @@ export class TSBufferValidator {
                 }
             }
             else if (schema.type === 'Partial') {
-                for (let v of target.properties!) {
+                for (let v of flatTarget.properties!) {
                     v.optional = true;
                 }
-                return target;
+                return flatTarget;
             }
             else if (schema.type === 'Omit') {
                 for (let key in schema.keys) {
-                    target.properties!.removeOne(v => v.name === key);
+                    flatTarget.properties!.removeOne(v => v.name === key);
                 }
-                return target;
+                return flatTarget;
             }
             else if (schema.type === 'Overwrite') {
                 let overwrite = this.getFlatInterfaceSchema(schema.overwrite);
                 if (overwrite.indexSignature) {
-                    target.indexSignature = overwrite.indexSignature;
+                    flatTarget.indexSignature = overwrite.indexSignature;
                 }
                 for (let prop of overwrite.properties!) {
-                    target.properties!.removeOne(v => v.name === prop.name);
-                    target.properties!.push(prop);
+                    flatTarget.properties!.removeOne(v => v.name === prop.name);
+                    flatTarget.properties!.push(prop);
                 }
-                return target;
+                return flatTarget;
             }
             else {
                 throw new Error(`Unknown type: ${(schema as any).type}`)
@@ -596,14 +612,127 @@ export class TSBufferValidator {
         }
     }
 
-    private _simplifyLogicSchema(schema: IntersectionTypeSchema | UnionTypeSchema) {
-        throw new Error('TODO');
+    private _getUnionFields(schemas: TSBufferSchema[]): string[] {
+        let unionFields: string[] = [];
 
-        // 合并interface
+        for (let i = 0, len = schemas.length; i < len; ++i) {
+            let schema = schemas[i];
+            if (this._isTypeReference(schema)) {
+                schema = this._parseReference(schema)
+            }
 
-        // 抽离非interface
+            // Interface及其Ref 加入interfaces
+            if (this._isInterfaceOrReference(schema)) {
+                let flat = this.getFlatInterfaceSchema(schema);
+                flat.properties.forEach(v => unionFields.binaryInsert(v.name));
+            }
+            // Intersection/Union 递归合并unionFields
+            else if (schema.type === 'Intersection' || schema.type === 'Union') {
+                let sub = this._getUnionFields(schema.members.map(v => v.type));
+                for (let v of sub) {
+                    if (unionFields.binarySearch(v) === -1) {
+                        unionFields.binaryInsert(v);
+                    }
+                }
+            }
+        }
 
-        // 整理interface fields
+        return unionFields;
     }
 
+    private _validateInterfaceOrReference(value: any, schema: InterfaceTypeSchema | InterfaceReference, unionFields?: string[]) {
+        let flat = this.getFlatInterfaceSchema(schema);
+        unionFields && this._extendUnionFieldsToProperties(flat.properties, unionFields);
+        return this.validateInterfaceType(value, flat);
+    }
+
+    // private _simplifyLogicSchema(schema: IntersectionTypeSchema | UnionTypeSchema): SimplifiedLogicMembers {
+    //     let interfaces: SimplifiedLogicMembers['interfaces'] = [];
+    //     let nonInterfaces: SimplifiedLogicMembers['nonInterfaces'] = [];
+    //     let unionFields: string[] = [];
+
+    //     for (let i = 0, len = schema.members.length; i < len; ++i) {
+    //         let member = schema.members[i];
+    //         let type = this._isTypeReference(member.type) ? this._parseReference(member.type) : member.type;
+
+    //         // Interface及其Ref 加入interfaces
+    //         if (type.type === 'Interface' || this._isInterfaceReference(type)) {
+    //             let flat = this.getFlatInterfaceSchema(type);
+    //             interfaces.push({
+    //                 flatSchema: flat,
+    //                 index: i
+    //             });
+    //             flat.properties.forEach(v => unionFields.binaryInsert(v.name));
+    //         }
+    //         // 其它 视为nonInterfaces
+    //         else {
+    //             nonInterfaces.push({
+    //                 schema: type,
+    //                 index: i
+    //             })
+    //         }
+
+    //         // Intersection/Union 递归合并unionFields
+    //         if (type.type === 'Intersection' || type.type === 'Union') {
+    //             let sub = this._simplifyLogicSchema(type);
+    //             for (let v of sub.unionFields) {
+    //                 if (unionFields.binarySearch(v) === -1) {
+    //                     unionFields.binaryInsert(v);
+    //                 }
+    //             }
+    //         }
+
+    //     }
+
+    //     return {
+    //         interfaces: interfaces,
+    //         nonInterfaces: nonInterfaces,
+    //         unionFields: unionFields
+    //     }
+    // }
+
+    private _isObject(value: any) {
+        return typeof value === 'object' && value !== null && !Array.isArray(value);
+    }
+
+    /**
+     * 将unionFields 扩展到 InterfaceTypeSchema中（optional的any类型）
+     * 以此来跳过对它们的检查（用于Intersection/Union）
+     * @param schema 
+     * @param unionFields 
+     */
+    private _extendUnionFieldsToProperties(properties: FlatInterfaceTypeSchema['properties'], unionFields: string[]) {
+        let newProperties: FlatInterfaceTypeSchema['properties'] = [];
+
+        for (let field of unionFields) {
+            if (!properties.find(v => v.name === field)) {
+                newProperties.push({
+                    id: -1,
+                    name: field,
+                    optional: true,
+                    type: {
+                        type: 'Any'
+                    }
+                })
+            }
+        }
+
+        newProperties.forEach(v => {
+            properties.push(v);
+        });
+    }
+}
+
+export type FlatInterfaceTypeSchema = InterfaceTypeSchema & { properties: NonNullable<InterfaceTypeSchema['properties']> };
+
+type SimplifiedLogicMembers = {
+    interfaces: {
+        flatSchema: FlatInterfaceTypeSchema,
+        index: number
+    }[],
+    nonInterfaces: {
+        schema: Exclude<TSBufferSchema, InterfaceTypeSchema | InterfaceReference>,
+        index: number
+    }[],
+    unionFields: string[]
 }

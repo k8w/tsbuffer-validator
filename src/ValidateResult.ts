@@ -16,7 +16,7 @@ export enum ValidateErrorCode {
     ExtendsMustBeInterface,
     InvalidBufferArrayType,
     SchemaError,
-    NonConditionSatisfied,
+    NonConditionMet
 }
 
 export class ValidateResult {
