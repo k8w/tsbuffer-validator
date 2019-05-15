@@ -260,5 +260,232 @@
         }
       ]
     }
+  },
+  "mapped": {
+    "Base": {
+      "type": "Interface",
+      "properties": [
+        {
+          "id": 0,
+          "name": "name",
+          "type": {
+            "type": "String"
+          }
+        },
+        {
+          "id": 1,
+          "name": "orders",
+          "type": {
+            "type": "Array",
+            "elementType": {
+              "type": "Number"
+            }
+          },
+          "optional": true
+        },
+        {
+          "id": 2,
+          "name": "sex",
+          "type": {
+            "type": "Interface",
+            "properties": [
+              {
+                "id": 0,
+                "name": "value",
+                "type": {
+                  "type": "Union",
+                  "members": [
+                    {
+                      "id": 0,
+                      "type": {
+                        "type": "Literal",
+                        "literal": "m"
+                      }
+                    },
+                    {
+                      "id": 1,
+                      "type": {
+                        "type": "Literal",
+                        "literal": "f"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "optional": true
+        }
+      ]
+    },
+    "Pick1": {
+      "target": {
+        "type": "Reference",
+        "targetName": "Base",
+        "path": "mapped"
+      },
+      "keys": [
+        "name"
+      ],
+      "type": "Pick"
+    },
+    "Pick2": {
+      "target": {
+        "type": "Reference",
+        "targetName": "Base",
+        "path": "mapped"
+      },
+      "keys": [
+        "name",
+        "orders"
+      ],
+      "type": "Pick"
+    },
+    "Pick3": {
+      "target": {
+        "type": "Reference",
+        "targetName": "Pick2",
+        "path": "mapped"
+      },
+      "keys": [
+        "orders"
+      ],
+      "type": "Pick"
+    },
+    "Partial1": {
+      "type": "Partial",
+      "target": {
+        "type": "Reference",
+        "targetName": "Base",
+        "path": "mapped"
+      }
+    },
+    "Partial2": {
+      "type": "Partial",
+      "target": {
+        "type": "Reference",
+        "targetName": "Pick2",
+        "path": "mapped"
+      }
+    },
+    "Omit1": {
+      "target": {
+        "type": "Reference",
+        "targetName": "Base",
+        "path": "mapped"
+      },
+      "keys": [
+        "sex"
+      ],
+      "type": "Omit"
+    },
+    "Omit2": {
+      "target": {
+        "type": "Reference",
+        "targetName": "Pick2",
+        "path": "mapped"
+      },
+      "keys": [
+        "orders"
+      ],
+      "type": "Omit"
+    },
+    "Omit3": {
+      "target": {
+        "type": "Reference",
+        "targetName": "Omit1",
+        "path": "mapped"
+      },
+      "keys": [
+        "name"
+      ],
+      "type": "Omit"
+    },
+    "Overwrite1": {
+      "type": "Overwrite",
+      "target": {
+        "type": "Reference",
+        "targetName": "Base",
+        "path": "mapped"
+      },
+      "overwrite": {
+        "type": "Interface",
+        "properties": [
+          {
+            "id": 0,
+            "name": "sex",
+            "type": {
+              "type": "Union",
+              "members": [
+                {
+                  "id": 0,
+                  "type": {
+                    "type": "Literal",
+                    "literal": "m"
+                  }
+                },
+                {
+                  "id": 1,
+                  "type": {
+                    "type": "Literal",
+                    "literal": "f"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": 1,
+            "name": "other",
+            "type": {
+              "type": "String"
+            }
+          }
+        ]
+      }
+    },
+    "Overwrite2": {
+      "type": "Overwrite",
+      "target": {
+        "type": "Reference",
+        "targetName": "Base",
+        "path": "mapped"
+      },
+      "overwrite": {
+        "type": "Interface",
+        "properties": [
+          {
+            "id": 0,
+            "name": "sex",
+            "type": {
+              "type": "Union",
+              "members": [
+                {
+                  "id": 0,
+                  "type": {
+                    "type": "Literal",
+                    "literal": "m"
+                  }
+                },
+                {
+                  "id": 1,
+                  "type": {
+                    "type": "Literal",
+                    "literal": "f"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": 1,
+            "name": "other",
+            "type": {
+              "type": "String"
+            }
+          }
+        ]
+      }
+    }
   }
 }
