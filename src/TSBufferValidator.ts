@@ -383,19 +383,30 @@ export class TSBufferValidator {
         return this.validateInterfaceType(value, this._flattenMappedType(schema));
     }
 
-    validateUnionType(value: any, schema: UnionTypeSchema): ValidateResult {
-        let unionFields = this._getUnionFields(schema.members.map(v => v.type));
+    validateUnionType(value: any, schema: UnionTypeSchema, unionFields?: string[]): ValidateResult {
+        if (!unionFields) {
+            this._extendsUnionFields(unionFields = [], schema.members.map(v => v.type));
+        }
 
         // 有一成功则成功
         for (let member of schema.members) {
+            let memberType = this._isTypeReference(member.type) ? this._parseReference(member.type) : member.type;
+
             let vRes: ValidateResult;
             // interface 加入unionFIelds去validate
-            if (this._isInterfaceOrReference(member.type)) {
-                vRes = this._validateInterfaceOrReference(value, member.type, unionFields);
+            if (this._isInterfaceOrReference(memberType)) {
+                vRes = this._validateInterfaceOrReference(value, memberType, unionFields);
+            }
+            // LogicType 递归unionFields
+            else if (memberType.type === 'Union') {
+                vRes = this.validateUnionType(value, memberType, unionFields);
+            }
+            else if (memberType.type === 'Intersection') {
+                vRes = this.validateIntersectionType(value, memberType, unionFields);
             }
             // 其它类型 直接validate
             else {
-                vRes = this.validateBySchema(value, member.type);
+                vRes = this.validateBySchema(value, memberType);
             }
 
             // 有一成功则成功
@@ -408,17 +419,28 @@ export class TSBufferValidator {
         return ValidateResult.error(ValidateErrorCode.NonConditionMet);
     }
 
-    validateIntersectionType(value: any, schema: IntersectionTypeSchema): ValidateResult {
-        let unionFields = this._getUnionFields(schema.members.map(v => v.type));
+    validateIntersectionType(value: any, schema: IntersectionTypeSchema, unionFields?: string[]): ValidateResult {
+        if (!unionFields) {
+            this._extendsUnionFields(unionFields = [], schema.members.map(v => v.type));
+        }
 
         // 有一失败则失败
         for (let i = 0, len = schema.members.length; i < len; ++i) {
             // 验证member
             let memberType = schema.members[i].type;
+            memberType = this._isTypeReference(memberType) ? this._parseReference(memberType) : memberType;
+
             let vRes: ValidateResult;
             // interface 加入unionFIelds去validate
             if (this._isInterfaceOrReference(memberType)) {
                 vRes = this._validateInterfaceOrReference(value, memberType, unionFields);
+            }
+            // LogicType 递归unionFields
+            else if (memberType.type === 'Union') {
+                vRes = this.validateUnionType(value, memberType, unionFields);
+            }
+            else if (memberType.type === 'Intersection') {
+                vRes = this.validateIntersectionType(value, memberType, unionFields);
             }
             // 其它类型 直接validate
             else {
@@ -619,9 +641,7 @@ export class TSBufferValidator {
         }
     }
 
-    private _getUnionFields(schemas: TSBufferSchema[]): string[] {
-        let unionFields: string[] = [];
-
+    private _extendsUnionFields(unionFields: string[], schemas: TSBufferSchema[]): void {
         for (let i = 0, len = schemas.length; i < len; ++i) {
             let schema = schemas[i];
             if (this._isTypeReference(schema)) {
@@ -631,20 +651,17 @@ export class TSBufferValidator {
             // Interface及其Ref 加入interfaces
             if (this._isInterfaceOrReference(schema)) {
                 let flat = this.getFlatInterfaceSchema(schema);
-                flat.properties.forEach(v => unionFields.binaryInsert(v.name));
+                flat.properties.forEach(v => {
+                    if (unionFields.binarySearch(v.name) === -1) {
+                        unionFields.binaryInsert(v.name);
+                    }
+                });
             }
             // Intersection/Union 递归合并unionFields
             else if (schema.type === 'Intersection' || schema.type === 'Union') {
-                let sub = this._getUnionFields(schema.members.map(v => v.type));
-                for (let v of sub) {
-                    if (unionFields.binarySearch(v) === -1) {
-                        unionFields.binaryInsert(v);
-                    }
-                }
+                let sub = this._extendsUnionFields(unionFields, schema.members.map(v => v.type));
             }
         }
-
-        return unionFields;
     }
 
     private _validateInterfaceOrReference(value: any, schema: InterfaceTypeSchema | InterfaceReference, unionFields?: string[]) {

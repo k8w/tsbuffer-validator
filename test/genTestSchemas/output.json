@@ -261,6 +261,340 @@
       ]
     }
   },
+  "logic": {
+    "AB": {
+      "type": "Intersection",
+      "members": [
+        {
+          "id": 0,
+          "type": {
+            "type": "Reference",
+            "targetName": "A",
+            "path": "logic"
+          }
+        },
+        {
+          "id": 1,
+          "type": {
+            "type": "Reference",
+            "targetName": "B",
+            "path": "logic"
+          }
+        }
+      ]
+    },
+    "A": {
+      "type": "Interface",
+      "properties": [
+        {
+          "id": 0,
+          "name": "a",
+          "type": {
+            "type": "String"
+          }
+        }
+      ]
+    },
+    "B": {
+      "type": "Interface",
+      "properties": [
+        {
+          "id": 0,
+          "name": "b",
+          "type": {
+            "type": "String"
+          }
+        }
+      ]
+    },
+    "CD": {
+      "type": "Union",
+      "members": [
+        {
+          "id": 0,
+          "type": {
+            "type": "Reference",
+            "targetName": "C",
+            "path": "logic"
+          }
+        },
+        {
+          "id": 1,
+          "type": {
+            "type": "Reference",
+            "targetName": "D",
+            "path": "logic"
+          }
+        }
+      ]
+    },
+    "C": {
+      "type": "Interface",
+      "properties": [
+        {
+          "id": 0,
+          "name": "c",
+          "type": {
+            "type": "String"
+          }
+        }
+      ]
+    },
+    "D": {
+      "type": "Interface",
+      "properties": [
+        {
+          "id": 0,
+          "name": "d",
+          "type": {
+            "type": "String"
+          }
+        }
+      ]
+    },
+    "ABC": {
+      "type": "Intersection",
+      "members": [
+        {
+          "id": 0,
+          "type": {
+            "type": "Reference",
+            "targetName": "A",
+            "path": "logic"
+          }
+        },
+        {
+          "id": 1,
+          "type": {
+            "type": "Reference",
+            "targetName": "B",
+            "path": "logic"
+          }
+        },
+        {
+          "id": 2,
+          "type": {
+            "type": "Reference",
+            "targetName": "C",
+            "path": "logic"
+          }
+        }
+      ]
+    },
+    "BCD": {
+      "type": "Union",
+      "members": [
+        {
+          "id": 0,
+          "type": {
+            "type": "Reference",
+            "targetName": "B",
+            "path": "logic"
+          }
+        },
+        {
+          "id": 1,
+          "type": {
+            "type": "Reference",
+            "targetName": "C",
+            "path": "logic"
+          }
+        },
+        {
+          "id": 2,
+          "type": {
+            "type": "Reference",
+            "targetName": "D",
+            "path": "logic"
+          }
+        }
+      ]
+    },
+    "ABCD": {
+      "type": "Union",
+      "members": [
+        {
+          "id": 0,
+          "type": {
+            "type": "Intersection",
+            "members": [
+              {
+                "id": 0,
+                "type": {
+                  "type": "Reference",
+                  "targetName": "A",
+                  "path": "logic"
+                }
+              },
+              {
+                "id": 1,
+                "type": {
+                  "type": "Reference",
+                  "targetName": "B",
+                  "path": "logic"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": 1,
+          "type": {
+            "type": "Intersection",
+            "members": [
+              {
+                "id": 0,
+                "type": {
+                  "type": "Reference",
+                  "targetName": "C",
+                  "path": "logic"
+                }
+              },
+              {
+                "id": 1,
+                "type": {
+                  "type": "Reference",
+                  "targetName": "D",
+                  "path": "logic"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "ABCD1": {
+      "type": "Union",
+      "members": [
+        {
+          "id": 0,
+          "type": {
+            "type": "Reference",
+            "targetName": "A",
+            "path": "logic"
+          }
+        },
+        {
+          "id": 1,
+          "type": {
+            "type": "Intersection",
+            "members": [
+              {
+                "id": 0,
+                "type": {
+                  "type": "Reference",
+                  "targetName": "B",
+                  "path": "logic"
+                }
+              },
+              {
+                "id": 1,
+                "type": {
+                  "type": "Reference",
+                  "targetName": "C",
+                  "path": "logic"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": 2,
+          "type": {
+            "type": "Reference",
+            "targetName": "D",
+            "path": "logic"
+          }
+        }
+      ]
+    },
+    "Conflict": {
+      "type": "Intersection",
+      "members": [
+        {
+          "id": 0,
+          "type": {
+            "type": "Interface",
+            "properties": [
+              {
+                "id": 0,
+                "name": "value",
+                "type": {
+                  "type": "String"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": 1,
+          "type": {
+            "type": "Interface",
+            "properties": [
+              {
+                "id": 0,
+                "name": "value",
+                "type": {
+                  "type": "Number"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "Conflict2": {
+      "type": "Union",
+      "members": [
+        {
+          "id": 0,
+          "type": {
+            "type": "Interface",
+            "properties": [
+              {
+                "id": 0,
+                "name": "type",
+                "type": {
+                  "type": "Literal",
+                  "literal": "string"
+                }
+              },
+              {
+                "id": 1,
+                "name": "value",
+                "type": {
+                  "type": "String"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": 1,
+          "type": {
+            "type": "Interface",
+            "properties": [
+              {
+                "id": 0,
+                "name": "type",
+                "type": {
+                  "type": "Literal",
+                  "literal": "number"
+                }
+              },
+              {
+                "id": 1,
+                "name": "value",
+                "type": {
+                  "type": "Number"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
   "mapped": {
     "Base": {
       "type": "Interface",
@@ -447,9 +781,16 @@
     "Overwrite2": {
       "type": "Overwrite",
       "target": {
-        "type": "Reference",
-        "targetName": "Base",
-        "path": "mapped"
+        "target": {
+          "type": "Reference",
+          "targetName": "Base",
+          "path": "mapped"
+        },
+        "keys": [
+          "name",
+          "sex"
+        ],
+        "type": "Pick"
       },
       "overwrite": {
         "type": "Interface",
