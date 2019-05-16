@@ -508,6 +508,83 @@
         }
       ]
     },
+    "ABCD2": {
+      "type": "Union",
+      "members": [
+        {
+          "id": 0,
+          "type": {
+            "type": "Intersection",
+            "members": [
+              {
+                "id": 0,
+                "type": {
+                  "type": "Reference",
+                  "targetName": "A",
+                  "path": "logic"
+                }
+              },
+              {
+                "id": 1,
+                "type": {
+                  "type": "Reference",
+                  "targetName": "B",
+                  "path": "logic"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": 1,
+          "type": {
+            "type": "Intersection",
+            "members": [
+              {
+                "id": 0,
+                "type": {
+                  "type": "Reference",
+                  "targetName": "B",
+                  "path": "logic"
+                }
+              },
+              {
+                "id": 1,
+                "type": {
+                  "type": "Reference",
+                  "targetName": "C",
+                  "path": "logic"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": 2,
+          "type": {
+            "type": "Intersection",
+            "members": [
+              {
+                "id": 0,
+                "type": {
+                  "type": "Reference",
+                  "targetName": "C",
+                  "path": "logic"
+                }
+              },
+              {
+                "id": 1,
+                "type": {
+                  "type": "Reference",
+                  "targetName": "D",
+                  "path": "logic"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
     "Conflict": {
       "type": "Intersection",
       "members": [
