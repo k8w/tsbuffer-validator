@@ -29,6 +29,10 @@ describe('LogicType', function () {
         // excess
         assert.deepStrictEqual(validator.validate({ a: 4, b: null, c: 'c', d: 'd' }, 'logic', 'ABCD'), ValidateResult.success);
 
+        // A | B&C | D
+        // TODO
+
+        // TODO failed的情况
 
 
         // assert.deepStrictEqual(validator.validate({ a: 'aa', b: 'bb' }, 'logic', 'AB'), ValidateResult.success);
