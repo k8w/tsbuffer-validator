@@ -672,6 +672,39 @@
         }
       ]
     },
+    "ABCD4": {
+      "type": "Union",
+      "members": [
+        {
+          "id": 0,
+          "type": {
+            "type": "Reference",
+            "targetName": "A",
+            "path": "logic"
+          }
+        },
+        {
+          "id": 1,
+          "type": {
+            "type": "Reference",
+            "targetName": "B",
+            "path": "logic"
+          }
+        },
+        {
+          "id": 2,
+          "type": {
+            "type": "Interface",
+            "indexSignature": {
+              "keyType": "String",
+              "type": {
+                "type": "Number"
+              }
+            }
+          }
+        }
+      ]
+    },
     "Conflict": {
       "type": "Intersection",
       "members": [

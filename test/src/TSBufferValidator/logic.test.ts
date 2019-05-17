@@ -125,4 +125,12 @@ describe('LogicType', function () {
         assert.deepStrictEqual(validator.validate({ type: 'number', value: 'x' }, 'logic', 'Conflict2'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
         assert.deepStrictEqual(validator.validate({}, 'logic', 'Conflict2'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
     })
+
+    it('Union: indexSignature & excess check', function () {
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: true, c: 'x', d: 'x' }, 'logic', 'ABCD4'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: true, c: true }, 'logic', 'ABCD4'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ a: true, b: true, c: true }, 'logic', 'ABCD4'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+        assert.deepStrictEqual(validator.validate({ a: true, b: true, c: 1 }, 'logic', 'ABCD4'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+        assert.deepStrictEqual(validator.validate({ a: 1, b: 1, c: 1 }, 'logic', 'ABCD4'), ValidateResult.success);
+    })
 })
