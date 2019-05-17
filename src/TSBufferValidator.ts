@@ -449,7 +449,7 @@ export class TSBufferValidator {
 
             // 有一失败则失败
             if (!vRes.isSucc) {
-                return ValidateResult.error(ValidateErrorCode.InnerError, 'Condition' + i, vRes);
+                return ValidateResult.error(ValidateErrorCode.InnerError, `<Condition${i}>`, vRes);
             }
         }
 

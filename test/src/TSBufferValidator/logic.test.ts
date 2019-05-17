@@ -83,10 +83,43 @@ describe('LogicType', function () {
     it('Intersection: Basic', function () {
         // A & B
         assert.deepStrictEqual(validator.validate({ a: 'aa', b: 'bb' }, 'logic', 'AB'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ a: 'aa', b: 'bb', c: 'cc' }, 'logic', 'AB'), ValidateResult.error(
+            ValidateErrorCode.InnerError, '<Condition0>', ValidateResult.error(ValidateErrorCode.InnerError, 'c', ValidateResult.error(ValidateErrorCode.UnexpectedField))
+        ));
+        assert.deepStrictEqual(validator.validate({ a: 'x' }, 'logic', 'AB'), ValidateResult.error(
+            ValidateErrorCode.InnerError, '<Condition1>', ValidateResult.error(ValidateErrorCode.InnerError, 'b', ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
+        ));
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: 123 }, 'logic', 'AB'), ValidateResult.error(
+            ValidateErrorCode.InnerError, '<Condition1>', ValidateResult.error(ValidateErrorCode.InnerError, 'b', ValidateResult.error(ValidateErrorCode.WrongType))
+        ));
 
         // A & B & C
         assert.deepStrictEqual(validator.validate({ a: 'a', b: 'b', c: 'c' }, 'logic', 'ABC'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x' }, 'logic', 'ABC'), ValidateResult.error(
+            ValidateErrorCode.InnerError, '<Condition2>', ValidateResult.error(ValidateErrorCode.InnerError, 'c', ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
+        ));
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', c: 'x', d: 1223 }, 'logic', 'ABC'), ValidateResult.error(
+            ValidateErrorCode.InnerError, '<Condition0>', ValidateResult.error(ValidateErrorCode.InnerError, 'd', ValidateResult.error(ValidateErrorCode.UnexpectedField))
+        ));
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', c: 123 }, 'logic', 'ABC'), ValidateResult.error(
+            ValidateErrorCode.InnerError, '<Condition2>', ValidateResult.error(ValidateErrorCode.InnerError, 'c', ValidateResult.error(ValidateErrorCode.WrongType))
+        ));
+    })
 
-        // TODO
+    it('Intersection: Conflict', function () {
+        assert.deepStrictEqual(validator.validate({ value: 'xx' }, 'logic', 'Conflict'), ValidateResult.error(
+            ValidateErrorCode.InnerError, '<Condition1>', ValidateResult.error(ValidateErrorCode.InnerError, 'value', ValidateResult.error(ValidateErrorCode.WrongType))
+        ));
+        assert.deepStrictEqual(validator.validate({ value: 123 }, 'logic', 'Conflict'), ValidateResult.error(
+            ValidateErrorCode.InnerError, '<Condition0>', ValidateResult.error(ValidateErrorCode.InnerError, 'value', ValidateResult.error(ValidateErrorCode.WrongType))
+        ));
+    });
+
+    it('Union: mutual exclusion', function () {
+        assert.deepStrictEqual(validator.validate({ type: 'string', value: 'x' }, 'logic', 'Conflict2'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ type: 'number', value: 123 }, 'logic', 'Conflict2'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ type: 'string', value: 123 }, 'logic', 'Conflict2'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+        assert.deepStrictEqual(validator.validate({ type: 'number', value: 'x' }, 'logic', 'Conflict2'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+        assert.deepStrictEqual(validator.validate({}, 'logic', 'Conflict2'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
     })
 })
