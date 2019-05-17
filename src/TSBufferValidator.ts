@@ -174,6 +174,14 @@ export class TSBufferValidator {
 
         // validate elementType
         for (let i = 0; i < schema.elementTypes.length; ++i) {
+            if (schema.optionalStartIndex !== undefined && i >= schema.optionalStartIndex && value[i] === undefined) {
+                continue;
+            }
+
+            if ((schema.optionalStartIndex === undefined || i < schema.optionalStartIndex) && value[i] === undefined) {
+                return ValidateResult.error(ValidateErrorCode.InnerError, '' + i, ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
+            }
+
             let elemValidateResult = this.validateBySchema(value[i], schema.elementTypes[i]);
             if (!elemValidateResult.isSucc) {
                 return ValidateResult.error(ValidateErrorCode.InnerError, '' + i, elemValidateResult);
@@ -225,25 +233,15 @@ export class TSBufferValidator {
         // interfaceSignature强制了key必须是数字的情况
         if (schema.indexSignature && schema.indexSignature.keyType === 'Number') {
             for (let key in value) {
-                let int = parseInt(key);
-                if (isNaN(int) || ('' + int) !== key) {
+                if (!this._isNumberKey(key)) {
                     return ValidateResult.error(ValidateErrorCode.InnerError, key, ValidateResult.error(ValidateErrorCode.InvalidNumberKey))
                 }
             }
         }
 
-        // 确保每个字段不重复检测
-        // 作为一个透传的参数在各个方法间共享传递
-        let skipFields: string[] = [];
-
         // 校验properties
         if (schema.properties) {
             for (let property of schema.properties) {
-                // skipFields
-                if (skipFields.indexOf(property.name) > -1) {
-                    continue;
-                }
-                skipFields.push(property.name);
 
                 // optional
                 if (property.optional && value[property.name] === undefined) {
@@ -275,46 +273,9 @@ export class TSBufferValidator {
         }
         // 超出字段检测
         else {
-            let remainedFields = Object.keys(value).remove(v => skipFields.indexOf(v) > -1);
+            let validatedFields = schema.properties.map(v => v.name);
+            let remainedFields = Object.keys(value).remove(v => validatedFields.indexOf(v) > -1);
             if (remainedFields.length) {
-                return ValidateResult.error(ValidateErrorCode.InnerError, remainedFields[0], ValidateResult.error(ValidateErrorCode.UnexpectedField))
-            }
-        }
-
-        return ValidateResult.success;
-    }
-
-    /**
-     * 检测value中的字段是否满足properties
-     * 注意：这个方法允许properties中未定义的字段存在！
-     * @return interface的error
-     */
-    // private _validateInterfaceProperties(value: any, properties: NonNullable<InterfaceTypeSchema['properties']>, indexSignature: InterfaceTypeSchema['indexSignature'], skipFields: string[]): ValidateResult {
-
-
-    //     return ValidateResult.success;
-    // }
-
-    private _validateInterfaceIndexSignature(value: any, indexSignature: InterfaceTypeSchema['indexSignature'], skipFields: string[]) {
-        let remainedFields = Object.keys(value).remove(v => skipFields.indexOf(v) > -1);
-        if (remainedFields.length) {
-            if (indexSignature) {
-                for (let field of remainedFields) {
-                    // skipFields
-                    if (skipFields.indexOf(field) > -1) {
-                        continue;
-                    }
-                    skipFields.push(field);
-
-                    // validate each field
-                    let vRes = this.validateBySchema(value[field], indexSignature.type);
-                    if (!vRes.isSucc) {
-                        return ValidateResult.error(ValidateErrorCode.InnerError, field, vRes);
-                    }
-                }
-            }
-            // Unexpected field
-            else {
                 return ValidateResult.error(ValidateErrorCode.InnerError, remainedFields[0], ValidateResult.error(ValidateErrorCode.UnexpectedField))
             }
         }
@@ -362,7 +323,7 @@ export class TSBufferValidator {
     validateBufferType(value: any, schema: BufferTypeSchema): ValidateResult {
         if (schema.arrayType) {
             if (!typedArrays[schema.arrayType]) {
-                return ValidateResult.error(ValidateErrorCode.WrongType);
+                throw new Error(`Error TypedArray type: ${schema.arrayType}`);
             }
             return value instanceof typedArrays[schema.arrayType] ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType)
         }
@@ -571,73 +532,72 @@ export class TSBufferValidator {
             target = schema.target;
         }
 
+        let flatTarget: FlatInterfaceTypeSchema;
         // 内层仍然为MappedType 递归之
         if (target.type === 'Pick' || target.type === 'Partial' || target.type === 'Omit' || target.type === 'Overwrite') {
-            return this._flattenMappedType(target);
+            flatTarget = this._flattenMappedType(target);
         }
-        // interface 展平之
         else if (target.type === 'Interface') {
-            // target已展平
-            let flatTarget = this._flattenInterface(target);
-
-            // 开始执行Mapped逻辑
-            if (schema.type === 'Pick') {
-                let properties: NonNullable<InterfaceTypeSchema['properties']> = [];
-                for (let key of schema.keys) {
-                    let propItem = flatTarget.properties!.find(v => v.name === key);
-                    if (propItem) {
-                        properties.push({
-                            id: properties.length,
-                            name: key,
-                            optional: propItem.optional,
-                            type: propItem.type
-                        })
-                    }
-                    else if (flatTarget.indexSignature) {
-                        properties.push({
-                            id: properties.length,
-                            name: key,
-                            type: flatTarget.indexSignature.type
-                        })
-                    }
-                    else {
-                        throw new Error(`Cannot find pick key [${key}]`);
-                    }
-                }
-                return {
-                    type: 'Interface',
-                    properties: properties
-                }
-            }
-            else if (schema.type === 'Partial') {
-                for (let v of flatTarget.properties!) {
-                    v.optional = true;
-                }
-                return flatTarget;
-            }
-            else if (schema.type === 'Omit') {
-                for (let key in schema.keys) {
-                    flatTarget.properties!.removeOne(v => v.name === key);
-                }
-                return flatTarget;
-            }
-            else if (schema.type === 'Overwrite') {
-                let overwrite = this.getFlatInterfaceSchema(schema.overwrite);
-                if (overwrite.indexSignature) {
-                    flatTarget.indexSignature = overwrite.indexSignature;
-                }
-                for (let prop of overwrite.properties!) {
-                    flatTarget.properties!.removeOne(v => v.name === prop.name);
-                    flatTarget.properties!.push(prop);
-                }
-                return flatTarget;
-            }
-            else {
-                throw new Error(`Unknown type: ${(schema as any).type}`)
-            }
+            flatTarget = this._flattenInterface(target);
         }
         else {
-            throw new Error(`MappedType target cannot be ${(target as any).type} type`);
+            throw new Error(`Invalid target.type: ${target.type}`)
+        }
+
+        // 开始执行Mapped逻辑
+        if (schema.type === 'Pick') {
+            let properties: NonNullable<InterfaceTypeSchema['properties']> = [];
+            for (let key of schema.keys) {
+                let propItem = flatTarget.properties!.find(v => v.name === key);
+                if (propItem) {
+                    properties.push({
+                        id: properties.length,
+                        name: key,
+                        optional: propItem.optional,
+                        type: propItem.type
+                    })
+                }
+                else if (flatTarget.indexSignature) {
+                    properties.push({
+                        id: properties.length,
+                        name: key,
+                        type: flatTarget.indexSignature.type
+                    })
+                }
+                else {
+                    throw new Error(`Cannot find pick key [${key}]`);
+                }
+            }
+            return {
+                type: 'Interface',
+                properties: properties
+            }
+        }
+        else if (schema.type === 'Partial') {
+            for (let v of flatTarget.properties!) {
+                v.optional = true;
+            }
+            return flatTarget;
+        }
+        else if (schema.type === 'Omit') {
+            for (let key of schema.keys) {
+                flatTarget.properties!.removeOne(v => v.name === key);
+            }
+            return flatTarget;
+        }
+        else if (schema.type === 'Overwrite') {
+            let overwrite = this.getFlatInterfaceSchema(schema.overwrite);
+            if (overwrite.indexSignature) {
+                flatTarget.indexSignature = overwrite.indexSignature;
+            }
+            for (let prop of overwrite.properties!) {
+                flatTarget.properties!.removeOne(v => v.name === prop.name);
+                flatTarget.properties!.push(prop);
+            }
+            return flatTarget;
+        }
+        else {
+            throw new Error(`Unknown type: ${(schema as any).type}`)
         }
     }
 
@@ -656,6 +616,13 @@ export class TSBufferValidator {
                         unionFields.binaryInsert(v.name);
                     }
                 });
+
+                if (flat.indexSignature) {
+                    let is = `[[${flat.indexSignature.keyType}]]`;
+                    if (unionFields.binarySearch(is) === -1) {
+                        unionFields.binaryInsert(is);
+                    }
+                }
             }
             // Intersection/Union 递归合并unionFields
             else if (schema.type === 'Intersection' || schema.type === 'Union') {
@@ -664,59 +631,15 @@ export class TSBufferValidator {
         }
     }
 
-    private _validateInterfaceOrReference(value: any, schema: InterfaceTypeSchema | InterfaceReference, unionFields?: string[]) {
-        let flat = this.getFlatInterfaceSchema(schema);
-        unionFields && this._extendUnionFieldsToProperties(flat.properties, unionFields);
-        return this.validateInterfaceType(value, flat);
+    private _isNumberKey(key: string): boolean {
+        let int = parseInt(key);
+        return !(isNaN(int) || ('' + int) !== key);
     }
 
-    // private _simplifyLogicSchema(schema: IntersectionTypeSchema | UnionTypeSchema): SimplifiedLogicMembers {
-    //     let interfaces: SimplifiedLogicMembers['interfaces'] = [];
-    //     let nonInterfaces: SimplifiedLogicMembers['nonInterfaces'] = [];
-    //     let unionFields: string[] = [];
-
-    //     for (let i = 0, len = schema.members.length; i < len; ++i) {
-    //         let member = schema.members[i];
-    //         let type = this._isTypeReference(member.type) ? this._parseReference(member.type) : member.type;
-
-    //         // Interface及其Ref 加入interfaces
-    //         if (type.type === 'Interface' || this._isInterfaceReference(type)) {
-    //             let flat = this.getFlatInterfaceSchema(type);
-    //             interfaces.push({
-    //                 flatSchema: flat,
-    //                 index: i
-    //             });
-    //             flat.properties.forEach(v => unionFields.binaryInsert(v.name));
-    //         }
-    //         // 其它 视为nonInterfaces
-    //         else {
-    //             nonInterfaces.push({
-    //                 schema: type,
-    //                 index: i
-    //             })
-    //         }
-
-    //         // Intersection/Union 递归合并unionFields
-    //         if (type.type === 'Intersection' || type.type === 'Union') {
-    //             let sub = this._simplifyLogicSchema(type);
-    //             for (let v of sub.unionFields) {
-    //                 if (unionFields.binarySearch(v) === -1) {
-    //                     unionFields.binaryInsert(v);
-    //                 }
-    //             }
-    //         }
-
-    //     }
-
-    //     return {
-    //         interfaces: interfaces,
-    //         nonInterfaces: nonInterfaces,
-    //         unionFields: unionFields
-    //     }
-    // }
-
-    private _isObject(value: any) {
-        return typeof value === 'object' && value !== null && !Array.isArray(value);
+    private _validateInterfaceOrReference(value: any, schema: InterfaceTypeSchema | InterfaceReference, unionFields?: string[]) {
+        let flat = this.getFlatInterfaceSchema(schema);
+        unionFields && this._extendUnionFieldsToInterface(flat, unionFields);
+        return this.validateInterfaceType(value, flat);
     }
 
     /**
@@ -725,11 +648,11 @@ export class TSBufferValidator {
      * @param schema 
      * @param unionFields 
      */
-    private _extendUnionFieldsToProperties(properties: FlatInterfaceTypeSchema['properties'], unionFields: string[]) {
+    private _extendUnionFieldsToInterface(schema: FlatInterfaceTypeSchema, unionFields: string[]) {
         let newProperties: FlatInterfaceTypeSchema['properties'] = [];
 
         for (let field of unionFields) {
-            if (!properties.find(v => v.name === field)) {
+            if (!schema.properties.find(v => v.name === field)) {
                 newProperties.push({
                     id: -1,
                     name: field,
@@ -742,8 +665,23 @@ export class TSBufferValidator {
         }
 
         newProperties.forEach(v => {
-            properties.push(v);
+            schema.properties.push(v);
         });
+
+        if (!schema.indexSignature) {
+            if (unionFields.binarySearch('[[String]]') > -1) {
+                schema.indexSignature = {
+                    keyType: 'String',
+                    type: { type: 'Any' }
+                }
+            }
+            else if (unionFields.binarySearch('[[Number]]') > -1) {
+                schema.indexSignature = {
+                    keyType: 'Number',
+                    type: { type: 'Any' }
+                }
+            }
+        }
     }
 }
 

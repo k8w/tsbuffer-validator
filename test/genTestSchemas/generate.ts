@@ -7,9 +7,13 @@ async function main() {
     let generator = new TSBufferSchemaGenerator({
         baseDir: path.resolve(__dirname, 'source')
     });
-    let result = await generator.generate(glob.sync('**/*.ts', {
+
+    let files = glob.sync('**/*.ts', {
         cwd: path.resolve(__dirname, 'source')
-    }));
+    });
+    console.log('Files: ', files)
+
+    let result = await generator.generate(files);
 
     fs.writeFileSync(path.resolve(__dirname, 'output.json'), JSON.stringify(result, null, 2));
 

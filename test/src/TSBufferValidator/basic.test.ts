@@ -4,6 +4,46 @@ import { TSBufferValidator } from '../../../src/TSBufferValidator';
 import { ValidateResult, ValidateErrorCode } from '../../../src/ValidateResult';
 
 describe('BasicType Validate', function () {
+    it('Unexist path or symbolName', function () {
+        let validator = new TSBufferValidator({
+            a: {
+                b: {
+                    type: 'xxx' as any
+                },
+                c: {
+                    type: 'Reference',
+                    path: 'x',
+                    targetName: 'x'
+                },
+                d: {
+                    type: 'Reference',
+                    path: 'a',
+                    targetName: 'x'
+                }
+            }
+        }, {});
+
+        assert.throws(() => {
+            validator.validate(1, 'xxx', 'xxx')
+        })
+
+        assert.throws(() => {
+            validator.validate(1, 'a', 'xxx')
+        })
+
+        assert.throws(() => {
+            validator.validate(1, 'a', 'b')
+        })
+
+        assert.throws(() => {
+            validator.validate(1, 'a', 'c')
+        })
+
+        assert.throws(() => {
+            validator.validate(1, 'a', 'd')
+        })
+    })
+
     it('Boolean', function () {
         let validator = new TSBufferValidator({
             a: {
@@ -151,7 +191,7 @@ describe('BasicType Validate', function () {
             a: {
                 b: {
                     type: 'Literal',
-                    literal:'123'
+                    literal: '123'
                 }
             }
         });
@@ -214,7 +254,7 @@ describe('BasicType Validate', function () {
             }
         });
 
-        assert.strictEqual(validator.validate({a:1}, 'a', 'b').isSucc, true);
+        assert.strictEqual(validator.validate({ a: 1 }, 'a', 'b').isSucc, true);
         assert.strictEqual(validator.validate([1, 2, 3], 'a', 'b').isSucc, true);
         assert.deepStrictEqual(validator.validate(null, 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongType));
         assert.deepStrictEqual(validator.validate(undefined, 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongType));
@@ -228,9 +268,18 @@ describe('BasicType Validate', function () {
             a: {
                 b: {
                     type: 'Buffer'
+                },
+                c: {
+                    type: 'Buffer',
+                    arrayType: 'xxx' as any
                 }
             }
         });
+
+        assert.throws(() => {
+            validator.validate(new Uint16Array(1), 'a', 'c');
+        })
+
         assert.strictEqual(validator.validate(new ArrayBuffer(10), 'a', 'b').isSucc, true);
         assert.deepStrictEqual(validator.validate(new Uint8Array(10), 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongType));
         assert.deepStrictEqual(validator.validate(null, 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongType));
@@ -240,7 +289,7 @@ describe('BasicType Validate', function () {
         assert.deepStrictEqual(validator.validate('123', 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongType));
         assert.deepStrictEqual(validator.validate({}, 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongType));
         assert.deepStrictEqual(validator.validate([], 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongType));
-    
+
         let typedArrays = ['Int8Array', 'Int16Array', 'Int32Array', 'BigInt64Array', 'Uint8Array', 'Uint16Array', 'Uint32Array', 'BigUint64Array', 'Float32Array', 'Float64Array'] as const;
         for (let arrayType of typedArrays) {
             validator = new TSBufferValidator({

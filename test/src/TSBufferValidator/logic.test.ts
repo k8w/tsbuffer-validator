@@ -95,15 +95,18 @@ describe('LogicType', function () {
 
         // A & B & C
         assert.deepStrictEqual(validator.validate({ a: 'a', b: 'b', c: 'c' }, 'logic', 'ABC'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x' }, 'logic', 'ABC'), ValidateResult.error(
-            ValidateErrorCode.InnerError, '<Condition2>', ValidateResult.error(ValidateErrorCode.InnerError, 'c', ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
-        ));
-        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', c: 'x', d: 1223 }, 'logic', 'ABC'), ValidateResult.error(
-            ValidateErrorCode.InnerError, '<Condition0>', ValidateResult.error(ValidateErrorCode.InnerError, 'd', ValidateResult.error(ValidateErrorCode.UnexpectedField))
-        ));
-        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', c: 123 }, 'logic', 'ABC'), ValidateResult.error(
-            ValidateErrorCode.InnerError, '<Condition2>', ValidateResult.error(ValidateErrorCode.InnerError, 'c', ValidateResult.error(ValidateErrorCode.WrongType))
-        ));
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x' }, 'logic', 'ABC'), ValidateResult.innerError('<Condition1>.c', ValidateErrorCode.MissingRequiredMember));
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', c: 'x', d: 1223 }, 'logic', 'ABC'), ValidateResult.innerError('<Condition0>.<Condition0>.d', ValidateErrorCode.UnexpectedField))
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', c: 123 }, 'logic', 'ABC'), ValidateResult.innerError('<Condition1>.c', ValidateErrorCode.WrongType));
+
+        // A & (B|C) & D
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', d: 'x' }, 'logic', 'ABCD3'), ValidateResult.success)
+        assert.deepStrictEqual(validator.validate({ a: 'x', c: 'x', d: 'x', e: 1, f: 'x' }, 'logic', 'ABCD3'), ValidateResult.success)
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', c: 1, d: 'x' }, 'logic', 'ABCD3'), ValidateResult.success)
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: 1, c: 'x', d: 'x' }, 'logic', 'ABCD3'), ValidateResult.success)
+        assert.deepStrictEqual(validator.validate({ a: 'x', d: 'x' }, 'logic', 'ABCD3'), ValidateResult.innerError('<Condition1>', ValidateErrorCode.NonConditionMet))
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: true, c: 'x', d: 'x' }, 'logic', 'ABCD3'), ValidateResult.innerError('<Condition3>.b', ValidateErrorCode.NonConditionMet))
+
     })
 
     it('Intersection: Conflict', function () {

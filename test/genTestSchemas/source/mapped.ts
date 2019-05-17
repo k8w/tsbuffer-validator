@@ -1,4 +1,3 @@
-import { Picked } from './mapped';
 export interface Base {
     name: string,
     orders?: number[],
@@ -25,4 +24,23 @@ export type Overwrite1 = Overwrite<Base, {
 export type Overwrite2 = Overwrite<Pick<Base, 'name' | 'sex'>, {
     sex: 'm' | 'f';
     other: string
+}>
+
+// indexSignature
+export interface Base1 {
+    a: string,
+    b: number,
+    [key: string]: string | number
+}
+
+export type IPick = Pick<Base1, 'a' | 'c'>;
+export type IPartial = Partial<Base1>;
+export type IOmit = Omit<Base1, 'b'|'c'>;
+export type IOverwrite1 = Overwrite<Base1, {
+    a: number,
+    b: string
+}>
+export type IOverwrite2 = Overwrite<Base1, {
+    b: string
+    [key: string]: string
 }>

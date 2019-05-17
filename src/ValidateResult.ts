@@ -70,6 +70,15 @@ export class ValidateResult {
         return new ValidateResult(errcode, fieldName, innerError);
     }
 
+    static innerError(fieldName: string, errcode: Exclude<ValidateErrorCode, ValidateErrorCode.InnerError>): ValidateResult {
+        let fields = fieldName.split('.');
+        let last = new ValidateResult(errcode);
+        for (let i = fields.length - 1; i > -1; --i) {
+            last = new ValidateResult(ValidateErrorCode.InnerError, fields[i], last);
+        }
+        return last;
+    }
+
     /**
      * 最里面的错误，如对上面 {a:{b:{c:"Wrong"}}} 的例子
      * 返回为
@@ -100,5 +109,4 @@ export class ValidateResult {
     get message(): string {
         return ValidateErrorCode[this.errcode] || 'UnknownError';
     }
-
 }

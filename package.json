@@ -32,7 +32,7 @@
   "homepage": "https://github.com/k8w/tsbuffer-validator#readme",
   "dependencies": {
     "k8w-extend-native": "^1.1.0",
-    "tsbuffer-schema": "^0.4.4"
+    "tsbuffer-schema": "^0.4.5"
   },
   "nyc": {
     "extension": [
