@@ -285,6 +285,7 @@ export class TSBufferValidator {
 
     /** 将ReferenceTYpeSchema层层转换为它最终实际引用的类型 */
     private _parseReference(schema: TypeReference): Exclude<TSBufferSchema, TypeReference> {
+        // Reference
         if (schema.type === 'Reference') {
             if (!this._proto[schema.path]) {
                 throw new Error('Cannot find path: ' + schema.path);
@@ -302,7 +303,8 @@ export class TSBufferValidator {
                 return parsedSchema
             }
         }
-        else if (schema.type === 'IndexedAccess') {
+        // IndexedAccess
+        else {
             if (!this._isInterfaceOrReference(schema.objectType)) {
                 throw new Error(`Error objectType: ${(schema.objectType as any).type}`);
             }
@@ -310,14 +312,42 @@ export class TSBufferValidator {
             // find prop item
             let flat = this.getFlatInterfaceSchema(schema.objectType);
             let propItem = flat.properties!.find(v => v.name === schema.index);
-            if (!propItem) {
-                throw new Error(`Error index: ${schema.index}`);
+            let propType: TSBufferSchema;
+            if (propItem) {
+                propType = propItem.type;
+            }
+            else {
+                if (flat.indexSignature) {
+                    propType = flat.indexSignature.type;
+                }
+                else {
+                    throw new Error(`Error index: ${schema.index}`);
+                }
             }
 
-            return this._isTypeReference(propItem.type) ? this._parseReference(propItem.type) : propItem.type;
-        }
+            // optional -> | undefined
+            if (propItem && propItem.optional &&    // 引用的字段是optional
+                (propItem.type.type !== 'Union' // 自身不为Union
+                    // 或自身为Union，但没有undefined成员条件
+                    || propItem.type.members.findIndex(v => v.type.type === 'Literal' && v.type.literal === undefined) === -1)
+            ) {
+                propType = {
+                    type: 'Union',
+                    members: [
+                        { id: 0, type: propType },
+                        {
+                            id: 1,
+                            type: {
+                                type: 'Literal',
+                                literal: undefined
+                            }
+                        }
+                    ]
+                }
+            }
 
-        throw new Error(`Type ${(schema as any).type} is not reference`);
+            return this._isTypeReference(propType) ? this._parseReference(propType) : propType;
+        }
     }
 
     validateBufferType(value: any, schema: BufferTypeSchema): ValidateResult {

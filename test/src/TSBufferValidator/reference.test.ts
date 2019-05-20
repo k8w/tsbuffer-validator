@@ -93,6 +93,32 @@ describe('TypeReference Validate', function () {
                         targetName: 'a1'
                     },
                     index: 'aaa'
+                },
+                b2: {
+                    type: 'IndexedAccess',
+                    objectType: {
+                        type: 'Reference',
+                        path: 'a',
+                        targetName: 'a1'
+                    },
+                    index: 'bbb'
+                }
+            },
+            e: {
+                e1: {
+                    type: 'IndexedAccess',
+                    objectType: {
+                        type: 'Any' as any
+                    },
+                    index: 'xxx'
+                },
+                e2: {
+                    type: 'IndexedAccess',
+                    objectType: {
+                        type: 'Interface',
+                        properties: []
+                    },
+                    index: 'xxx'
                 }
             }
         });
@@ -101,7 +127,85 @@ describe('TypeReference Validate', function () {
         assert.deepStrictEqual(validator.validate(123, 'b', 'b1'), ValidateResult.error(ValidateErrorCode.WrongType));
         assert.deepStrictEqual(validator.validate(null, 'b', 'b1'), ValidateResult.error(ValidateErrorCode.WrongType));
         assert.deepStrictEqual(validator.validate(undefined, 'b', 'b1'), ValidateResult.error(ValidateErrorCode.WrongType));
+
+        assert.strictEqual(validator.validate(true, 'b', 'b2').isSucc, true);
+        assert.deepStrictEqual(validator.validate(123, 'b', 'b2'), ValidateResult.error(ValidateErrorCode.WrongType));
+        assert.deepStrictEqual(validator.validate(null, 'b', 'b2'), ValidateResult.error(ValidateErrorCode.WrongType));
+        assert.deepStrictEqual(validator.validate(undefined, 'b', 'b2'), ValidateResult.error(ValidateErrorCode.WrongType));
+
+        assert.throws(() => {
+            validator.validate(123, 'e', 'e1');
+        })
+        assert.throws(() => {
+            validator.validate(123, 'e', 'e2');
+        })
     });
 
-    // TODO optional 转为 | undefined
+    it('Optional to | undefined', function () {
+        let validator = new TSBufferValidator({
+            a: {
+                a1: {
+                    type: 'Interface',
+                    properties: [
+                        {
+                            id: 0,
+                            optional: true,
+                            name: 'aaa',
+                            type: { type: 'String' }
+                        }
+                    ]
+                },
+                b1: {
+                    type: 'IndexedAccess',
+                    objectType: {
+                        type: 'Reference',
+                        path: 'a',
+                        targetName: 'a1'
+                    },
+                    index: 'aaa'
+                }
+            }
+        });
+
+        assert.deepStrictEqual(validator.validate('abc', 'a', 'b1'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate(undefined, 'a', 'b1'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate(123, 'a', 'b1'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+    });
+
+    it('IndexedAccess a optional fields with | undefined', function () {
+        let validator = new TSBufferValidator({
+            a: {
+                a1: {
+                    type: 'Interface',
+                    properties: [
+                        {
+                            id: 0,
+                            optional: true,
+                            name: 'aaa',
+                            type: {
+                                type: 'Union',
+                                members: [
+                                    { id: 0, type: { type: 'String' } },
+                                    { id: 0, type: { type: 'Literal', literal: undefined } }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                b1: {
+                    type: 'IndexedAccess',
+                    objectType: {
+                        type: 'Reference',
+                        path: 'a',
+                        targetName: 'a1'
+                    },
+                    index: 'aaa'
+                }
+            }
+        });
+
+        assert.deepStrictEqual(validator.validate('abc', 'a', 'b1'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate(undefined, 'a', 'b1'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate(123, 'a', 'b1'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+    })
 })

@@ -133,4 +133,30 @@ describe('LogicType', function () {
         assert.deepStrictEqual(validator.validate({ a: true, b: true, c: 1 }, 'logic', 'ABCD4'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
         assert.deepStrictEqual(validator.validate({ a: 1, b: 1, c: 1 }, 'logic', 'ABCD4'), ValidateResult.success);
     })
+
+    it('Basic Intersection', function () {
+        let validator = new TSBufferValidator({
+            a: {
+                a1: {
+                    type: 'Intersection',
+                    members: [
+                        { id: 0, type: { type: 'String' } },
+                        { id: 1, type: { type: 'String' } },
+                    ]
+                },
+                a2: {
+                    type: 'Intersection',
+                    members: [
+                        { id: 0, type: { type: 'String' } },
+                        { id: 1, type: { type: 'Any' } },
+                    ]
+                }
+            }
+        });
+
+        assert.deepStrictEqual(validator.validate('abc', 'a', 'a1'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate('abc', 'a', 'a2'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate(123, 'a', 'a1'), ValidateResult.innerError('<Condition0>', ValidateErrorCode.WrongType));
+        assert.deepStrictEqual(validator.validate(123, 'a', 'a2'), ValidateResult.innerError('<Condition0>', ValidateErrorCode.WrongType));
+    });
 })

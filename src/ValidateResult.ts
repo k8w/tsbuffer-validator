@@ -55,7 +55,7 @@ export class ValidateResult {
      */
     innerError?: ValidateResult;
 
-    private constructor(errcode: ValidateErrorCode = 0, fieldName?: string, innerError?: ValidateResult) {
+    constructor(errcode: ValidateErrorCode = 0, fieldName?: string, innerError?: ValidateResult) {
         this.errcode = errcode;
         this.fieldName = fieldName;
         this.innerError = innerError;

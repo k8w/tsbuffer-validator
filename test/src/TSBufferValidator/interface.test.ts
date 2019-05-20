@@ -234,5 +234,42 @@ describe('Interface Validate', function () {
                 ValidateResult.error(ValidateErrorCode.WrongType)
             ))
         ));
+
+        // originalError
+        let originalError = validator.validate({
+            value1: {
+                value1: {
+                    a: 1,
+                    b: 1
+                },
+                value2: {
+                    c: true
+                }
+            },
+            value2: 'b'
+        }, 'interface2', 'Interface4').originalError
+        assert.deepStrictEqual(originalError, new ValidateResult(ValidateErrorCode.WrongType, 'value1.value1.a'));
+        assert.deepStrictEqual(originalError.message, 'WrongType');
+    })
+
+    it('Cannot extend from non-interface', function () {
+        let validator = new TSBufferValidator({
+            a: {
+                a1: {
+                    type: 'String'
+                },
+                b1: {
+                    type: 'Interface',
+                    extends: [{
+                        type: 'Reference',
+                        path: 'a',
+                        targetName: 'a1'
+                    }]
+                }
+            }
+        })
+        assert.throws(() => {
+            validator.validate({ a: 1 }, 'a', 'b1')
+        })
     })
 })
