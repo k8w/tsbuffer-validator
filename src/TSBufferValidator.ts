@@ -124,17 +124,19 @@ export class TSBufferValidator {
         // scalarType类型检测
         // 整形却为小数
         if (scalarType !== 'float' && scalarType !== 'double' && typeof value === 'number' && value !== (value | 0)) {
-            return ValidateResult.error(ValidateErrorCode.InvalidInteger);
+            return ValidateResult.error(ValidateErrorCode.WrongScalarType);
         }
         // 无符号整形却为负数
-        if ((scalarType.indexOf('uint') === 0 || scalarType.indexOf('fixed') === 0)
-            && value < 0
-        ) {
-            return ValidateResult.error(ValidateErrorCode.InvalidUnsignedNumber);
+        if (scalarType.indexOf('uint') === 0 && value < 0) {
+            return ValidateResult.error(ValidateErrorCode.WrongScalarType);
         }
         // 不是bigint却为bigint
-        if (scalarType.indexOf('64') === -1 && typeof value === 'bigint') {
-            return ValidateResult.error(ValidateErrorCode.CantBeBigInt);
+        if (scalarType !== 'bigint' && typeof value === 'bigint') {
+            return ValidateResult.error(ValidateErrorCode.WrongScalarType);
+        }
+        // 应该是bigint却不为bigint
+        if (scalarType === 'bigint' && typeof value !== 'bigint') {
+            return ValidateResult.error(ValidateErrorCode.WrongScalarType);
         }
 
         return ValidateResult.success;
