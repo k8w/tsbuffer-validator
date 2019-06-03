@@ -88,7 +88,7 @@ describe('BasicType Validate', function () {
     });
 
     it('Number: int', function () {
-        let scalarTypes = ['int', 'uint', 'int32', 'int64', 'uint32', 'uint64'] as const;
+        let scalarTypes = ['int', 'uint', 'int32', 'uint32'] as const;
         for (let scalarType of scalarTypes) {
             let validator = new TSBufferValidator({
                 a: {
@@ -121,20 +121,23 @@ describe('BasicType Validate', function () {
     });
 
     it('Number: bigint', function () {
-        let validator = new TSBufferValidator({
-            a: {
-                b: {
-                    type: 'Number',
-                    scalarType: 'bigint'
+        (['bigint', 'bigint64', 'biguint64'] as const).forEach(v => {
+            let validator = new TSBufferValidator({
+                a: {
+                    b: {
+                        type: 'Number',
+                        scalarType: v
+                    }
                 }
-            }
-        });
-        assert.deepStrictEqual(validator.validate(BigInt(1234), 'a', 'b'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate(1234, 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongScalarType));
-        assert.deepStrictEqual(validator.validate(1.234, 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongScalarType));
-        assert.deepStrictEqual(validator.validate(true, 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongType));
-        assert.deepStrictEqual(validator.validate('', 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongType));
-        assert.deepStrictEqual(validator.validate('123', 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongType));
+            });
+            assert.deepStrictEqual(validator.validate(BigInt(1234), 'a', 'b'), ValidateResult.success);
+            assert.deepStrictEqual(validator.validate(1234, 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongScalarType));
+            assert.deepStrictEqual(validator.validate(1.234, 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongScalarType));
+            assert.deepStrictEqual(validator.validate(true, 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongType));
+            assert.deepStrictEqual(validator.validate('', 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongType));
+            assert.deepStrictEqual(validator.validate('123', 'a', 'b'), ValidateResult.error(ValidateErrorCode.WrongType));
+
+        })
     })
 
     it('String', function () {

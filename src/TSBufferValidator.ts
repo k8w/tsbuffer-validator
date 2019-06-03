@@ -127,15 +127,15 @@ export class TSBufferValidator {
             return ValidateResult.error(ValidateErrorCode.WrongScalarType);
         }
         // 无符号整形却为负数
-        if (scalarType.indexOf('uint') === 0 && value < 0) {
+        if (scalarType.indexOf('uint') > -1 && value < 0) {
             return ValidateResult.error(ValidateErrorCode.WrongScalarType);
         }
         // 不是bigint却为bigint
-        if (scalarType !== 'bigint' && typeof value === 'bigint') {
+        if (scalarType.indexOf('big') === -1 && typeof value === 'bigint') {
             return ValidateResult.error(ValidateErrorCode.WrongScalarType);
         }
         // 应该是bigint却不为bigint
-        if (scalarType === 'bigint' && typeof value !== 'bigint') {
+        if (scalarType.indexOf('big') > -1 && typeof value !== 'bigint') {
             return ValidateResult.error(ValidateErrorCode.WrongScalarType);
         }
 
