@@ -298,7 +298,7 @@ export class TSBufferValidator {
                 throw new Error(`Cannot find [${schema.targetName}] at ${schema.path}`);
             }
 
-            if (this._isTypeReference(parsedSchema)) {
+            if (this.isTypeReference(parsedSchema)) {
                 return this.parseReference(parsedSchema);
             }
             else {
@@ -348,7 +348,7 @@ export class TSBufferValidator {
                 }
             }
 
-            return this._isTypeReference(propType) ? this.parseReference(propType) : propType;
+            return this.isTypeReference(propType) ? this.parseReference(propType) : propType;
         }
     }
 
@@ -383,7 +383,7 @@ export class TSBufferValidator {
 
         // 有一成功则成功
         for (let member of schema.members) {
-            let memberType = this._isTypeReference(member.type) ? this.parseReference(member.type) : member.type;
+            let memberType = this.isTypeReference(member.type) ? this.parseReference(member.type) : member.type;
 
             let vRes: ValidateResult;
             // interface 加入unionFIelds去validate
@@ -421,7 +421,7 @@ export class TSBufferValidator {
         for (let i = 0, len = schema.members.length; i < len; ++i) {
             // 验证member
             let memberType = schema.members[i].type;
-            memberType = this._isTypeReference(memberType) ? this.parseReference(memberType) : memberType;
+            memberType = this.isTypeReference(memberType) ? this.parseReference(memberType) : memberType;
 
             let vRes: ValidateResult;
             // interface 加入unionFIelds去validate
@@ -451,7 +451,7 @@ export class TSBufferValidator {
     }
 
     private _isInterfaceOrReference(schema: TSBufferSchema): schema is InterfaceTypeSchema | InterfaceReference {
-        if (this._isTypeReference(schema)) {
+        if (this.isTypeReference(schema)) {
             let parsed = this.parseReference(schema);
             return this._isInterfaceOrReference(parsed);
         }
@@ -464,7 +464,7 @@ export class TSBufferValidator {
         }
     }
 
-    private _isTypeReference(schema: TSBufferSchema): schema is TypeReference {
+    isTypeReference(schema: TSBufferSchema): schema is TypeReference {
         return schema.type === 'Reference' || schema.type === 'IndexedAccess';
     }
 
@@ -472,7 +472,7 @@ export class TSBufferValidator {
      * 将interface及其引用转换为展平的schema
      */
     getFlatInterfaceSchema(schema: InterfaceTypeSchema | InterfaceReference): FlatInterfaceTypeSchema {
-        if (this._isTypeReference(schema)) {
+        if (this.isTypeReference(schema)) {
             let parsed = this.parseReference(schema);
             if (parsed.type !== 'Interface') {
                 throw new Error(`Cannot flatten non interface type: ${parsed.type}`);
@@ -636,7 +636,7 @@ export class TSBufferValidator {
     private _extendsUnionFields(unionFields: string[], schemas: TSBufferSchema[]): void {
         for (let i = 0, len = schemas.length; i < len; ++i) {
             let schema = schemas[i];
-            if (this._isTypeReference(schema)) {
+            if (this.isTypeReference(schema)) {
                 schema = this.parseReference(schema)
             }
 
