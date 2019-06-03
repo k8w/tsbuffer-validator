@@ -88,7 +88,7 @@ describe('BasicType Validate', function () {
     });
 
     it('Number: int', function () {
-        let scalarTypes = ['int', 'sint', 'uint', 'int32', 'int64', 'uint32', 'uint64'] as const;
+        let scalarTypes = ['int', 'uint', 'int32', 'int64', 'uint32', 'uint64'] as const;
         for (let scalarType of scalarTypes) {
             let validator = new TSBufferValidator({
                 a: {
