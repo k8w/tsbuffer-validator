@@ -286,7 +286,7 @@ export class TSBufferValidator {
     }
 
     /** 将ReferenceTYpeSchema层层转换为它最终实际引用的类型 */
-    private _parseReference(schema: TypeReference): Exclude<TSBufferSchema, TypeReference> {
+    private parseReference(schema: TypeReference): Exclude<TSBufferSchema, TypeReference> {
         // Reference
         if (schema.type === 'Reference') {
             if (!this._proto[schema.path]) {
@@ -299,7 +299,7 @@ export class TSBufferValidator {
             }
 
             if (this._isTypeReference(parsedSchema)) {
-                return this._parseReference(parsedSchema);
+                return this.parseReference(parsedSchema);
             }
             else {
                 return parsedSchema
@@ -348,7 +348,7 @@ export class TSBufferValidator {
                 }
             }
 
-            return this._isTypeReference(propType) ? this._parseReference(propType) : propType;
+            return this._isTypeReference(propType) ? this.parseReference(propType) : propType;
         }
     }
 
@@ -365,11 +365,11 @@ export class TSBufferValidator {
     }
 
     validateIndexedAccessType(value: any, schema: IndexedAccessTypeSchema): ValidateResult {
-        return this.validateBySchema(value, this._parseReference(schema));
+        return this.validateBySchema(value, this.parseReference(schema));
     }
 
     validateReferenceType(value: any, schema: ReferenceTypeSchema): ValidateResult {
-        return this.validateBySchema(value, this._parseReference(schema));
+        return this.validateBySchema(value, this.parseReference(schema));
     }
 
     validateMappedType(value: any, schema: PickTypeSchema | PartialTypeSchema | OmitTypeSchema | OverwriteTypeSchema): ValidateResult {
@@ -383,7 +383,7 @@ export class TSBufferValidator {
 
         // 有一成功则成功
         for (let member of schema.members) {
-            let memberType = this._isTypeReference(member.type) ? this._parseReference(member.type) : member.type;
+            let memberType = this._isTypeReference(member.type) ? this.parseReference(member.type) : member.type;
 
             let vRes: ValidateResult;
             // interface 加入unionFIelds去validate
@@ -421,7 +421,7 @@ export class TSBufferValidator {
         for (let i = 0, len = schema.members.length; i < len; ++i) {
             // 验证member
             let memberType = schema.members[i].type;
-            memberType = this._isTypeReference(memberType) ? this._parseReference(memberType) : memberType;
+            memberType = this._isTypeReference(memberType) ? this.parseReference(memberType) : memberType;
 
             let vRes: ValidateResult;
             // interface 加入unionFIelds去validate
@@ -452,7 +452,7 @@ export class TSBufferValidator {
 
     private _isInterfaceOrReference(schema: TSBufferSchema): schema is InterfaceTypeSchema | InterfaceReference {
         if (this._isTypeReference(schema)) {
-            let parsed = this._parseReference(schema);
+            let parsed = this.parseReference(schema);
             return this._isInterfaceOrReference(parsed);
         }
         else {
@@ -473,7 +473,7 @@ export class TSBufferValidator {
      */
     getFlatInterfaceSchema(schema: InterfaceTypeSchema | InterfaceReference): FlatInterfaceTypeSchema {
         if (this._isTypeReference(schema)) {
-            let parsed = this._parseReference(schema);
+            let parsed = this.parseReference(schema);
             if (parsed.type !== 'Interface') {
                 throw new Error(`Cannot flatten non interface type: ${parsed.type}`);
             }
@@ -514,7 +514,7 @@ export class TSBufferValidator {
         if (schema.extends) {
             for (let extendsRef of schema.extends) {
                 // 解引用
-                let parsedExtRef = this._parseReference(extendsRef);
+                let parsedExtRef = this.parseReference(extendsRef);
                 if (parsedExtRef.type !== 'Interface') {
                     throw new Error('SchemaError: extends must from interface but from ' + parsedExtRef.type)
                 }
@@ -557,7 +557,7 @@ export class TSBufferValidator {
         // target 解引用
         let target: Exclude<PickTypeSchema['target'], ReferenceTypeSchema>;
         if (schema.target.type === 'Reference') {
-            let parsed = this._parseReference(schema.target);
+            let parsed = this.parseReference(schema.target);
             target = parsed as typeof target;
         }
         else {
@@ -637,7 +637,7 @@ export class TSBufferValidator {
         for (let i = 0, len = schemas.length; i < len; ++i) {
             let schema = schemas[i];
             if (this._isTypeReference(schema)) {
-                schema = this._parseReference(schema)
+                schema = this.parseReference(schema)
             }
 
             // Interface及其Ref 加入interfaces
