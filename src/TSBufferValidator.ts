@@ -286,7 +286,7 @@ export class TSBufferValidator {
     }
 
     /** 将ReferenceTYpeSchema层层转换为它最终实际引用的类型 */
-    private parseReference(schema: TypeReference): Exclude<TSBufferSchema, TypeReference> {
+    parseReference(schema: TypeReference): Exclude<TSBufferSchema, TypeReference> {
         // Reference
         if (schema.type === 'Reference') {
             if (!this._proto[schema.path]) {
