@@ -13,6 +13,6 @@
   "dependencies": {
     "@types/glob": "^7.1.1",
     "glob": "^7.1.4",
-    "tsbuffer-schema-generator": "^1.0.5"
+    "tsbuffer-schema-generator": "^1.1.0"
   }
 }

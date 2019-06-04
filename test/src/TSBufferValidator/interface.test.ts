@@ -261,9 +261,12 @@ describe('Interface Validate', function () {
                 b1: {
                     type: 'Interface',
                     extends: [{
-                        type: 'Reference',
-                        path: 'a',
-                        targetName: 'a1'
+                        id: 0,
+                        type: {
+                            type: 'Reference',
+                            path: 'a',
+                            targetName: 'a1'
+                        }
                     }]
                 }
             }

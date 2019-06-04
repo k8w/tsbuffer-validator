@@ -179,14 +179,20 @@
       "type": "Interface",
       "extends": [
         {
-          "type": "Reference",
-          "path": "interface1",
-          "targetName": "Interface3"
+          "id": 0,
+          "type": {
+            "type": "Reference",
+            "path": "interface1",
+            "targetName": "Interface3"
+          }
         },
         {
-          "type": "Reference",
-          "targetName": "Interface5",
-          "path": "interface2"
+          "id": 1,
+          "type": {
+            "type": "Reference",
+            "targetName": "Interface5",
+            "path": "interface2"
+          }
         }
       ],
       "properties": [
@@ -240,14 +246,20 @@
       "type": "Interface",
       "extends": [
         {
-          "type": "Reference",
-          "targetName": "Interface5",
-          "path": "interface2"
+          "id": 0,
+          "type": {
+            "type": "Reference",
+            "targetName": "Interface5",
+            "path": "interface2"
+          }
         },
         {
-          "type": "Reference",
-          "targetName": "Interface7",
-          "path": "interface2"
+          "id": 1,
+          "type": {
+            "type": "Reference",
+            "targetName": "Interface7",
+            "path": "interface2"
+          }
         }
       ],
       "properties": [

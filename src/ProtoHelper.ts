@@ -21,7 +21,7 @@ export default class ProtoHelper {
     }
 
     /** 将ReferenceTYpeSchema层层转换为它最终实际引用的类型 */
-    parseReference(schema: TypeReference): Exclude<TSBufferSchema, TypeReference> {
+    parseReference(schema: TSBufferSchema): Exclude<TSBufferSchema, TypeReference> {
         // Reference
         if (schema.type === 'Reference') {
             if (!this._proto[schema.path]) {
@@ -41,7 +41,7 @@ export default class ProtoHelper {
             }
         }
         // IndexedAccess
-        else {
+        else if (schema.type === 'IndexedAccess') {
             if (!this.isInterface(schema.objectType)) {
                 throw new Error(`Error objectType: ${(schema.objectType as any).type}`);
             }
@@ -84,6 +84,9 @@ export default class ProtoHelper {
             }
 
             return this.isTypeReference(propType) ? this.parseReference(propType) : propType;
+        }
+        else {
+            return schema;
         }
     }
 
@@ -149,9 +152,9 @@ export default class ProtoHelper {
 
         // extends的优先级次之，补全没有定义的字段
         if (schema.extends) {
-            for (let extendsRef of schema.extends) {
+            for (let extend of schema.extends) {
                 // 解引用
-                let parsedExtRef = this.parseReference(extendsRef);
+                let parsedExtRef = this.parseReference(extend.type);
                 if (parsedExtRef.type !== 'Interface') {
                     throw new Error('SchemaError: extends must from interface but from ' + parsedExtRef.type)
                 }
