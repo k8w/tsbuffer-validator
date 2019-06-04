@@ -41,13 +41,13 @@ export class TSBufferValidator {
     }
 
     private _proto: TSBufferProto;
-    private _protoHelper: ProtoHelper;
+    readonly protoHelper: ProtoHelper;
     constructor(proto: TSBufferProto, options?: Partial<TSBufferValidatorOptions>) {
         this._proto = proto;
         if (options) {
             Object.assign(this._options, options);
         }
-        this._protoHelper = new ProtoHelper(proto);
+        this.protoHelper = new ProtoHelper(proto);
     }
 
     validate(value: any, path: string, symbolName: string): ValidateResult {
@@ -229,7 +229,7 @@ export class TSBufferValidator {
         }
 
         // 先展平
-        let flatSchema = this._protoHelper.getFlatInterfaceSchema(schema);
+        let flatSchema = this.protoHelper.getFlatInterfaceSchema(schema);
 
         return this._validateFlatInterface(value, flatSchema);
     }
@@ -301,15 +301,15 @@ export class TSBufferValidator {
     }
 
     validateIndexedAccessType(value: any, schema: IndexedAccessTypeSchema): ValidateResult {
-        return this.validateBySchema(value, this._protoHelper.parseReference(schema));
+        return this.validateBySchema(value, this.protoHelper.parseReference(schema));
     }
 
     validateReferenceType(value: any, schema: ReferenceTypeSchema): ValidateResult {
-        return this.validateBySchema(value, this._protoHelper.parseReference(schema));
+        return this.validateBySchema(value, this.protoHelper.parseReference(schema));
     }
 
     validateMappedType(value: any, schema: PickTypeSchema | PartialTypeSchema | OmitTypeSchema | OverwriteTypeSchema): ValidateResult {
-        return this.validateInterfaceType(value, this._protoHelper.getFlatInterfaceSchema(schema));
+        return this.validateInterfaceType(value, this.protoHelper.getFlatInterfaceSchema(schema));
     }
 
     validateUnionType(value: any, schema: UnionTypeSchema, unionFields?: string[]): ValidateResult {
@@ -319,11 +319,11 @@ export class TSBufferValidator {
 
         // 有一成功则成功
         for (let member of schema.members) {
-            let memberType = this._protoHelper.isTypeReference(member.type) ? this._protoHelper.parseReference(member.type) : member.type;
+            let memberType = this.protoHelper.isTypeReference(member.type) ? this.protoHelper.parseReference(member.type) : member.type;
 
             let vRes: ValidateResult;
             // interface 加入unionFIelds去validate
-            if (this._protoHelper.isInterface(memberType)) {
+            if (this.protoHelper.isInterface(memberType)) {
                 vRes = this._validateInterfaceOrReference(value, memberType, unionFields);
             }
             // LogicType 递归unionFields
@@ -357,11 +357,11 @@ export class TSBufferValidator {
         for (let i = 0, len = schema.members.length; i < len; ++i) {
             // 验证member
             let memberType = schema.members[i].type;
-            memberType = this._protoHelper.isTypeReference(memberType) ? this._protoHelper.parseReference(memberType) : memberType;
+            memberType = this.protoHelper.isTypeReference(memberType) ? this.protoHelper.parseReference(memberType) : memberType;
 
             let vRes: ValidateResult;
             // interface 加入unionFIelds去validate
-            if (this._protoHelper.isInterface(memberType)) {
+            if (this.protoHelper.isInterface(memberType)) {
                 vRes = this._validateInterfaceOrReference(value, memberType, unionFields);
             }
             // LogicType 递归unionFields
@@ -389,13 +389,13 @@ export class TSBufferValidator {
     private _extendsUnionFields(unionFields: string[], schemas: TSBufferSchema[]): void {
         for (let i = 0, len = schemas.length; i < len; ++i) {
             let schema = schemas[i];
-            if (this._protoHelper.isTypeReference(schema)) {
-                schema = this._protoHelper.parseReference(schema)
+            if (this.protoHelper.isTypeReference(schema)) {
+                schema = this.protoHelper.parseReference(schema)
             }
 
             // Interface及其Ref 加入interfaces
-            if (this._protoHelper.isInterface(schema)) {
-                let flat = this._protoHelper.getFlatInterfaceSchema(schema);
+            if (this.protoHelper.isInterface(schema)) {
+                let flat = this.protoHelper.getFlatInterfaceSchema(schema);
                 flat.properties.forEach(v => {
                     if (unionFields.binarySearch(v.name) === -1) {
                         unionFields.binaryInsert(v.name);
@@ -422,7 +422,7 @@ export class TSBufferValidator {
     }
 
     private _validateInterfaceOrReference(value: any, schema: InterfaceTypeSchema | InterfaceReference, unionFields?: string[]) {
-        let flat = this._protoHelper.getFlatInterfaceSchema(schema);
+        let flat = this.protoHelper.getFlatInterfaceSchema(schema);
         unionFields && this._extendUnionFieldsToInterface(flat, unionFields);
         return this.validateInterfaceType(value, flat);
     }
