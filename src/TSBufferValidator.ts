@@ -314,7 +314,7 @@ export class TSBufferValidator {
 
     validateUnionType(value: any, schema: UnionTypeSchema, unionFields?: string[]): ValidateResult {
         if (!unionFields) {
-            this._extendsUnionFields(unionFields = [], schema.members.map(v => v.type));
+            this.protoHelper.extendsUnionFields(unionFields = [], schema.members.map(v => v.type));
         }
 
         // 有一成功则成功
@@ -350,7 +350,7 @@ export class TSBufferValidator {
 
     validateIntersectionType(value: any, schema: IntersectionTypeSchema, unionFields?: string[]): ValidateResult {
         if (!unionFields) {
-            this._extendsUnionFields(unionFields = [], schema.members.map(v => v.type));
+            this.protoHelper.extendsUnionFields(unionFields = [], schema.members.map(v => v.type));
         }
 
         // 有一失败则失败
@@ -384,36 +384,6 @@ export class TSBufferValidator {
 
         // 全成功则成功
         return ValidateResult.success;
-    }
-
-    private _extendsUnionFields(unionFields: string[], schemas: TSBufferSchema[]): void {
-        for (let i = 0, len = schemas.length; i < len; ++i) {
-            let schema = schemas[i];
-            if (this.protoHelper.isTypeReference(schema)) {
-                schema = this.protoHelper.parseReference(schema)
-            }
-
-            // Interface及其Ref 加入interfaces
-            if (this.protoHelper.isInterface(schema)) {
-                let flat = this.protoHelper.getFlatInterfaceSchema(schema);
-                flat.properties.forEach(v => {
-                    if (unionFields.binarySearch(v.name) === -1) {
-                        unionFields.binaryInsert(v.name);
-                    }
-                });
-
-                if (flat.indexSignature) {
-                    let is = `[[${flat.indexSignature.keyType}]]`;
-                    if (unionFields.binarySearch(is) === -1) {
-                        unionFields.binaryInsert(is);
-                    }
-                }
-            }
-            // Intersection/Union 递归合并unionFields
-            else if (schema.type === 'Intersection' || schema.type === 'Union') {
-                let sub = this._extendsUnionFields(unionFields, schema.members.map(v => v.type));
-            }
-        }
     }
 
     private _isNumberKey(key: string): boolean {

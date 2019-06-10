@@ -108,6 +108,36 @@ export default class ProtoHelper {
         return schema.type === 'Reference' || schema.type === 'IndexedAccess';
     }
 
+    extendsUnionFields(unionFields: string[], schemas: TSBufferSchema[]): void {
+        for (let i = 0, len = schemas.length; i < len; ++i) {
+            let schema = schemas[i];
+            if (this.isTypeReference(schema)) {
+                schema = this.parseReference(schema)
+            }
+
+            // Interface及其Ref 加入interfaces
+            if (this.isInterface(schema)) {
+                let flat = this.getFlatInterfaceSchema(schema);
+                flat.properties.forEach(v => {
+                    if (unionFields.binarySearch(v.name) === -1) {
+                        unionFields.binaryInsert(v.name);
+                    }
+                });
+
+                if (flat.indexSignature) {
+                    let is = `[[${flat.indexSignature.keyType}]]`;
+                    if (unionFields.binarySearch(is) === -1) {
+                        unionFields.binaryInsert(is);
+                    }
+                }
+            }
+            // Intersection/Union 递归合并unionFields
+            else if (schema.type === 'Intersection' || schema.type === 'Union') {
+                let sub = this.extendsUnionFields(unionFields, schema.members.map(v => v.type));
+            }
+        }
+    }
+
     /**
      * 将interface及其引用转换为展平的schema
      */
