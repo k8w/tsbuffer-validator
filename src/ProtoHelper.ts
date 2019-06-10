@@ -139,6 +139,48 @@ export default class ProtoHelper {
     }
 
     /**
+     * 将unionFields 扩展到 InterfaceTypeSchema中（optional的any类型）
+     * 以此来跳过对它们的检查（用于Intersection/Union）
+     * @param schema 
+     * @param unionFields 
+     */
+    extendUnionFieldsToInterface(schema: FlatInterfaceTypeSchema, unionFields: string[]) {
+        let newProperties: FlatInterfaceTypeSchema['properties'] = [];
+
+        for (let field of unionFields) {
+            if (!schema.properties.find(v => v.name === field)) {
+                newProperties.push({
+                    id: -1,
+                    name: field,
+                    optional: true,
+                    type: {
+                        type: 'Any'
+                    }
+                })
+            }
+        }
+
+        newProperties.forEach(v => {
+            schema.properties.push(v);
+        });
+
+        if (!schema.indexSignature) {
+            if (unionFields.binarySearch('[[String]]') > -1) {
+                schema.indexSignature = {
+                    keyType: 'String',
+                    type: { type: 'Any' }
+                }
+            }
+            else if (unionFields.binarySearch('[[Number]]') > -1) {
+                schema.indexSignature = {
+                    keyType: 'Number',
+                    type: { type: 'Any' }
+                }
+            }
+        }
+    }
+
+    /**
      * 将interface及其引用转换为展平的schema
      */
     getFlatInterfaceSchema(schema: InterfaceTypeSchema | InterfaceReference): FlatInterfaceTypeSchema {
