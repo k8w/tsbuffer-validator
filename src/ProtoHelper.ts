@@ -275,4 +275,9 @@ export default class ProtoHelper {
 
 }
 
-export type FlatInterfaceTypeSchema = InterfaceTypeSchema & { properties: NonNullable<InterfaceTypeSchema['properties']> };
+export type FlatInterfaceTypeSchema = Overwrite<
+    Omit<InterfaceTypeSchema, 'extends'>,
+    {
+        properties: NonNullable<InterfaceTypeSchema['properties']>
+    }
+>;
