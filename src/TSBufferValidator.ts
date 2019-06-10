@@ -324,7 +324,7 @@ export class TSBufferValidator {
             let vRes: ValidateResult;
             // interface 加入unionFIelds去validate
             if (this.protoHelper.isInterface(memberType)) {
-                vRes = this._validateInterfaceOrReference(value, memberType, unionFields);
+                vRes = this.validateInterfaceReference(value, memberType, unionFields);
             }
             // LogicType 递归unionFields
             else if (memberType.type === 'Union') {
@@ -362,7 +362,7 @@ export class TSBufferValidator {
             let vRes: ValidateResult;
             // interface 加入unionFIelds去validate
             if (this.protoHelper.isInterface(memberType)) {
-                vRes = this._validateInterfaceOrReference(value, memberType, unionFields);
+                vRes = this.validateInterfaceReference(value, memberType, unionFields);
             }
             // LogicType 递归unionFields
             else if (memberType.type === 'Union') {
