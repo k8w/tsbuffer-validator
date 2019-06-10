@@ -391,8 +391,9 @@ export class TSBufferValidator {
         return !(isNaN(int) || ('' + int) !== key);
     }
 
-    private _validateInterfaceOrReference(value: any, schema: InterfaceTypeSchema | InterfaceReference, unionFields?: string[]) {
+    validateInterfaceReference(value: any, schema: InterfaceTypeSchema | InterfaceReference, unionFields?: string[]) {
         let flat = this.protoHelper.getFlatInterfaceSchema(schema);
+        // flat是新创建的Schema，故可以直接extend，不会影响原始schema
         unionFields && this.protoHelper.extendUnionFieldsToInterface(flat, unionFields);
         return this.validateInterfaceType(value, flat);
     }
