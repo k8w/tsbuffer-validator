@@ -37,6 +37,7 @@ describe('NestedType', function () {
     it('Tuple', function () {
         // succ
         assert.deepStrictEqual(validator.validate([123, 'x'], 'nested', 'Tuple1'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate([123, 'x', 123], 'nested', 'Tuple1'), ValidateResult.success);
         assert.deepStrictEqual(validator.validate([{ value: 'x' }, 'x', [true, false]], 'nested', 'Tuple2'), ValidateResult.success);
         assert.deepStrictEqual(validator.validate([{ value: 'x' }, 'x', []], 'nested', 'Tuple2'), ValidateResult.success);
         assert.deepStrictEqual(validator.validate([{ value: 'x' }, 'x', [false, undefined]], 'nested', 'Tuple2'), ValidateResult.success);

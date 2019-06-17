@@ -1220,6 +1220,23 @@
         },
         {
           "type": "String"
+        },
+        {
+          "type": "Union",
+          "members": [
+            {
+              "id": 0,
+              "type": {
+                "type": "Number"
+              }
+            },
+            {
+              "id": 1,
+              "type": {
+                "type": "Literal"
+              }
+            }
+          ]
         }
       ]
     },

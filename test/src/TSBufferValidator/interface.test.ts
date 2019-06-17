@@ -275,4 +275,39 @@ describe('Interface Validate', function () {
             validator.validate({ a: 1 }, 'a', 'b1')
         })
     })
+
+    it('Required | undefined', function () {
+        let validator = new TSBufferValidator({
+            a: {
+                b: {
+                    type: 'Interface',
+                    properties: [
+                        {
+                            id: 0,
+                            name: 'value',
+                            type: {
+                                type: 'Union',
+                                members: [
+                                    {
+                                        id: 0,
+                                        type: { type: 'String' }
+                                    },
+                                    {
+                                        id: 1,
+                                        type: {
+                                            type: 'Literal',
+                                            literal: undefined
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        })
+
+        assert.deepStrictEqual(validator.validate({}, 'a', 'b'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({value: 'aaa'}, 'a', 'b'), ValidateResult.success);
+    })
 })

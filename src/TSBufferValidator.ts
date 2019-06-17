@@ -179,12 +179,19 @@ export class TSBufferValidator {
 
         // validate elementType
         for (let i = 0; i < schema.elementTypes.length; ++i) {
-            if (schema.optionalStartIndex !== undefined && i >= schema.optionalStartIndex && value[i] === undefined) {
-                continue;
-            }
-
-            if ((schema.optionalStartIndex === undefined || i < schema.optionalStartIndex) && value[i] === undefined) {
-                return ValidateResult.error(ValidateErrorCode.InnerError, '' + i, ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
+            if (value[i] === undefined) {
+                if (
+                    // Optional
+                    schema.optionalStartIndex !== undefined && i >= schema.optionalStartIndex
+                    // Can be undefined
+                    || this._canBeUndefined(schema.elementTypes[i])
+                ) {
+                    continue;
+                }
+                // Missing Required
+                else {
+                    return ValidateResult.error(ValidateErrorCode.InnerError, '' + i, ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
+                }
             }
 
             let elemValidateResult = this.validateBySchema(value[i], schema.elementTypes[i]);
@@ -194,6 +201,18 @@ export class TSBufferValidator {
         }
 
         return ValidateResult.success;
+    }
+
+    private _canBeUndefined(schema: TSBufferSchema): boolean {
+        if (schema.type === 'Union') {
+            return schema.members.some(v => this._canBeUndefined(v.type))
+        }
+
+        if (schema.type === 'Literal' && schema.literal === undefined) {
+            return true;
+        }
+
+        return false;
     }
 
     validateEnumType(value: any, schema: EnumTypeSchema): ValidateResult {
@@ -247,15 +266,14 @@ export class TSBufferValidator {
         // 校验properties
         if (schema.properties) {
             for (let property of schema.properties) {
-
-                // optional
-                if (property.optional && value[property.name] === undefined) {
-                    continue;
-                }
-
-                // required
-                if (!property.optional && value[property.name] === undefined) {
-                    return ValidateResult.error(ValidateErrorCode.InnerError, property.name, ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
+                if (value[property.name] === undefined) {
+                    // Optional or Can be undefined
+                    if (property.optional || this._canBeUndefined(property.type)) {
+                        continue;
+                    }
+                    else {
+                        return ValidateResult.error(ValidateErrorCode.InnerError, property.name, ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
+                    }
                 }
 
                 // property本身验证
