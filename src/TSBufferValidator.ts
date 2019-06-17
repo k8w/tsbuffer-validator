@@ -126,7 +126,7 @@ export class TSBufferValidator {
 
         // scalarType类型检测
         // 整形却为小数
-        if (scalarType !== 'float' && scalarType !== 'double' && typeof value === 'number' && value !== (value | 0)) {
+        if (scalarType !== 'float' && scalarType !== 'double' && typeof value === 'number' && !Number.isInteger(value)) {
             return ValidateResult.error(ValidateErrorCode.WrongScalarType);
         }
         // 无符号整形却为负数
