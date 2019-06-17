@@ -395,7 +395,7 @@ export class TSBufferValidator {
         let flat = this.protoHelper.getFlatInterfaceSchema(schema);
         // flat是新创建的Schema，故可以直接extend，不会影响原始schema
         unionFields && this.protoHelper.extendUnionFieldsToInterface(flat, unionFields);
-        return this.validateInterfaceType(value, flat);
+        return this._validateFlatInterface(value, flat);
     }
 
 
