@@ -50,14 +50,16 @@ export class TSBufferValidator {
         this.protoHelper = new ProtoHelper(proto);
     }
 
-    validate(value: any, path: string, symbolName: string): ValidateResult {
+    /**
+     * 验证
+     * @param value 
+     * @param schemaId 例如 a/b.ts 里的 Test类型 则ID为 a/b/Test
+     */
+    validate(value: any, schemaId: string): ValidateResult {
         //获取Schema
-        if (!this._proto[path]) {
-            throw new Error(`Cannot find path: ${path}`);
-        }
-        let schema: TSBufferSchema = this._proto[path][symbolName];
+        let schema: TSBufferSchema = this._proto[schemaId];
         if (!schema) {
-            throw new Error(`Cannot find schema [${symbolName}] at ${path}`);
+            throw new Error(`Cannot find schema [${schemaId}]`);
         }
 
         return this.validateBySchema(value, schema);

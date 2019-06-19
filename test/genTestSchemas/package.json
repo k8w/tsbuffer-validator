@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "generate": "ts-node generate.ts",
-    "ug": "npm i tsbuffer-schema-generator@*",
+    "ug": "npm i tsbuffer-proto-generator@*",
     "listen": "onchange -i -v source/**/*.ts -- ts-node generate.ts"
   },
   "author": "",
@@ -13,6 +13,6 @@
   "dependencies": {
     "@types/glob": "^7.1.1",
     "glob": "^7.1.4",
-    "tsbuffer-schema-generator": "^1.1.0"
+    "tsbuffer-proto-generator": "^1.0.1"
   }
 }

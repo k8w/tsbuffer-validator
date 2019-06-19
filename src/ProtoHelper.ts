@@ -24,13 +24,9 @@ export default class ProtoHelper {
     parseReference(schema: TSBufferSchema): Exclude<TSBufferSchema, TypeReference> {
         // Reference
         if (schema.type === 'Reference') {
-            if (!this._proto[schema.path]) {
-                throw new Error('Cannot find path: ' + schema.path);
-            }
-
-            let parsedSchema = this._proto[schema.path][schema.targetName];
+            let parsedSchema = this._proto[schema.target];
             if (!parsedSchema) {
-                throw new Error(`Cannot find [${schema.targetName}] at ${schema.path}`);
+                throw new Error(`Cannot find reference target: ${schema.target}`);
             }
 
             if (this.isTypeReference(parsedSchema)) {

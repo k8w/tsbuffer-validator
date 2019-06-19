@@ -1,10 +1,10 @@
-import { TSBufferSchemaGenerator } from 'tsbuffer-schema-generator';
+import { TSBufferProtoGenerator } from 'tsbuffer-proto-generator';
 import * as glob from "glob";
 import * as path from "path";
 import * as fs from "fs";
 
 async function main() {
-    let generator = new TSBufferSchemaGenerator({
+    let generator = new TSBufferProtoGenerator({
         baseDir: path.resolve(__dirname, 'source')
     });
 

@@ -34,7 +34,7 @@
   "homepage": "https://github.com/k8w/tsbuffer-validator#readme",
   "dependencies": {
     "k8w-extend-native": "^1.1.0",
-    "tsbuffer-schema": "^0.8.0"
+    "tsbuffer-schema": "^0.9.0"
   },
   "nyc": {
     "extension": [
