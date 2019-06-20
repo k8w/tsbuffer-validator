@@ -249,7 +249,7 @@ describe('Interface Validate', function () {
             value2: 'b'
         }, 'interface2/Interface4').originalError
         assert.deepStrictEqual(originalError, new ValidateResult(ValidateErrorCode.WrongType, 'value1.value1.a'));
-        assert.deepStrictEqual(originalError.message, 'WrongType');
+        assert.deepStrictEqual(originalError.message, 'value1.value1.a: WrongType');
     })
 
     it('Cannot extend from non-interface', function () {
