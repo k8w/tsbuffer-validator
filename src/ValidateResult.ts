@@ -105,6 +105,6 @@ export class ValidateResult {
     }
 
     get message(): string {
-        return ValidateErrorCode[this.errcode] || 'UnknownError';
+        return (this.fieldName ? this.fieldName + ': ' : '') + ValidateErrorCode[this.errcode] || 'UnknownError';
     }
 }
