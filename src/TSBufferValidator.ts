@@ -26,14 +26,14 @@ const typedArrays = {
     Int8Array: Int8Array,
     Int16Array: Int16Array,
     Int32Array: Int32Array,
-    BigInt64Array: BigInt64Array,
+    BigInt64Array: typeof BigInt64Array !== 'undefined' ? BigInt64Array : undefined,
     Uint8Array: Uint8Array,
     Uint16Array: Uint16Array,
     Uint32Array: Uint32Array,
-    BigUint64Array: BigUint64Array,
+    BigUint64Array: typeof BigUint64Array !== 'undefined' ? BigUint64Array : undefined,
     Float32Array: Float32Array,
     Float64Array: Float64Array
-}
+};
 
 export class TSBufferValidator {
 
@@ -310,10 +310,11 @@ export class TSBufferValidator {
 
     validateBufferType(value: any, schema: BufferTypeSchema): ValidateResult {
         if (schema.arrayType) {
-            if (!typedArrays[schema.arrayType]) {
+            let typeArrayClass = typedArrays[schema.arrayType];
+            if (!typeArrayClass) {
                 throw new Error(`Error TypedArray type: ${schema.arrayType}`);
             }
-            return value instanceof typedArrays[schema.arrayType] ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType)
+            return value instanceof typeArrayClass ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType)
         }
         else {
             return value instanceof ArrayBuffer ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
