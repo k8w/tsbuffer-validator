@@ -20,6 +20,8 @@ import { TypeReference } from 'tsbuffer-schema/src/TypeReference';
 import ProtoHelper, { FlatInterfaceTypeSchema } from './ProtoHelper';
 
 export interface TSBufferValidatorOptions {
+    /** 不检查interface中是否包含Schema之外的字段 */
+    skipExcessCheck?: boolean;
 }
 
 const typedArrays = {
@@ -128,7 +130,7 @@ export class TSBufferValidator {
 
         // scalarType类型检测
         // 整形却为小数
-        if (scalarType !== 'float' && scalarType !== 'double' && typeof value === 'number' && !Number.isInteger(value)) {
+        if (scalarType !== 'double' && typeof value === 'number' && !Number.isInteger(value)) {
             return ValidateResult.error(ValidateErrorCode.WrongScalarType);
         }
         // 无符号整形却为负数
@@ -297,7 +299,7 @@ export class TSBufferValidator {
             }
         }
         // 超出字段检测
-        else {
+        else if(!this._options.skipExcessCheck) {
             let validatedFields = schema.properties.map(v => v.name);
             let remainedFields = Object.keys(value).remove(v => validatedFields.indexOf(v) > -1);
             if (remainedFields.length) {

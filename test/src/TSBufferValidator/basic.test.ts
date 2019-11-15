@@ -1,5 +1,4 @@
 import * as assert from 'assert';
-import { TSBufferProto } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../../src/TSBufferValidator';
 import { ValidateResult, ValidateErrorCode } from '../../../src/ValidateResult';
 
@@ -57,7 +56,7 @@ describe('BasicType Validate', function () {
     })
 
     it('Number: number', function () {
-        let scalarTypes = [undefined, 'float', 'double'] as const;
+        let scalarTypes = [undefined, 'double'] as const;
         for (let scalarType of scalarTypes) {
             let validator = new TSBufferValidator({
                 'a/b': {
@@ -80,7 +79,7 @@ describe('BasicType Validate', function () {
     });
 
     it('Number: int', function () {
-        let scalarTypes = ['int', 'uint', 'int32', 'uint32'] as const;
+        let scalarTypes = ['int', 'uint'] as const;
         for (let scalarType of scalarTypes) {
             let validator = new TSBufferValidator({
                 'a/b': {
