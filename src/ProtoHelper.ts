@@ -264,7 +264,7 @@ export default class ProtoHelper {
     private _flattenMappedType(schema: PickTypeSchema | PartialTypeSchema | OverwriteTypeSchema | OmitTypeSchema): FlatInterfaceTypeSchema {
         // target 解引用
         let target: Exclude<PickTypeSchema['target'], ReferenceTypeSchema>;
-        if (schema.target.type === 'Reference') {
+        if (this.isTypeReference(schema.target)) {
             let parsed = this.parseReference(schema.target);
             target = parsed as typeof target;
         }
