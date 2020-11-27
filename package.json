@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer-validator",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Validator for TSBuffer values",
   "main": "index.js",
   "scripts": {
@@ -34,7 +34,7 @@
   "homepage": "https://github.com/k8w/tsbuffer-validator#readme",
   "dependencies": {
     "k8w-extend-native": "*",
-    "tsbuffer-schema": "^1.0.0"
+    "tsbuffer-schema": "*"
   },
   "nyc": {
     "extension": [

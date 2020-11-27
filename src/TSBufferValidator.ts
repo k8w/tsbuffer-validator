@@ -246,7 +246,7 @@ export class TSBufferValidator {
         return typeof value === 'object' && value !== null ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
     }
 
-    validateInterfaceType(value: any, schema: InterfaceTypeSchema): ValidateResult {
+    validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference): ValidateResult {
         if (typeof value !== 'object') {
             return ValidateResult.error(ValidateErrorCode.WrongType);
         }
@@ -332,7 +332,7 @@ export class TSBufferValidator {
     }
 
     validateMappedType(value: any, schema: PickTypeSchema | PartialTypeSchema | OmitTypeSchema | OverwriteTypeSchema): ValidateResult {
-        return this.validateInterfaceType(value, this.protoHelper.getFlatInterfaceSchema(schema));
+        return this.validateInterfaceType(value, schema);
     }
 
     validateUnionType(value: any, schema: UnionTypeSchema, unionFields?: string[]): ValidateResult {
