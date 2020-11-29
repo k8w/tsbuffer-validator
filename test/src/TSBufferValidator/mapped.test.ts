@@ -70,6 +70,12 @@ describe('MappedType Validate', function () {
         assert.deepStrictEqual(validator.validate({ a: 'x', c: 'x' }, 'mapped/IPartial'), ValidateResult.success);
         assert.deepStrictEqual(validator.validate({ c: 1 }, 'mapped/IPartial'), ValidateResult.success);
         assert.deepStrictEqual(validator.validate({ a: 'x', c: undefined }, 'mapped/IPartial'), ValidateResult.innerError('c', ValidateErrorCode.NonConditionMet));
+    
+        // PartialAB
+        assert.deepStrictEqual(validator.validate({ type: 'A', valueA: 'AAA', common: 'xxx' }, 'mapped/PartialAB'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ type: 'A', valueA: 'AAA' }, 'mapped/PartialAB'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ type: 'B' }, 'mapped/PartialAB'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ common1: 'string' }, 'mapped/PartialAB'), ValidateResult.success);
     });
 
     it('Omit', function () {

@@ -340,17 +340,14 @@ export default class ProtoHelper {
         }
     }
 
-    parsePickOmit(schema: PickTypeSchema | OmitTypeSchema): TSBufferSchema {
-        let parents: (Omit<PickTypeSchema | OmitTypeSchema, 'target'>)[] = [];
+    parseMappedType(schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema): InterfaceTypeSchema | UnionTypeSchema {
+        let parents: (PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema)[] = [];
         let child: TSBufferSchema = schema;
         do {
-            parents.push({
-                type: child.type,
-                keys: child.keys
-            });
+            parents.push(child);
             child = this.parseReference(child.target);
         }
-        while (child.type === 'Pick' || child.type === 'Omit');
+        while (child.type === 'Pick' || child.type === 'Omit' || child.type==='Partial'||child.type==='Overwrite');
 
         // Final
         if (child.type === 'Interface') {
@@ -366,8 +363,7 @@ export default class ProtoHelper {
                     for (let i = parents.length - 1; i > -1; --i) {
                         let parent = parents[i];
                         type = {
-                            type: parent.type,
-                            keys: parent.keys,
+                            ...parent,
                             target: type
                         } as PickTypeSchema | OmitTypeSchema
                     }
@@ -384,6 +380,9 @@ export default class ProtoHelper {
             throw new Error(`Unsupported pattern ${schema.type}<${child.type}>`);
         }
     }
+
+
+
 }
 
 export interface FlatInterfaceTypeSchema {

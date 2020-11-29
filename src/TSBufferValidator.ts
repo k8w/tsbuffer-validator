@@ -16,6 +16,8 @@ import { ValidateResult, ValidateErrorCode } from './ValidateResult';
 import { InterfaceReference } from 'tsbuffer-schema/src/InterfaceReference';
 import ProtoHelper, { FlatInterfaceTypeSchema } from './ProtoHelper';
 import { parse } from 'path';
+import { PartialTypeSchema } from 'tsbuffer-schema/src/schemas/PartialTypeSchema';
+import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
 
 export interface TSBufferValidatorOptions {
     /** 不检查interface中是否包含Schema之外的字段 */
@@ -99,10 +101,9 @@ export class TSBufferValidator {
                 return this.validateIntersectionType(value, schema);
             case 'Pick':
             case 'Omit':
-                return this.validatePickOmitType(value, schema);
             case 'Partial':
             case 'Overwrite':
-                return this.validateInterfaceType(value, schema);
+                return this.validateMappedType(value, schema);
             // 错误的type
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
@@ -256,17 +257,16 @@ export class TSBufferValidator {
         return this._validateFlatInterface(value, flatSchema);
     }
 
-    validatePickOmitType(value: any, schema: PickTypeSchema | OmitTypeSchema): ValidateResult {
-        let parsed = this.protoHelper.parsePickOmit(schema);
+    validateMappedType(value: any, schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema): ValidateResult {
+        let parsed = this.protoHelper.parseMappedType(schema);
         if (parsed.type === 'Interface') {
             return this.validateInterfaceType(value, schema);
         }
         else if(parsed.type==='Union'){
             return this.validateUnionType(value, parsed);
         }
-        else {
-            throw new Error(`Unsupported ${schema.type}<${parsed.type}>`)
-        }
+            
+        throw new Error();
     }
 
     private _validateFlatInterface(value: any, schema: FlatInterfaceTypeSchema) {

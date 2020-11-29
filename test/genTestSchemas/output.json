@@ -1252,6 +1252,30 @@
     ],
     "type": "Pick"
   },
+  "mapped/PartialAB": {
+    "type": "Partial",
+    "target": {
+      "type": "Reference",
+      "target": "mapped/AB"
+    }
+  },
+  "mapped/PartialPick": {
+    "type": "Partial",
+    "target": {
+      "type": "Reference",
+      "target": "mapped/PickAB"
+    }
+  },
+  "mapped/PickPartial": {
+    "target": {
+      "type": "Reference",
+      "target": "mapped/PartialAB"
+    },
+    "keys": [
+      "type"
+    ],
+    "type": "Pick"
+  },
   "nested/ArrStr": {
     "type": "Array",
     "elementType": {
