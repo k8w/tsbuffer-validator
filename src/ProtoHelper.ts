@@ -340,10 +340,7 @@ export default class ProtoHelper {
         }
     }
 
-    parsePickOmit(schema: PickTypeSchema | OmitTypeSchema): {
-        final: Exclude<TSBufferSchema, TypeReference | PickTypeSchema | OmitTypeSchema>,
-        parents: (Omit<PickTypeSchema | OmitTypeSchema, 'target'>)[]
-    } {
+    parsePickOmit(schema: PickTypeSchema | OmitTypeSchema): TSBufferSchema {
         let parents: (Omit<PickTypeSchema | OmitTypeSchema, 'target'>)[] = [];
         let child: TSBufferSchema = schema;
         do {
@@ -355,12 +352,38 @@ export default class ProtoHelper {
         }
         while (child.type === 'Pick' || child.type === 'Omit');
 
-        return {
-            final: child,
-            parents: parents
+        // Final
+        if (child.type === 'Interface') {
+            return child;
+        }
+        // PickOmit<A|B> === PickOmit<A> | PickOmit<B>
+        else if (child.type === 'Union') {
+            let newSchema: UnionTypeSchema = {
+                type: 'Union',
+                members: child.members.map(v => {
+                    // 从里面往外装
+                    let type: TSBufferSchema = v.type;
+                    for (let i = parents.length - 1; i > -1; --i) {
+                        let parent = parents[i];
+                        type = {
+                            type: parent.type,
+                            keys: parent.keys,
+                            target: type
+                        } as PickTypeSchema | OmitTypeSchema
+                    }
+
+                    return {
+                        id: v.id,
+                        type: type
+                    }
+                })
+            };
+            return newSchema;
+        }
+        else {
+            throw new Error(`Unsupported pattern ${schema.type}<${child.type}>`);
         }
     }
-
 }
 
 export interface FlatInterfaceTypeSchema {

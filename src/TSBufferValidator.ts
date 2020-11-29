@@ -258,35 +258,14 @@ export class TSBufferValidator {
 
     validatePickOmitType(value: any, schema: PickTypeSchema | OmitTypeSchema): ValidateResult {
         let parsed = this.protoHelper.parsePickOmit(schema);
-        if (parsed.final.type === 'Interface') {
-            return this.validateInterfaceType(value, schema)
+        if (parsed.type === 'Interface') {
+            return this.validateInterfaceType(value, schema);
         }
-        else if (parsed.final.type === 'Union') {
-            // PickOmit<PickOmit<A|B>> === PickOmit<PickOmit<A>> | PickOmit<PickOmit<B>>;
-            let newSchema: UnionTypeSchema = {
-                type: 'Union',
-                members: parsed.final.members.map(v => {
-                    // 从里面往外装
-                    let type: TSBufferSchema = v.type;
-                    for (let i = parsed.parents.length - 1; i > -1; --i) {
-                        let parent = parsed.parents[i];
-                        type = {
-                            type: parent.type,
-                            keys: parent.keys,
-                            target: type
-                        } as PickTypeSchema | OmitTypeSchema
-                    }
-
-                    return {
-                        id: v.id,
-                        type: type
-                    }
-                })
-            };
-            return this.validateBySchema(value, newSchema)
+        else if(parsed.type==='Union'){
+            return this.validateUnionType(value, parsed);
         }
         else {
-            throw new Error(`Invalid ${schema.type} final type: ` + parsed.final.type);
+            throw new Error(`Unsupported ${schema.type}<${parsed.type}>`)
         }
     }
 
