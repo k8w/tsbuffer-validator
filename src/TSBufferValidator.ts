@@ -103,7 +103,7 @@ export class TSBufferValidator {
             case 'Partial':
             case 'Omit':
             case 'Overwrite':
-                return this.validateMappedType(value, schema);
+                return this.validateInterfaceType(value, schema);
             // 错误的type
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
@@ -299,7 +299,7 @@ export class TSBufferValidator {
             }
         }
         // 超出字段检测
-        else if(!this._options.skipExcessCheck) {
+        else if (!this._options.skipExcessCheck) {
             let validatedFields = schema.properties.map(v => v.name);
             let remainedFields = Object.keys(value).remove(v => validatedFields.indexOf(v) > -1);
             if (remainedFields.length) {
@@ -329,10 +329,6 @@ export class TSBufferValidator {
 
     validateReferenceType(value: any, schema: ReferenceTypeSchema): ValidateResult {
         return this.validateBySchema(value, this.protoHelper.parseReference(schema));
-    }
-
-    validateMappedType(value: any, schema: PickTypeSchema | PartialTypeSchema | OmitTypeSchema | OverwriteTypeSchema): ValidateResult {
-        return this.validateInterfaceType(value, schema);
     }
 
     validateUnionType(value: any, schema: UnionTypeSchema, unionFields?: string[]): ValidateResult {
