@@ -256,47 +256,6 @@ export class TSBufferValidator {
         return this._validateFlatInterface(value, flatSchema);
     }
 
-    // validatePickOmitType(value: any, schema: PickTypeSchema | OmitTypeSchema, keyFilter?: InterfaceKeyFilter): ValidateResult {
-    //     let parsedTarget = this.protoHelper.parseReference(schema.target);
-    //     // Pick<A|B>
-    //     if (parsedTarget.type === 'Union') {
-    //         // Pick<A|B>验证通过的判定：validate(value, A|B) && validateKeys(value, keyFilter)
-
-    //         // 先验证 validate(value, A|B)
-    //         let vResUnion = this.validateUnionType(value, parsedTarget);
-    //         if (!vResUnion.isSucc) {
-    //             return vResUnion;
-    //         }
-
-    //         // keyFilter 与父级合并
-    //         if (!keyFilter) {
-    //             keyFilter = InterfaceKeyFilter.get();
-    //         }
-    //         if (schema.type === 'Pick') {
-    //             keyFilter.addPickKeys(schema.keys);
-    //         }
-    //         else {
-    //             keyFilter.addOmitKeys(schema.keys);
-    //         }
-
-    //         // 验证 validateKeys(value, keyFilter)
-    //         let vResKey = keyFilter.validate(value);
-    //         InterfaceKeyFilter.put(keyFilter);
-    //         if (!vResKey.isSucc) {
-    //             return ValidateResult.innerError(vResKey.key, ValidateErrorCode.UnexpectedField);
-    //         }
-    //         return ValidateResult.success;
-    //     }
-    //     // Pick<A&B> Omit<A&B>
-    //     else if (parsedTarget.type === 'Intersection') {
-    //         throw new Error(`Unsupported pattern ${schema.type === 'Pick' ? 'Pick<A & B>' : 'Omit<A & B>'}`);
-    //     }
-    //     // Pick<InterfaceReference>
-    //     else {
-    //         return this.validateInterfaceType(value, schema)
-    //     }
-    // }
-
     validatePickOmitType(value: any, schema: PickTypeSchema | OmitTypeSchema): ValidateResult {
         let parsed = this.protoHelper.parsePickOmit(schema);
         if (parsed.final.type === 'Interface') {
