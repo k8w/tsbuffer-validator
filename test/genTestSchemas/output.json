@@ -1100,6 +1100,158 @@
       }
     }
   },
+  "mapped/A": {
+    "type": "Interface",
+    "properties": [
+      {
+        "id": 0,
+        "name": "type",
+        "type": {
+          "type": "Literal",
+          "literal": "A"
+        }
+      },
+      {
+        "id": 1,
+        "name": "common",
+        "type": {
+          "type": "String"
+        }
+      },
+      {
+        "id": 2,
+        "name": "valueA",
+        "type": {
+          "type": "String"
+        }
+      },
+      {
+        "id": 3,
+        "name": "common1",
+        "type": {
+          "type": "String"
+        },
+        "optional": true
+      },
+      {
+        "id": 4,
+        "name": "common2",
+        "type": {
+          "type": "String"
+        },
+        "optional": true
+      }
+    ]
+  },
+  "mapped/B": {
+    "type": "Interface",
+    "properties": [
+      {
+        "id": 0,
+        "name": "type",
+        "type": {
+          "type": "Literal",
+          "literal": "B"
+        }
+      },
+      {
+        "id": 1,
+        "name": "common",
+        "type": {
+          "type": "String"
+        }
+      },
+      {
+        "id": 2,
+        "name": "valueB",
+        "type": {
+          "type": "String"
+        }
+      },
+      {
+        "id": 3,
+        "name": "common1",
+        "type": {
+          "type": "String"
+        },
+        "optional": true
+      },
+      {
+        "id": 4,
+        "name": "common2",
+        "type": {
+          "type": "String"
+        },
+        "optional": true
+      }
+    ]
+  },
+  "mapped/AB": {
+    "type": "Union",
+    "members": [
+      {
+        "id": 0,
+        "type": {
+          "type": "Reference",
+          "target": "mapped/A"
+        }
+      },
+      {
+        "id": 1,
+        "type": {
+          "type": "Reference",
+          "target": "mapped/B"
+        }
+      }
+    ]
+  },
+  "mapped/PickAB": {
+    "target": {
+      "type": "Reference",
+      "target": "mapped/AB"
+    },
+    "keys": [
+      "type",
+      "common"
+    ],
+    "type": "Pick"
+  },
+  "mapped/OmitAB": {
+    "target": {
+      "type": "Reference",
+      "target": "mapped/AB"
+    },
+    "keys": [
+      "common",
+      "common1"
+    ],
+    "type": "Omit"
+  },
+  "mapped/NestedAB": {
+    "target": {
+      "target": {
+        "target": {
+          "type": "Reference",
+          "target": "mapped/AB"
+        },
+        "keys": [
+          "type",
+          "common",
+          "common1"
+        ],
+        "type": "Pick"
+      },
+      "keys": [
+        "common1",
+        "type"
+      ],
+      "type": "Omit"
+    },
+    "keys": [
+      "common"
+    ],
+    "type": "Pick"
+  },
   "nested/ArrStr": {
     "type": "Array",
     "elementType": {

@@ -35,7 +35,7 @@ export interface Base1 {
 
 export type IPick = Pick<Base1, 'a' | 'c'>;
 export type IPartial = Partial<Base1>;
-export type IOmit = Omit<Base1, 'b'|'c'>;
+export type IOmit = Omit<Base1, 'b' | 'c'>;
 export type IOverwrite1 = Overwrite<Base1, {
     a: number,
     b: string
@@ -44,3 +44,22 @@ export type IOverwrite2 = Overwrite<Base1, {
     b: string
     [key: string]: string
 }>
+
+export interface A {
+    type: 'A',
+    common: string,
+    valueA: string,
+    common1?: string,
+    common2?: string,
+}
+export interface B {
+    type: 'B',
+    common: string,
+    valueB: string,
+    common1?: string,
+    common2?: string,
+}
+export type AB = A | B;
+export type PickAB = Pick<AB, 'type' | 'common'>;
+export type OmitAB = Omit<AB, 'common' | 'common1'>;
+export type NestedAB = Pick<Omit<Pick<AB, 'type' | 'common' | 'common1'>, 'common1' | 'type'>, 'common'>

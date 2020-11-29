@@ -11,13 +11,11 @@ import { ReferenceTypeSchema } from 'tsbuffer-schema/src/schemas/ReferenceTypeSc
 import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
 import { IntersectionTypeSchema } from 'tsbuffer-schema/src/schemas/IntersectionTypeSchema';
 import { PickTypeSchema } from 'tsbuffer-schema/src/schemas/PickTypeSchema';
-import { PartialTypeSchema } from 'tsbuffer-schema/src/schemas/PartialTypeSchema';
 import { OmitTypeSchema } from 'tsbuffer-schema/src/schemas/OmitTypeSchema';
-import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
 import { ValidateResult, ValidateErrorCode } from './ValidateResult';
 import { InterfaceReference } from 'tsbuffer-schema/src/InterfaceReference';
-import { TypeReference } from 'tsbuffer-schema/src/TypeReference';
 import ProtoHelper, { FlatInterfaceTypeSchema } from './ProtoHelper';
+import { parse } from 'path';
 
 export interface TSBufferValidatorOptions {
     /** 不检查interface中是否包含Schema之外的字段 */
@@ -100,8 +98,9 @@ export class TSBufferValidator {
             case 'Intersection':
                 return this.validateIntersectionType(value, schema);
             case 'Pick':
-            case 'Partial':
             case 'Omit':
+                return this.validatePickOmitType(value, schema);
+            case 'Partial':
             case 'Overwrite':
                 return this.validateInterfaceType(value, schema);
             // 错误的type
@@ -255,6 +254,81 @@ export class TSBufferValidator {
         let flatSchema = this.protoHelper.getFlatInterfaceSchema(schema);
 
         return this._validateFlatInterface(value, flatSchema);
+    }
+
+    // validatePickOmitType(value: any, schema: PickTypeSchema | OmitTypeSchema, keyFilter?: InterfaceKeyFilter): ValidateResult {
+    //     let parsedTarget = this.protoHelper.parseReference(schema.target);
+    //     // Pick<A|B>
+    //     if (parsedTarget.type === 'Union') {
+    //         // Pick<A|B>验证通过的判定：validate(value, A|B) && validateKeys(value, keyFilter)
+
+    //         // 先验证 validate(value, A|B)
+    //         let vResUnion = this.validateUnionType(value, parsedTarget);
+    //         if (!vResUnion.isSucc) {
+    //             return vResUnion;
+    //         }
+
+    //         // keyFilter 与父级合并
+    //         if (!keyFilter) {
+    //             keyFilter = InterfaceKeyFilter.get();
+    //         }
+    //         if (schema.type === 'Pick') {
+    //             keyFilter.addPickKeys(schema.keys);
+    //         }
+    //         else {
+    //             keyFilter.addOmitKeys(schema.keys);
+    //         }
+
+    //         // 验证 validateKeys(value, keyFilter)
+    //         let vResKey = keyFilter.validate(value);
+    //         InterfaceKeyFilter.put(keyFilter);
+    //         if (!vResKey.isSucc) {
+    //             return ValidateResult.innerError(vResKey.key, ValidateErrorCode.UnexpectedField);
+    //         }
+    //         return ValidateResult.success;
+    //     }
+    //     // Pick<A&B> Omit<A&B>
+    //     else if (parsedTarget.type === 'Intersection') {
+    //         throw new Error(`Unsupported pattern ${schema.type === 'Pick' ? 'Pick<A & B>' : 'Omit<A & B>'}`);
+    //     }
+    //     // Pick<InterfaceReference>
+    //     else {
+    //         return this.validateInterfaceType(value, schema)
+    //     }
+    // }
+
+    validatePickOmitType(value: any, schema: PickTypeSchema | OmitTypeSchema): ValidateResult {
+        let parsed = this.protoHelper.parsePickOmit(schema);
+        if (parsed.final.type === 'Interface') {
+            return this.validateInterfaceType(value, schema)
+        }
+        else if (parsed.final.type === 'Union') {
+            // PickOmit<PickOmit<A|B>> === PickOmit<PickOmit<A>> | PickOmit<PickOmit<B>>;
+            let newSchema: UnionTypeSchema = {
+                type: 'Union',
+                members: parsed.final.members.map(v => {
+                    // 从里面往外装
+                    let type: TSBufferSchema = v.type;
+                    for (let i = parsed.parents.length - 1; i > -1; --i) {
+                        let parent = parsed.parents[i];
+                        type = {
+                            type: parent.type,
+                            keys: parent.keys,
+                            target: type
+                        } as PickTypeSchema | OmitTypeSchema
+                    }
+
+                    return {
+                        id: v.id,
+                        type: type
+                    }
+                })
+            };
+            return this.validateBySchema(value, newSchema)
+        }
+        else {
+            throw new Error(`Invalid ${schema.type} final type: ` + parsed.final.type);
+        }
     }
 
     private _validateFlatInterface(value: any, schema: FlatInterfaceTypeSchema) {
@@ -416,6 +490,4 @@ export class TSBufferValidator {
         unionFields && this.protoHelper.extendUnionFieldsToInterface(flat, unionFields);
         return this._validateFlatInterface(value, flat);
     }
-
-
 }

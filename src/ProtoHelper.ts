@@ -7,6 +7,7 @@ import { PartialTypeSchema } from "tsbuffer-schema/src/schemas/PartialTypeSchema
 import { OverwriteTypeSchema } from "tsbuffer-schema/src/schemas/OverwriteTypeSchema";
 import { OmitTypeSchema } from "tsbuffer-schema/src/schemas/OmitTypeSchema";
 import { ReferenceTypeSchema } from "tsbuffer-schema/src/schemas/ReferenceTypeSchema";
+import { UnionTypeSchema } from "tsbuffer-schema/src/schemas/UnionTypeSchema";
 
 export default class ProtoHelper {
 
@@ -336,6 +337,27 @@ export default class ProtoHelper {
         }
         else {
             throw new Error(`Unknown type: ${(schema as any).type}`)
+        }
+    }
+
+    parsePickOmit(schema: PickTypeSchema | OmitTypeSchema): {
+        final: Exclude<TSBufferSchema, TypeReference | PickTypeSchema | OmitTypeSchema>,
+        parents: (Omit<PickTypeSchema | OmitTypeSchema, 'target'>)[]
+    } {
+        let parents: (Omit<PickTypeSchema | OmitTypeSchema, 'target'>)[] = [];
+        let child: TSBufferSchema = schema;
+        do {
+            parents.push({
+                type: child.type,
+                keys: child.keys
+            });
+            child = this.parseReference(child.target);
+        }
+        while (child.type === 'Pick' || child.type === 'Omit');
+
+        return {
+            final: child,
+            parents: parents
         }
     }
 

@@ -31,6 +31,24 @@ describe('MappedType Validate', function () {
         assert.deepStrictEqual(validator.validate({ a: 'x', c: 1 }, 'mapped/IPick'), ValidateResult.success);
         assert.deepStrictEqual(validator.validate({ a: 'x', c: undefined }, 'mapped/IPick'), ValidateResult.innerError('c', ValidateErrorCode.MissingRequiredMember));
         assert.deepStrictEqual(validator.validate({ a: 'x', c: null }, 'mapped/IPick'), ValidateResult.innerError('c', ValidateErrorCode.NonConditionMet));
+
+        // Pick<A|B>
+        assert.deepStrictEqual(validator.validate({
+            type: 'A',
+            common: 'xxx'
+        }, 'mapped/PickAB'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({
+            type: 'B',
+            common: 'xxx'
+        }, 'mapped/PickAB'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({
+            type: 'A',
+            common: 'xxx',
+            valueA: 'asdg'
+        }, 'mapped/PickAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+        assert.deepStrictEqual(validator.validate({
+            common: 'xxx',
+        }, 'mapped/PickAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
     });
 
     it('Partial', function () {
@@ -78,7 +96,49 @@ describe('MappedType Validate', function () {
         assert.deepStrictEqual(validator.validate({ a: 'x', b: 1 }, 'mapped/IOmit'), ValidateResult.success);
         assert.deepStrictEqual(validator.validate({ a: 'x', b: 'b', c: 'c' }, 'mapped/IOmit'), ValidateResult.success);
         assert.deepStrictEqual(validator.validate({ a: 'x', c: null }, 'mapped/IOmit'), ValidateResult.innerError('c', ValidateErrorCode.NonConditionMet));
+    
+        // Omit<A|B>
+        assert.deepStrictEqual(validator.validate({
+            type: 'A',
+            valueA: 'AAA'
+        }, 'mapped/OmitAB'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({
+            type: 'B',
+            valueB: 'BBB',
+            common2: 'xxx'
+        }, 'mapped/OmitAB'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({
+            type: 'A',
+            valueB: 'BBB'
+        }, 'mapped/OmitAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+        assert.deepStrictEqual(validator.validate({
+            type: 'A',
+        }, 'mapped/OmitAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+        assert.deepStrictEqual(validator.validate({
+            type: 'A',
+            valueA: 'AAA',
+            common: 'asdg'
+        }, 'mapped/OmitAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
     });
+
+    it('Nested Pick<A|B> Omit<A|B>', function () {
+        assert.deepStrictEqual(validator.validate({
+            common: 'asdg'
+        }, 'mapped/NestedAB'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({
+            type: 'A',
+            common: 'asdg'
+        }, 'mapped/NestedAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+        assert.deepStrictEqual(validator.validate({
+            type: 'A',
+            valueA: 'asdg',
+            common: 'asdg'
+        }, 'mapped/NestedAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+        assert.deepStrictEqual(validator.validate({
+            common: 'asdg',
+            common2: 'asdg'
+        }, 'mapped/NestedAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+    })
 
     it('Overwrite', function () {
         // Overwrite1

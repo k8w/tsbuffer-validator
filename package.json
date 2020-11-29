@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer-validator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Validator for TSBuffer values",
   "main": "index.js",
   "scripts": {
