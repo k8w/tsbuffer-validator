@@ -20,8 +20,10 @@ import { PartialTypeSchema } from 'tsbuffer-schema/src/schemas/PartialTypeSchema
 import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
 
 export interface TSBufferValidatorOptions {
-    /** 不检查interface中是否包含Schema之外的字段 */
-    skipExcessCheck?: boolean;
+    /** 不检查interface中是否包含Schema之外的字段，默认为false */
+    skipExcessCheck: boolean;
+    /** undefined和null区别对待，默认为true */
+    strictNullCheck: boolean;
 }
 
 const typedArrays = {
@@ -40,6 +42,8 @@ const typedArrays = {
 export class TSBufferValidator {
 
     _options: TSBufferValidatorOptions = {
+        skipExcessCheck: false,
+        strictNullCheck: true
     }
 
     private _proto: TSBufferProto;
@@ -183,7 +187,7 @@ export class TSBufferValidator {
 
         // validate elementType
         for (let i = 0; i < schema.elementTypes.length; ++i) {
-            if (value[i] === undefined) {
+            if (value[i] === undefined || !this._options.strictNullCheck && value[i] == undefined) {
                 if (
                     // Optional
                     schema.optionalStartIndex !== undefined && i >= schema.optionalStartIndex
@@ -239,6 +243,11 @@ export class TSBufferValidator {
     }
 
     validateLiteralType(value: any, schema: LiteralTypeSchema): ValidateResult {
+        // 非 null undefined 严格模式，null undefined同等对待
+        if (schema.literal == null && !this._options.strictNullCheck) {
+            return value === schema.literal ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.InvalidLiteralValue);
+        }
+
         return value === schema.literal ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.InvalidLiteralValue);
     }
 
@@ -262,10 +271,10 @@ export class TSBufferValidator {
         if (parsed.type === 'Interface') {
             return this.validateInterfaceType(value, schema);
         }
-        else if(parsed.type==='Union'){
+        else if (parsed.type === 'Union') {
             return this.validateUnionType(value, parsed);
         }
-            
+
         throw new Error();
     }
 
@@ -282,7 +291,7 @@ export class TSBufferValidator {
         // 校验properties
         if (schema.properties) {
             for (let property of schema.properties) {
-                if (value[property.name] === undefined) {
+                if (value[property.name] === undefined || !this._options.strictNullCheck && value[property.name] == undefined) {
                     // Optional or Can be undefined
                     if (property.optional || this._canBeUndefined(property.type)) {
                         continue;
