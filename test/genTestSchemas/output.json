@@ -673,6 +673,25 @@
       }
     ]
   },
+  "logic/AOrNull": {
+    "type": "Union",
+    "members": [
+      {
+        "id": 0,
+        "type": {
+          "type": "Reference",
+          "target": "logic/A"
+        }
+      },
+      {
+        "id": 1,
+        "type": {
+          "type": "Literal",
+          "literal": null
+        }
+      }
+    ]
+  },
   "logic/Conflict": {
     "type": "Intersection",
     "members": [

@@ -78,6 +78,10 @@ describe('LogicType', function () {
             ValidateResult.error(ValidateErrorCode.NonConditionMet));
         assert.deepStrictEqual(validator.validate({ a: 'x', d: 'x' }, 'logic/ABCD2'),
             ValidateResult.error(ValidateErrorCode.NonConditionMet));
+
+        // A | null
+        assert.strictEqual(validator.validate({ a: 'sss' }, 'logic/AOrNull'), ValidateResult.success);
+        assert.strictEqual(validator.validate(null, 'logic/AOrNull'), ValidateResult.success);
     });
 
     it('Intersection: Basic', function () {

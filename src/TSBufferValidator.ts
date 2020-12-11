@@ -71,7 +71,9 @@ export class TSBufferValidator {
         return this.validateBySchema(value, schema);
     }
 
-    validateBySchema(value: any, schema: TSBufferSchema): ValidateResult {
+    validateBySchema(value: any, schema: TSBufferSchema, options?: {
+        unionFields?: string[]
+    }): ValidateResult {
         switch (schema.type) {
             case 'Boolean':
                 return this.validateBooleanType(value);
@@ -92,7 +94,7 @@ export class TSBufferValidator {
             case 'NonPrimitive':
                 return this.validateNonPrimitiveType(value);
             case 'Interface':
-                return this.validateInterfaceType(value, schema);
+                return this.validateInterfaceType(value, schema, options);
             case 'Buffer':
                 return this.validateBufferType(value, schema);
             case 'IndexedAccess':
@@ -100,14 +102,14 @@ export class TSBufferValidator {
             case 'Reference':
                 return this.validateReferenceType(value, schema);
             case 'Union':
-                return this.validateUnionType(value, schema);
+                return this.validateUnionType(value, schema, options?.unionFields);
             case 'Intersection':
-                return this.validateIntersectionType(value, schema);
+                return this.validateIntersectionType(value, schema, options?.unionFields);
             case 'Pick':
             case 'Omit':
             case 'Partial':
             case 'Overwrite':
-                return this.validateMappedType(value, schema);
+                return this.validateMappedType(value, schema, options);
             // 错误的type
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
@@ -255,21 +257,24 @@ export class TSBufferValidator {
         return typeof value === 'object' && value !== null ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
     }
 
-    validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference): ValidateResult {
-        if (typeof value !== 'object') {
+    validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference, options?: { unionFields?: string[] }): ValidateResult {
+        if (typeof value !== 'object' || value === null) {
             return ValidateResult.error(ValidateErrorCode.WrongType);
         }
 
         // 先展平
         let flatSchema = this.protoHelper.getFlatInterfaceSchema(schema);
 
+        // Union Fields
+        options?.unionFields && this.protoHelper.extendUnionFieldsToInterface(flatSchema, options.unionFields);
+
         return this._validateFlatInterface(value, flatSchema);
     }
 
-    validateMappedType(value: any, schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema): ValidateResult {
+    validateMappedType(value: any, schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema, options?: { unionFields?: string[] }): ValidateResult {
         let parsed = this.protoHelper.parseMappedType(schema);
         if (parsed.type === 'Interface') {
-            return this.validateInterfaceType(value, schema);
+            return this.validateInterfaceType(value, schema, options);
         }
         else if (parsed.type === 'Union') {
             return this.validateUnionType(value, parsed);
@@ -360,24 +365,7 @@ export class TSBufferValidator {
         // 有一成功则成功
         for (let member of schema.members) {
             let memberType = this.protoHelper.isTypeReference(member.type) ? this.protoHelper.parseReference(member.type) : member.type;
-
-            let vRes: ValidateResult;
-            // interface 加入unionFIelds去validate
-            if (this.protoHelper.isInterface(memberType)) {
-                vRes = this.validateInterfaceReference(value, memberType, unionFields);
-            }
-            // LogicType 递归unionFields
-            else if (memberType.type === 'Union') {
-                vRes = this.validateUnionType(value, memberType, unionFields);
-            }
-            else if (memberType.type === 'Intersection') {
-                vRes = this.validateIntersectionType(value, memberType, unionFields);
-            }
-            // 其它类型 直接validate
-            else {
-                vRes = this.validateBySchema(value, memberType);
-            }
-
+            let vRes: ValidateResult = this.validateBySchema(value, memberType, { unionFields: unionFields });
             // 有一成功则成功
             if (vRes.isSucc) {
                 return ValidateResult.success;
@@ -402,7 +390,7 @@ export class TSBufferValidator {
             let vRes: ValidateResult;
             // interface 加入unionFIelds去validate
             if (this.protoHelper.isInterface(memberType)) {
-                vRes = this.validateInterfaceReference(value, memberType, unionFields);
+                vRes = this.validateInterfaceType(value, memberType, { unionFields: unionFields });
             }
             // LogicType 递归unionFields
             else if (memberType.type === 'Union') {
@@ -429,12 +417,5 @@ export class TSBufferValidator {
     private _isNumberKey(key: string): boolean {
         let int = parseInt(key);
         return !(isNaN(int) || ('' + int) !== key);
-    }
-
-    validateInterfaceReference(value: any, schema: InterfaceTypeSchema | InterfaceReference, unionFields?: string[]) {
-        let flat = this.protoHelper.getFlatInterfaceSchema(schema);
-        // flat是新创建的Schema，故可以直接extend，不会影响原始schema
-        unionFields && this.protoHelper.extendUnionFieldsToInterface(flat, unionFields);
-        return this._validateFlatInterface(value, flat);
     }
 }

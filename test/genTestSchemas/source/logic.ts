@@ -12,6 +12,7 @@ export type ABCD1 = A | B & C | D;
 export type ABCD2 = A & B | B & C | C & D;
 export type ABCD3 = A & (B | C) & D & { [key: string]: string | number };
 export type ABCD4 = A | B | { [key: string]: number }
+export type AOrNull = A | null;
 
 export type Conflict = { value: string } & { value: number };
 export type Conflict2 = { type: 'string', value: string } | { type: 'number', value: number };
