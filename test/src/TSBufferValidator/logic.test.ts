@@ -82,6 +82,8 @@ describe('LogicType', function () {
         // A | null
         assert.strictEqual(validator.validate({ a: 'sss' }, 'logic/AOrNull'), ValidateResult.success);
         assert.strictEqual(validator.validate(null, 'logic/AOrNull'), ValidateResult.success);
+        assert.strictEqual(validator.validate([{ a: 'sss' }], 'logic/AOrNullArr'), ValidateResult.success);
+        assert.strictEqual(validator.validate([null], 'logic/AOrNullArr'), ValidateResult.success);
     });
 
     it('Intersection: Basic', function () {

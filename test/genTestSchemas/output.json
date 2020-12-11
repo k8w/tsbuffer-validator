@@ -692,6 +692,13 @@
       }
     ]
   },
+  "logic/AOrNullArr": {
+    "type": "Array",
+    "elementType": {
+      "type": "Reference",
+      "target": "logic/AOrNull"
+    }
+  },
   "logic/Conflict": {
     "type": "Intersection",
     "members": [
