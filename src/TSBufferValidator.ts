@@ -40,6 +40,7 @@ const typedArrays = {
 
 export class TSBufferValidator {
 
+    /** 默认配置 */
     _options: TSBufferValidatorOptions = {
         skipExcessCheck: false,
         strictNullCheck: true
@@ -68,6 +69,15 @@ export class TSBufferValidator {
         }
 
         return this.validateBySchema(value, schema);
+    }
+
+    /**
+     * 移除协议中不存在的字段，确保类型安全
+     * @param value 
+     * @param schema 
+     */
+    prune(value: any, schema: string | TSBufferSchema): any {
+        // TODO
     }
 
     validateBySchema(value: any, schema: TSBufferSchema, options?: {
