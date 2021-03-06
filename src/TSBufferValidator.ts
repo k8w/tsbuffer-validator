@@ -15,7 +15,6 @@ import { OmitTypeSchema } from 'tsbuffer-schema/src/schemas/OmitTypeSchema';
 import { ValidateResult, ValidateErrorCode } from './ValidateResult';
 import { InterfaceReference } from 'tsbuffer-schema/src/InterfaceReference';
 import ProtoHelper, { FlatInterfaceTypeSchema } from './ProtoHelper';
-import { parse } from 'path';
 import { PartialTypeSchema } from 'tsbuffer-schema/src/schemas/PartialTypeSchema';
 import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
 
