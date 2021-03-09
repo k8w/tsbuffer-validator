@@ -1,22 +1,22 @@
-import { TSBufferSchema, TSBufferProto } from 'tsbuffer-schema';
-import { NumberTypeSchema } from 'tsbuffer-schema/src/schemas/NumberTypeSchema';
-import { ArrayTypeSchema } from 'tsbuffer-schema/src/schemas/ArrayTypeSchema';
-import { TupleTypeSchema } from 'tsbuffer-schema/src/schemas/TupleTypeSchema';
-import { EnumTypeSchema } from 'tsbuffer-schema/src/schemas/EnumTypeSchema';
-import { LiteralTypeSchema } from 'tsbuffer-schema/src/schemas/LiteralTypeSchema';
-import { InterfaceTypeSchema } from 'tsbuffer-schema/src/schemas/InterfaceTypeSchema';
-import { BufferTypeSchema } from 'tsbuffer-schema/src/schemas/BufferTypeSchema';
-import { IndexedAccessTypeSchema } from 'tsbuffer-schema/src/schemas/IndexedAccessTypeSchema';
-import { ReferenceTypeSchema } from 'tsbuffer-schema/src/schemas/ReferenceTypeSchema';
-import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
-import { IntersectionTypeSchema } from 'tsbuffer-schema/src/schemas/IntersectionTypeSchema';
-import { PickTypeSchema } from 'tsbuffer-schema/src/schemas/PickTypeSchema';
-import { OmitTypeSchema } from 'tsbuffer-schema/src/schemas/OmitTypeSchema';
-import { ValidateResult, ValidateErrorCode } from './ValidateResult';
+import { TSBufferProto, TSBufferSchema } from 'tsbuffer-schema';
 import { InterfaceReference } from 'tsbuffer-schema/src/InterfaceReference';
-import ProtoHelper, { FlatInterfaceTypeSchema } from './ProtoHelper';
-import { PartialTypeSchema } from 'tsbuffer-schema/src/schemas/PartialTypeSchema';
+import { ArrayTypeSchema } from 'tsbuffer-schema/src/schemas/ArrayTypeSchema';
+import { BufferTypeSchema } from 'tsbuffer-schema/src/schemas/BufferTypeSchema';
+import { EnumTypeSchema } from 'tsbuffer-schema/src/schemas/EnumTypeSchema';
+import { IndexedAccessTypeSchema } from 'tsbuffer-schema/src/schemas/IndexedAccessTypeSchema';
+import { InterfaceTypeSchema } from 'tsbuffer-schema/src/schemas/InterfaceTypeSchema';
+import { IntersectionTypeSchema } from 'tsbuffer-schema/src/schemas/IntersectionTypeSchema';
+import { LiteralTypeSchema } from 'tsbuffer-schema/src/schemas/LiteralTypeSchema';
+import { NumberTypeSchema } from 'tsbuffer-schema/src/schemas/NumberTypeSchema';
+import { OmitTypeSchema } from 'tsbuffer-schema/src/schemas/OmitTypeSchema';
 import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
+import { PartialTypeSchema } from 'tsbuffer-schema/src/schemas/PartialTypeSchema';
+import { PickTypeSchema } from 'tsbuffer-schema/src/schemas/PickTypeSchema';
+import { ReferenceTypeSchema } from 'tsbuffer-schema/src/schemas/ReferenceTypeSchema';
+import { TupleTypeSchema } from 'tsbuffer-schema/src/schemas/TupleTypeSchema';
+import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
+import { FlatInterfaceTypeSchema, ProtoHelper } from './ProtoHelper';
+import { ValidateErrorCode, ValidateResult } from './ValidateResult';
 
 export interface TSBufferValidatorOptions {
     /** 不检查interface中是否包含Schema之外的字段，默认为false */
@@ -85,47 +85,47 @@ export class TSBufferValidator {
     }): ValidateResult {
         switch (schema.type) {
             case 'Boolean':
-                return this.validateBooleanType(value);
+                return this._validateBooleanType(value);
             case 'Number':
-                return this.validateNumberType(value, schema);
+                return this._validateNumberType(value, schema);
             case 'String':
-                return this.validateStringType(value);
+                return this._validateStringType(value);
             case 'Array':
-                return this.validateArrayType(value, schema);
+                return this._validateArrayType(value, schema);
             case 'Tuple':
-                return this.validateTupleType(value, schema);
+                return this._validateTupleType(value, schema);
             case 'Enum':
-                return this.validateEnumType(value, schema);
+                return this._validateEnumType(value, schema);
             case 'Any':
-                return this.validateAnyType(value);
+                return this._validateAnyType(value);
             case 'Literal':
-                return this.validateLiteralType(value, schema);
+                return this._validateLiteralType(value, schema);
             case 'NonPrimitive':
-                return this.validateNonPrimitiveType(value);
+                return this._validateNonPrimitiveType(value);
             case 'Interface':
-                return this.validateInterfaceType(value, schema, options);
+                return this._validateInterfaceType(value, schema, options);
             case 'Buffer':
-                return this.validateBufferType(value, schema);
+                return this._validateBufferType(value, schema);
             case 'IndexedAccess':
-                return this.validateIndexedAccessType(value, schema);
+                return this._validateIndexedAccessType(value, schema);
             case 'Reference':
-                return this.validateReferenceType(value, schema);
+                return this._validateReferenceType(value, schema);
             case 'Union':
-                return this.validateUnionType(value, schema, options?.unionFields);
+                return this._validateUnionType(value, schema, options?.unionFields);
             case 'Intersection':
-                return this.validateIntersectionType(value, schema, options?.unionFields);
+                return this._validateIntersectionType(value, schema, options?.unionFields);
             case 'Pick':
             case 'Omit':
             case 'Partial':
             case 'Overwrite':
-                return this.validateMappedType(value, schema, options);
+                return this._validateMappedType(value, schema, options);
             // 错误的type
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
         }
     }
 
-    validateBooleanType(value: any): ValidateResult {
+    private _validateBooleanType(value: any): ValidateResult {
         if (typeof value === 'boolean') {
             return ValidateResult.success;
         }
@@ -134,7 +134,7 @@ export class TSBufferValidator {
         }
     }
 
-    validateNumberType(value: any, schema: NumberTypeSchema): ValidateResult {
+    private _validateNumberType(value: any, schema: NumberTypeSchema): ValidateResult {
         // Wrong Type
         if (typeof value !== 'number' && typeof value !== 'bigint') {
             return ValidateResult.error(ValidateErrorCode.WrongType);
@@ -164,11 +164,11 @@ export class TSBufferValidator {
         return ValidateResult.success;
     }
 
-    validateStringType(value: any): ValidateResult {
+    private _validateStringType(value: any): ValidateResult {
         return typeof value === 'string' ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
     }
 
-    validateArrayType(value: any, schema: ArrayTypeSchema): ValidateResult {
+    private _validateArrayType(value: any, schema: ArrayTypeSchema): ValidateResult {
         // is Array type
         if (!Array.isArray(value)) {
             return ValidateResult.error(ValidateErrorCode.WrongType);
@@ -185,7 +185,7 @@ export class TSBufferValidator {
         return ValidateResult.success;
     }
 
-    validateTupleType(value: any, schema: TupleTypeSchema): ValidateResult {
+    private _validateTupleType(value: any, schema: TupleTypeSchema): ValidateResult {
         // is Array type
         if (!Array.isArray(value)) {
             return ValidateResult.error(ValidateErrorCode.WrongType);
@@ -234,7 +234,7 @@ export class TSBufferValidator {
         return false;
     }
 
-    validateEnumType(value: any, schema: EnumTypeSchema): ValidateResult {
+    private _validateEnumType(value: any, schema: EnumTypeSchema): ValidateResult {
         // must be string or number
         if (typeof value !== 'string' && typeof value !== 'number') {
             return ValidateResult.error(ValidateErrorCode.WrongType);
@@ -249,11 +249,11 @@ export class TSBufferValidator {
         }
     }
 
-    validateAnyType(value: any): ValidateResult {
+    private _validateAnyType(value: any): ValidateResult {
         return ValidateResult.success;
     }
 
-    validateLiteralType(value: any, schema: LiteralTypeSchema): ValidateResult {
+    private _validateLiteralType(value: any, schema: LiteralTypeSchema): ValidateResult {
         // 非 null undefined 严格模式，null undefined同等对待
         if (schema.literal == null && !this._options.strictNullCheck) {
             return value === schema.literal ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.InvalidLiteralValue);
@@ -262,11 +262,11 @@ export class TSBufferValidator {
         return value === schema.literal ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.InvalidLiteralValue);
     }
 
-    validateNonPrimitiveType(value: any): ValidateResult {
+    private _validateNonPrimitiveType(value: any): ValidateResult {
         return typeof value === 'object' && value !== null ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
     }
 
-    validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference, options?: { unionFields?: string[] }): ValidateResult {
+    private _validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference, options?: { unionFields?: string[] }): ValidateResult {
         if (typeof value !== 'object' || value === null) {
             return ValidateResult.error(ValidateErrorCode.WrongType);
         }
@@ -280,13 +280,13 @@ export class TSBufferValidator {
         return this._validateFlatInterface(value, flatSchema);
     }
 
-    validateMappedType(value: any, schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema, options?: { unionFields?: string[] }): ValidateResult {
+    private _validateMappedType(value: any, schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema, options?: { unionFields?: string[] }): ValidateResult {
         let parsed = this.protoHelper.parseMappedType(schema);
         if (parsed.type === 'Interface') {
-            return this.validateInterfaceType(value, schema, options);
+            return this._validateInterfaceType(value, schema, options);
         }
         else if (parsed.type === 'Union') {
-            return this.validateUnionType(value, parsed);
+            return this._validateUnionType(value, parsed);
         }
 
         throw new Error();
@@ -345,7 +345,7 @@ export class TSBufferValidator {
         return ValidateResult.success;
     }
 
-    validateBufferType(value: any, schema: BufferTypeSchema): ValidateResult {
+    private _validateBufferType(value: any, schema: BufferTypeSchema): ValidateResult {
         if (schema.arrayType) {
             let typeArrayClass = typedArrays[schema.arrayType];
             if (!typeArrayClass) {
@@ -358,15 +358,15 @@ export class TSBufferValidator {
         }
     }
 
-    validateIndexedAccessType(value: any, schema: IndexedAccessTypeSchema): ValidateResult {
+    private _validateIndexedAccessType(value: any, schema: IndexedAccessTypeSchema): ValidateResult {
         return this.validateBySchema(value, this.protoHelper.parseReference(schema));
     }
 
-    validateReferenceType(value: any, schema: ReferenceTypeSchema): ValidateResult {
+    private _validateReferenceType(value: any, schema: ReferenceTypeSchema): ValidateResult {
         return this.validateBySchema(value, this.protoHelper.parseReference(schema));
     }
 
-    validateUnionType(value: any, schema: UnionTypeSchema, unionFields?: string[]): ValidateResult {
+    private _validateUnionType(value: any, schema: UnionTypeSchema, unionFields?: string[]): ValidateResult {
         if (!unionFields) {
             this.protoHelper.extendsUnionFields(unionFields = [], schema.members.map(v => v.type));
         }
@@ -385,7 +385,7 @@ export class TSBufferValidator {
         return ValidateResult.error(ValidateErrorCode.NonConditionMet);
     }
 
-    validateIntersectionType(value: any, schema: IntersectionTypeSchema, unionFields?: string[]): ValidateResult {
+    private _validateIntersectionType(value: any, schema: IntersectionTypeSchema, unionFields?: string[]): ValidateResult {
         if (!unionFields) {
             this.protoHelper.extendsUnionFields(unionFields = [], schema.members.map(v => v.type));
         }
@@ -399,14 +399,14 @@ export class TSBufferValidator {
             let vRes: ValidateResult;
             // interface 加入unionFIelds去validate
             if (this.protoHelper.isInterface(memberType)) {
-                vRes = this.validateInterfaceType(value, memberType, { unionFields: unionFields });
+                vRes = this._validateInterfaceType(value, memberType, { unionFields: unionFields });
             }
             // LogicType 递归unionFields
             else if (memberType.type === 'Union') {
-                vRes = this.validateUnionType(value, memberType, unionFields);
+                vRes = this._validateUnionType(value, memberType, unionFields);
             }
             else if (memberType.type === 'Intersection') {
-                vRes = this.validateIntersectionType(value, memberType, unionFields);
+                vRes = this._validateIntersectionType(value, memberType, unionFields);
             }
             // 其它类型 直接validate
             else {

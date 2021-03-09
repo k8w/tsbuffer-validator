@@ -9,7 +9,7 @@ import { OmitTypeSchema } from "tsbuffer-schema/src/schemas/OmitTypeSchema";
 import { ReferenceTypeSchema } from "tsbuffer-schema/src/schemas/ReferenceTypeSchema";
 import { UnionTypeSchema } from "tsbuffer-schema/src/schemas/UnionTypeSchema";
 
-export default class ProtoHelper {
+export class ProtoHelper {
 
     private _proto: TSBufferProto;
 
@@ -187,15 +187,15 @@ export default class ProtoHelper {
             return this.getFlatInterfaceSchema(parsed);
         }
         else if (schema.type === 'Interface') {
-            return this._flattenInterface(schema);
+            return this.flattenInterface(schema);
         }
         else {
-            return this._flattenMappedType(schema);
+            return this.flattenMappedType(schema);
         }
     }
 
     // 展平interface
-    private _flattenInterface(schema: InterfaceTypeSchema): FlatInterfaceTypeSchema {
+    flattenInterface(schema: InterfaceTypeSchema): FlatInterfaceTypeSchema {
         let properties: {
             [name: string]: {
                 optional?: boolean;
@@ -260,7 +260,7 @@ export default class ProtoHelper {
     }
 
     // 将MappedTypeSchema转换为展平的Interface
-    private _flattenMappedType(schema: PickTypeSchema | PartialTypeSchema | OverwriteTypeSchema | OmitTypeSchema): FlatInterfaceTypeSchema {
+    flattenMappedType(schema: PickTypeSchema | PartialTypeSchema | OverwriteTypeSchema | OmitTypeSchema): FlatInterfaceTypeSchema {
         // target 解引用
         let target: Exclude<PickTypeSchema['target'], ReferenceTypeSchema>;
         if (this.isTypeReference(schema.target)) {
@@ -274,10 +274,10 @@ export default class ProtoHelper {
         let flatTarget: FlatInterfaceTypeSchema;
         // 内层仍然为MappedType 递归之
         if (target.type === 'Pick' || target.type === 'Partial' || target.type === 'Omit' || target.type === 'Overwrite') {
-            flatTarget = this._flattenMappedType(target);
+            flatTarget = this.flattenMappedType(target);
         }
         else if (target.type === 'Interface') {
-            flatTarget = this._flattenInterface(target);
+            flatTarget = this.flattenInterface(target);
         }
         else {
             throw new Error(`Invalid target.type: ${target.type}`)
@@ -380,9 +380,6 @@ export default class ProtoHelper {
             throw new Error(`Unsupported pattern ${schema.type}<${child.type}>`);
         }
     }
-
-
-
 }
 
 export interface FlatInterfaceTypeSchema {

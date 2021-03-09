@@ -6,7 +6,7 @@ export default {
     output: [
         {
             format: 'cjs',
-            file: './dist/index.js'
+            file: './dist/index.cjs'
         },
         {
             format: 'es',
@@ -17,12 +17,17 @@ export default {
         typescript({
             tsconfigOverride: {
                 compilerOptions: {
-                    declaration: true,
                     module: "esnext"
                 }
             }
         }),
-        terser()
+        terser({
+            mangle: {
+                properties: {
+                    regex: /^_/
+                }
+            }
+        })
     ],
     external: ['tslib']
 }
