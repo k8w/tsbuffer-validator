@@ -19,7 +19,17 @@ import { FlatInterfaceTypeSchema, ProtoHelper } from './ProtoHelper';
 import { ValidateErrorCode, ValidateResult } from './ValidateResult';
 
 export interface ValidateOptions {
-    unionFields?: string[]
+    unionFields?: string[],
+    /** 
+     * 为true时，将把超出字段设为undefined，不会在原值上修改，而是会将结果放到output中
+     * 优先级比 skipExcessCheck 更高
+     */
+    prune?: {
+        enabled: boolean,
+        output?: {
+            [key: string]: any
+        }
+    }
 }
 
 export interface TSBufferValidatorOptions {
@@ -75,15 +85,6 @@ export class TSBufferValidator {
         return this.validateBySchema(value, schema, options);
     }
 
-    /**
-     * 移除协议中不存在的字段，确保类型安全
-     * @param value 
-     * @param schema 
-     */
-    prune(value: any, schema: string | TSBufferSchema): any {
-        // TODO
-    }
-
     validateBySchema(value: any, schema: TSBufferSchema, options?: ValidateOptions): ValidateResult {
         switch (schema.type) {
             case 'Boolean':
@@ -105,7 +106,7 @@ export class TSBufferValidator {
             case 'NonPrimitive':
                 return this._validateNonPrimitiveType(value);
             case 'Interface':
-                return this._validateInterfaceType(value, schema, options);
+                return this._validateInterfaceType(value, schema, options || {});
             case 'Buffer':
                 return this._validateBufferType(value, schema);
             case 'IndexedAccess':
@@ -113,14 +114,14 @@ export class TSBufferValidator {
             case 'Reference':
                 return this._validateReferenceType(value, schema);
             case 'Union':
-                return this._validateUnionType(value, schema, options);
+                return this._validateUnionType(value, schema, options || {});
             case 'Intersection':
-                return this._validateIntersectionType(value, schema, options);
+                return this._validateIntersectionType(value, schema, options || {});
             case 'Pick':
             case 'Omit':
             case 'Partial':
             case 'Overwrite':
-                return this._validateMappedType(value, schema, options);
+                return this._validateMappedType(value, schema, options || {});
             // 错误的type
             default:
                 throw new Error(`Unrecognized schema type: ${(schema as any).type}`);
@@ -268,7 +269,7 @@ export class TSBufferValidator {
         return typeof value === 'object' && value !== null ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
     }
 
-    private _validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference, options?: { unionFields?: string[] }): ValidateResult {
+    private _validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference, options: { unionFields?: string[] }): ValidateResult {
         if (typeof value !== 'object' || value === null) {
             return ValidateResult.error(ValidateErrorCode.WrongType);
         }
@@ -279,22 +280,22 @@ export class TSBufferValidator {
         // Union Fields
         options?.unionFields && this.protoHelper.extendUnionFieldsToInterface(flatSchema, options.unionFields);
 
-        return this._validateFlatInterface(value, flatSchema);
+        return this._validateFlatInterface(value, flatSchema, options);
     }
 
-    private _validateMappedType(value: any, schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema, options?: { unionFields?: string[] }): ValidateResult {
+    private _validateMappedType(value: any, schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema, options: { unionFields?: string[] }): ValidateResult {
         let parsed = this.protoHelper.parseMappedType(schema);
         if (parsed.type === 'Interface') {
             return this._validateInterfaceType(value, schema, options);
         }
         else if (parsed.type === 'Union') {
-            return this._validateUnionType(value, parsed);
+            return this._validateUnionType(value, parsed, options);
         }
 
         throw new Error();
     }
 
-    private _validateFlatInterface(value: any, schema: FlatInterfaceTypeSchema) {
+    private _validateFlatInterface(value: any, schema: FlatInterfaceTypeSchema, options: ValidateOptions) {
         // interfaceSignature强制了key必须是数字的情况
         if (schema.indexSignature && schema.indexSignature.keyType === 'Number') {
             for (let key in value) {
@@ -335,12 +336,27 @@ export class TSBufferValidator {
                 }
             }
         }
-        // 超出字段检测
-        else if (!this.options.skipExcessCheck) {
+        // 超出字段检测（默认不跳过、或者修剪模式）
+        else if (!this.options.skipExcessCheck || options.prune?.enabled) {
             let validatedFields = schema.properties.map(v => v.name);
             let remainedFields = Object.keys(value).remove(v => validatedFields.indexOf(v) > -1);
-            if (remainedFields.length) {
-                return ValidateResult.error(ValidateErrorCode.InnerError, remainedFields[0], ValidateResult.error(ValidateErrorCode.UnexpectedField))
+            // Prune 优先级更高
+            if (options.prune?.enabled) {
+                if (remainedFields.length) {
+                    options.prune.output = {};
+                    for (let key of validatedFields) {
+                        options.prune.output[key] = value[key];
+                    }
+                }
+                else {
+                    options.prune.output = value;
+                }
+            }
+            // excessCheck （与Prune互斥）
+            else {
+                if (remainedFields.length) {
+                    return ValidateResult.error(ValidateErrorCode.InnerError, remainedFields[0], ValidateResult.error(ValidateErrorCode.UnexpectedField))
+                }
             }
         }
 
@@ -368,10 +384,7 @@ export class TSBufferValidator {
         return this.validateBySchema(value, this.protoHelper.parseReference(schema));
     }
 
-    private _validateUnionType(value: any, schema: UnionTypeSchema, options?: ValidateOptions): ValidateResult {
-        if (!options) {
-            options = {}
-        }
+    private _validateUnionType(value: any, schema: UnionTypeSchema, options: ValidateOptions): ValidateResult {
         if (!options.unionFields) {
             this.protoHelper.extendsUnionFields(options.unionFields = [], schema.members.map(v => v.type));
         }
@@ -390,10 +403,7 @@ export class TSBufferValidator {
         return ValidateResult.error(ValidateErrorCode.NonConditionMet);
     }
 
-    private _validateIntersectionType(value: any, schema: IntersectionTypeSchema, options?: ValidateOptions): ValidateResult {
-        if (!options) {
-            options = {}
-        }
+    private _validateIntersectionType(value: any, schema: IntersectionTypeSchema, options: ValidateOptions): ValidateResult {
         if (!options.unionFields) {
             this.protoHelper.extendsUnionFields(options.unionFields = [], schema.members.map(v => v.type));
         }
