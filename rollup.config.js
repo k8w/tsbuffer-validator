@@ -1,5 +1,5 @@
-import typescript from 'rollup-plugin-typescript2';
 import { terser } from 'rollup-plugin-terser';
+import typescript from 'rollup-plugin-typescript2';
 
 export default {
     input: './index.ts',
@@ -26,8 +26,11 @@ export default {
                 properties: {
                     regex: /^_/
                 }
+            },
+            format: {
+                comments: false
             }
         })
     ],
-    external: ['tslib']
+    // external: ['tslib']
 }
