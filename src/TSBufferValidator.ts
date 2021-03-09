@@ -18,6 +18,10 @@ import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
 import { FlatInterfaceTypeSchema, ProtoHelper } from './ProtoHelper';
 import { ValidateErrorCode, ValidateResult } from './ValidateResult';
 
+export interface ValidateOptions {
+    unionFields?: string[]
+}
+
 export interface TSBufferValidatorOptions {
     /** 不检查interface中是否包含Schema之外的字段，默认为false */
     skipExcessCheck: boolean;
@@ -61,14 +65,14 @@ export class TSBufferValidator {
      * @param value 
      * @param schemaId 例如 a/b.ts 里的 Test类型 则ID为 a/b/Test
      */
-    validate(value: any, schemaId: string): ValidateResult {
+    validate(value: any, schemaId: string, options?: ValidateOptions): ValidateResult {
         //获取Schema
         let schema: TSBufferSchema = this._proto[schemaId];
         if (!schema) {
             throw new Error(`Cannot find schema [${schemaId}]`);
         }
 
-        return this.validateBySchema(value, schema);
+        return this.validateBySchema(value, schema, options);
     }
 
     /**
@@ -80,9 +84,7 @@ export class TSBufferValidator {
         // TODO
     }
 
-    validateBySchema(value: any, schema: TSBufferSchema, options?: {
-        unionFields?: string[]
-    }): ValidateResult {
+    validateBySchema(value: any, schema: TSBufferSchema, options?: ValidateOptions): ValidateResult {
         switch (schema.type) {
             case 'Boolean':
                 return this._validateBooleanType(value);
@@ -111,9 +113,9 @@ export class TSBufferValidator {
             case 'Reference':
                 return this._validateReferenceType(value, schema);
             case 'Union':
-                return this._validateUnionType(value, schema, options?.unionFields);
+                return this._validateUnionType(value, schema, options);
             case 'Intersection':
-                return this._validateIntersectionType(value, schema, options?.unionFields);
+                return this._validateIntersectionType(value, schema, options);
             case 'Pick':
             case 'Omit':
             case 'Partial':
@@ -366,15 +368,18 @@ export class TSBufferValidator {
         return this.validateBySchema(value, this.protoHelper.parseReference(schema));
     }
 
-    private _validateUnionType(value: any, schema: UnionTypeSchema, unionFields?: string[]): ValidateResult {
-        if (!unionFields) {
-            this.protoHelper.extendsUnionFields(unionFields = [], schema.members.map(v => v.type));
+    private _validateUnionType(value: any, schema: UnionTypeSchema, options?: ValidateOptions): ValidateResult {
+        if (!options) {
+            options = {}
+        }
+        if (!options.unionFields) {
+            this.protoHelper.extendsUnionFields(options.unionFields = [], schema.members.map(v => v.type));
         }
 
         // 有一成功则成功
         for (let member of schema.members) {
             let memberType = this.protoHelper.isTypeReference(member.type) ? this.protoHelper.parseReference(member.type) : member.type;
-            let vRes: ValidateResult = this.validateBySchema(value, memberType, { unionFields: unionFields });
+            let vRes: ValidateResult = this.validateBySchema(value, memberType, options);
             // 有一成功则成功
             if (vRes.isSucc) {
                 return ValidateResult.success;
@@ -385,9 +390,12 @@ export class TSBufferValidator {
         return ValidateResult.error(ValidateErrorCode.NonConditionMet);
     }
 
-    private _validateIntersectionType(value: any, schema: IntersectionTypeSchema, unionFields?: string[]): ValidateResult {
-        if (!unionFields) {
-            this.protoHelper.extendsUnionFields(unionFields = [], schema.members.map(v => v.type));
+    private _validateIntersectionType(value: any, schema: IntersectionTypeSchema, options?: ValidateOptions): ValidateResult {
+        if (!options) {
+            options = {}
+        }
+        if (!options.unionFields) {
+            this.protoHelper.extendsUnionFields(options.unionFields = [], schema.members.map(v => v.type));
         }
 
         // 有一失败则失败
@@ -399,14 +407,14 @@ export class TSBufferValidator {
             let vRes: ValidateResult;
             // interface 加入unionFIelds去validate
             if (this.protoHelper.isInterface(memberType)) {
-                vRes = this._validateInterfaceType(value, memberType, { unionFields: unionFields });
+                vRes = this._validateInterfaceType(value, memberType, options);
             }
             // LogicType 递归unionFields
             else if (memberType.type === 'Union') {
-                vRes = this._validateUnionType(value, memberType, unionFields);
+                vRes = this._validateUnionType(value, memberType, options);
             }
             else if (memberType.type === 'Intersection') {
-                vRes = this._validateIntersectionType(value, memberType, unionFields);
+                vRes = this._validateIntersectionType(value, memberType, options);
             }
             // 其它类型 直接validate
             else {
