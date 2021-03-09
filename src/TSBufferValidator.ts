@@ -45,17 +45,17 @@ const typedArrays = {
 export class TSBufferValidator {
 
     /** 默认配置 */
-    _options: TSBufferValidatorOptions = {
+    options: TSBufferValidatorOptions = {
         skipExcessCheck: false,
         strictNullCheck: true
     }
+    proto: TSBufferProto;
 
-    private _proto: TSBufferProto;
     readonly protoHelper: ProtoHelper;
     constructor(proto: TSBufferProto, options?: Partial<TSBufferValidatorOptions>) {
-        this._proto = proto;
+        this.proto = proto;
         if (options) {
-            Object.assign(this._options, options);
+            Object.assign(this.options, options);
         }
         this.protoHelper = new ProtoHelper(proto);
     }
@@ -67,7 +67,7 @@ export class TSBufferValidator {
      */
     validate(value: any, schemaId: string, options?: ValidateOptions): ValidateResult {
         //获取Schema
-        let schema: TSBufferSchema = this._proto[schemaId];
+        let schema: TSBufferSchema = this.proto[schemaId];
         if (!schema) {
             throw new Error(`Cannot find schema [${schemaId}]`);
         }
@@ -200,7 +200,7 @@ export class TSBufferValidator {
 
         // validate elementType
         for (let i = 0; i < schema.elementTypes.length; ++i) {
-            if (value[i] === undefined || !this._options.strictNullCheck && value[i] == undefined) {
+            if (value[i] === undefined || !this.options.strictNullCheck && value[i] == undefined) {
                 if (
                     // Optional
                     schema.optionalStartIndex !== undefined && i >= schema.optionalStartIndex
@@ -257,7 +257,7 @@ export class TSBufferValidator {
 
     private _validateLiteralType(value: any, schema: LiteralTypeSchema): ValidateResult {
         // 非 null undefined 严格模式，null undefined同等对待
-        if (schema.literal == null && !this._options.strictNullCheck) {
+        if (schema.literal == null && !this.options.strictNullCheck) {
             return value === schema.literal ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.InvalidLiteralValue);
         }
 
@@ -307,7 +307,7 @@ export class TSBufferValidator {
         // 校验properties
         if (schema.properties) {
             for (let property of schema.properties) {
-                if (value[property.name] === undefined || !this._options.strictNullCheck && value[property.name] == undefined) {
+                if (value[property.name] === undefined || !this.options.strictNullCheck && value[property.name] == undefined) {
                     // Optional or Can be undefined
                     if (property.optional || this._canBeUndefined(property.type)) {
                         continue;
@@ -336,7 +336,7 @@ export class TSBufferValidator {
             }
         }
         // 超出字段检测
-        else if (!this._options.skipExcessCheck) {
+        else if (!this.options.skipExcessCheck) {
             let validatedFields = schema.properties.map(v => v.name);
             let remainedFields = Object.keys(value).remove(v => validatedFields.indexOf(v) > -1);
             if (remainedFields.length) {
