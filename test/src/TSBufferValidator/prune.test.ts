@@ -29,4 +29,8 @@ describe('prune', function () {
             bbb: 'asdgasdg'
         });
     })
+
+    it('logic', function () {
+        throw new Error('TODO')
+    })
 })
