@@ -128,6 +128,34 @@ export class TSBufferValidator {
         }
     }
 
+    /**
+     * 修剪 Object，移除 Schema 中未定义的 Key
+     * @param value 
+     * @param schema 
+     * @param options 
+     * @returns 
+     */
+    prune(value: any, schema: string | TSBufferSchema, options?: ValidateOptions): (
+        { isSucc: true, error?: undefined, output: any }
+        | { isSucc: false, error: ValidateResult, output?: undefined }
+    ) {
+        let newOptions: ValidateOptions = {
+            ...options,
+            prune: {
+                enabled: true
+            }
+        }
+        let vRes = typeof schema === 'string' ? this.validate(value, schema, newOptions)
+            : this.validateBySchema(value, schema, newOptions);
+        return vRes.isSucc ? {
+            isSucc: true,
+            output: newOptions.prune!.output || value
+        } : {
+            isSucc: false,
+            error: vRes
+        }
+    }
+
     private _validateBooleanType(value: any): ValidateResult {
         if (typeof value === 'boolean') {
             return ValidateResult.success;
