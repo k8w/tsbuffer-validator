@@ -139,18 +139,19 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
      * @returns 如果是object会返回一个value的浅拷贝，否则返回原始value
      */
     private _prune<T>(value: T, unionProperties: string[]): T {
-        if (typeof value !== 'object' || value === null || Object.getPrototypeOf(value) !== Object.prototype) {
-            return value;
-        }
+        // TODO
+        // if (typeof value !== 'object' || value === null || Object.getPrototypeOf(value) !== Object.prototype) {
+        //     return value;
+        // }
 
-        // remove excess properties
-        let output: any = {};
-        for (let property of unionProperties) {
-            if ((value as Object).hasOwnProperty(property)) {
-                output[property] = value[property as keyof T];
-            }
-        }
-        return output;
+        // // remove excess properties
+        // let output: any = {};
+        // for (let property of unionProperties) {
+        //     if ((value as Object).hasOwnProperty(property)) {
+        //         output[property] = value[property as keyof T];
+        //     }
+        // }
+        // return output;
     }
 
     private _validateBooleanType(value: any): ValidateResult {
