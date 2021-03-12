@@ -31,6 +31,36 @@ describe('prune', function () {
     })
 
     it('logic', function () {
-        throw new Error('TODO')
+        assert.deepStrictEqual(validator.prune({
+            a: 'sss',
+            b: 'fff',
+            c: 'asdf'
+        }, 'logic/AB').output, {
+            a: 'sss',
+            b: 'fff'
+        });
+
+        assert.deepStrictEqual(validator.prune({
+            a: 'sss',
+            b: 'fff',
+            c: 'asdf'
+        }, 'logic/CD').output, undefined);
+        validator.options.skipExcessCheck = true;
+        assert.deepStrictEqual(validator.prune({
+            a: 'sss',
+            b: 'fff',
+            c: 'asdf'
+        }, 'logic/CD').output, {
+            c: 'asdf'
+        });
+        assert.deepStrictEqual(validator.prune({
+            a: 'sss',
+            b: 'fff',
+            c: 'asdf',
+            d: 'ffd',
+        }, 'logic/CD').output, {
+            c: 'asdf',
+            d: 'ffd'
+        });
     })
 })
