@@ -1,4 +1,4 @@
-import { TSBufferProto, TSBufferSchema } from "tsbuffer-schema";
+import { TSBufferSchema } from "tsbuffer-schema";
 import { InterfaceTypeSchema } from "tsbuffer-schema/src/schemas/InterfaceTypeSchema";
 import { TypeReference } from "tsbuffer-schema/src/TypeReference";
 import { InterfaceReference } from "tsbuffer-schema/src/InterfaceReference";
@@ -8,16 +8,17 @@ import { OverwriteTypeSchema } from "tsbuffer-schema/src/schemas/OverwriteTypeSc
 import { OmitTypeSchema } from "tsbuffer-schema/src/schemas/OmitTypeSchema";
 import { ReferenceTypeSchema } from "tsbuffer-schema/src/schemas/ReferenceTypeSchema";
 import { UnionTypeSchema } from "tsbuffer-schema/src/schemas/UnionTypeSchema";
+import { TSBufferValidator } from "..";
 
 export class ProtoHelper {
 
-    private _proto: TSBufferProto;
+    private _proto: TSBufferValidator<any>['proto'];
 
-    get proto(): TSBufferProto {
+    get proto(): TSBufferValidator<any>['proto'] {
         return this._proto;
     }
 
-    constructor(proto: TSBufferProto) {
+    constructor(proto: TSBufferValidator<any>['proto']) {
         this._proto = proto;
     }
 
@@ -106,11 +107,11 @@ export class ProtoHelper {
     }
 
     /**
-     * nonExcessProperties: 在Union或Intersection类型中，出现在任意member中的字段
-     * @param nonExcessProperties 
+     * unionProperties: 在Union或Intersection类型中，出现在任意member中的字段
+     * @param unionProperties 
      * @param schemas 
      */
-    addNonExcessProperties(nonExcessProperties: string[], schemas: TSBufferSchema[]): void {
+    addUnionProperties(unionProperties: string[], schemas: TSBufferSchema[]): void {
         for (let i = 0, len = schemas.length; i < len; ++i) {
             let schema = this.parseReference(schemas[i]);
 
@@ -118,17 +119,17 @@ export class ProtoHelper {
             if (this.isInterface(schema)) {
                 let flat = this.getFlatInterfaceSchema(schema);
                 flat.properties.forEach(v => {
-                    nonExcessProperties.binaryInsert(v.name, true);
+                    unionProperties.binaryInsert(v.name, true);
                 });
 
                 if (flat.indexSignature) {
                     let key = `[[${flat.indexSignature.keyType}]]`;
-                    nonExcessProperties.binaryInsert(key, true);
+                    unionProperties.binaryInsert(key, true);
                 }
             }
-            // Intersection/Union 递归合并nonExcessProperties
+            // Intersection/Union 递归合并unionProperties
             else if (schema.type === 'Intersection' || schema.type === 'Union') {
-                let sub = this.addNonExcessProperties(nonExcessProperties, schema.members.map(v => v.type));
+                this.addUnionProperties(unionProperties, schema.members.map(v => v.type));
             }
         }
     }
