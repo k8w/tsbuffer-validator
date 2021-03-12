@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { TSBufferValidator } from '../../../src/TSBufferValidator';
-import { ValidateResult, ValidateErrorCode } from '../../../src/ValidateResult';
+import { ValidateErrorCode, ValidateResult } from '../../../src/ValidateResult';
 
 describe('BasicType Validate', function () {
     it('Unexist path or symbolName', function () {
@@ -19,11 +19,11 @@ describe('BasicType Validate', function () {
         }, {});
 
         assert.throws(() => {
-            validator.validate(1, 'xxx/xxx')
+            validator.validate(1, 'xxx/xxx' as any)
         })
 
         assert.throws(() => {
-            validator.validate(1, 'a/xxx')
+            validator.validate(1, 'a/xxx' as any)
         })
 
         assert.throws(() => {
@@ -193,41 +193,41 @@ describe('BasicType Validate', function () {
         assert.deepStrictEqual(validator.validate(null, 'a/b'), ValidateResult.error(ValidateErrorCode.InvalidLiteralValue));
         assert.deepStrictEqual(validator.validate(undefined, 'a/b'), ValidateResult.error(ValidateErrorCode.InvalidLiteralValue));
 
-        validator = new TSBufferValidator({
+        let validator1 = new TSBufferValidator({
             'a/b': {
                 type: 'Literal',
                 literal: 123
             }
         });
-        assert.strictEqual(validator.validate(123, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator.validate('123', 'a/b'), ValidateResult.error(ValidateErrorCode.InvalidLiteralValue));
+        assert.strictEqual(validator1.validate(123, 'a/b').isSucc, true);
+        assert.deepStrictEqual(validator1.validate('123', 'a/b'), ValidateResult.error(ValidateErrorCode.InvalidLiteralValue));
 
-        validator = new TSBufferValidator({
+        let validator2 = new TSBufferValidator({
             'a/b': {
                 type: 'Literal',
                 literal: true
             }
         });
-        assert.strictEqual(validator.validate(true, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator.validate(1, 'a/b'), ValidateResult.error(ValidateErrorCode.InvalidLiteralValue));
+        assert.strictEqual(validator2.validate(true, 'a/b').isSucc, true);
+        assert.deepStrictEqual(validator2.validate(1, 'a/b'), ValidateResult.error(ValidateErrorCode.InvalidLiteralValue));
 
-        validator = new TSBufferValidator({
+        let validator3 = new TSBufferValidator({
             'a/b': {
                 type: 'Literal',
                 literal: null
             }
         });
-        assert.strictEqual(validator.validate(null, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator.validate(undefined, 'a/b'), ValidateResult.error(ValidateErrorCode.InvalidLiteralValue));
+        assert.strictEqual(validator3.validate(null, 'a/b').isSucc, true);
+        assert.deepStrictEqual(validator3.validate(undefined, 'a/b'), ValidateResult.error(ValidateErrorCode.InvalidLiteralValue));
 
-        validator = new TSBufferValidator({
+        let validator4 = new TSBufferValidator({
             'a/b': {
                 type: 'Literal',
                 literal: undefined
             }
         });
-        assert.strictEqual(validator.validate(undefined, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator.validate(null, 'a/b'), ValidateResult.error(ValidateErrorCode.InvalidLiteralValue));
+        assert.strictEqual(validator4.validate(undefined, 'a/b').isSucc, true);
+        assert.deepStrictEqual(validator4.validate(null, 'a/b'), ValidateResult.error(ValidateErrorCode.InvalidLiteralValue));
     })
 
     it('NonPrimitive', function () {
@@ -273,7 +273,7 @@ describe('BasicType Validate', function () {
 
         let typedArrays = ['Int8Array', 'Int16Array', 'Int32Array', 'BigInt64Array', 'Uint8Array', 'Uint16Array', 'Uint32Array', 'BigUint64Array', 'Float32Array', 'Float64Array'] as const;
         for (let arrayType of typedArrays) {
-            validator = new TSBufferValidator({
+            let validator = new TSBufferValidator({
                 'a/b': {
                     type: 'Buffer',
                     arrayType: arrayType

@@ -106,11 +106,11 @@ export class ProtoHelper {
     }
 
     /**
-     * UnionFields: 在Union或Intersection类型中，出现在任意member中的字段
-     * @param unionFields 
+     * nonExcessProperties: 在Union或Intersection类型中，出现在任意member中的字段
+     * @param nonExcessProperties 
      * @param schemas 
      */
-    extendsUnionFields(unionFields: string[], schemas: TSBufferSchema[]): void {
+    addNonExcessProperties(nonExcessProperties: string[], schemas: TSBufferSchema[]): void {
         for (let i = 0, len = schemas.length; i < len; ++i) {
             let schema = this.parseReference(schemas[i]);
 
@@ -118,31 +118,31 @@ export class ProtoHelper {
             if (this.isInterface(schema)) {
                 let flat = this.getFlatInterfaceSchema(schema);
                 flat.properties.forEach(v => {
-                    unionFields.binaryInsert(v.name, true);
+                    nonExcessProperties.binaryInsert(v.name, true);
                 });
 
                 if (flat.indexSignature) {
                     let key = `[[${flat.indexSignature.keyType}]]`;
-                    unionFields.binaryInsert(key, true);
+                    nonExcessProperties.binaryInsert(key, true);
                 }
             }
-            // Intersection/Union 递归合并unionFields
+            // Intersection/Union 递归合并nonExcessProperties
             else if (schema.type === 'Intersection' || schema.type === 'Union') {
-                let sub = this.extendsUnionFields(unionFields, schema.members.map(v => v.type));
+                let sub = this.addNonExcessProperties(nonExcessProperties, schema.members.map(v => v.type));
             }
         }
     }
 
     /**
-     * 将unionFields 扩展到 InterfaceTypeSchema中（optional的any类型）
+     * 将nonExcessProperties 扩展到 InterfaceTypeSchema中（optional的any类型）
      * 以此来跳过对它们的检查（用于Intersection/Union）
      * @param schema 
-     * @param unionFields 
+     * @param nonExcessProperties 
      */
-    extendUnionFieldsToInterface(schema: FlatInterfaceTypeSchema, unionFields: string[]) {
+    applyNonExcessProperties(schema: FlatInterfaceTypeSchema, nonExcessProperties: string[]) {
         let newProperties: FlatInterfaceTypeSchema['properties'] = [];
 
-        for (let field of unionFields) {
+        for (let field of nonExcessProperties) {
             if (!schema.properties.find(v => v.name === field)) {
                 newProperties.push({
                     id: -1,
@@ -160,13 +160,13 @@ export class ProtoHelper {
         });
 
         if (!schema.indexSignature) {
-            if (unionFields.binarySearch('[[String]]') > -1) {
+            if (nonExcessProperties.binarySearch('[[String]]') > -1) {
                 schema.indexSignature = {
                     keyType: 'String',
                     type: { type: 'Any' }
                 }
             }
-            else if (unionFields.binarySearch('[[Number]]') > -1) {
+            else if (nonExcessProperties.binarySearch('[[Number]]') > -1) {
                 schema.indexSignature = {
                     keyType: 'Number',
                     type: { type: 'Any' }
