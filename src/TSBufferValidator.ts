@@ -13,7 +13,6 @@ import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSc
 import { PartialTypeSchema } from 'tsbuffer-schema/src/schemas/PartialTypeSchema';
 import { PickTypeSchema } from 'tsbuffer-schema/src/schemas/PickTypeSchema';
 import { ReferenceTypeSchema } from 'tsbuffer-schema/src/schemas/ReferenceTypeSchema';
-import { StringTypeSchema } from 'tsbuffer-schema/src/schemas/StringTypeSchema';
 import { TupleTypeSchema } from 'tsbuffer-schema/src/schemas/TupleTypeSchema';
 import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
 import { FlatInterfaceTypeSchema, ProtoHelper } from './ProtoHelper';
@@ -53,18 +52,11 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         strictNullChecks: true
     }
     /** 会自动赋予每个schema一个uuid，便于提升性能 */
-    proto: { [schemaId: string]: TSBufferSchema & { uuid: number } };
+    proto: TSBufferProto;
 
     readonly protoHelper: ProtoHelper;
     constructor(proto: Proto, options?: Partial<TSBufferValidatorOptions>) {
-        this.proto = {};
-        let uuid = 0;
-        for (let key in proto) {
-            this.proto[key] = {
-                ...(proto as TSBufferProto)[key],
-                uuid: ++uuid
-            }
-        }
+        this.proto = proto;
 
         if (options) {
             Object.assign(this.options, options);
@@ -312,7 +304,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
 
         // From union or intersecton type
         if (unionProperties) {
-            this.protoHelper.applyNonExcessProperties(flatSchema, unionProperties);
+            flatSchema = this.protoHelper.applyUnionProperties(flatSchema, unionProperties);
         }
 
         return this._validateFlatInterface(value, flatSchema);
@@ -401,9 +393,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
     }
 
     private _validateUnionType(value: any, schema: UnionTypeSchema, unionProperties?: string[]): ValidateResult {
-        if (!unionProperties) {
-            this.protoHelper.addUnionProperties(unionProperties = [], schema.members.map(v => v.type));
-        }
+        unionProperties = unionProperties || this.protoHelper.getUnionProperties(schema);
 
         // 有一成功则成功
         for (let member of schema.members) {
@@ -422,9 +412,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
     }
 
     private _validateIntersectionType(value: any, schema: IntersectionTypeSchema, unionProperties?: string[]): ValidateResult {
-        if (!unionProperties) {
-            this.protoHelper.addUnionProperties(unionProperties = [], schema.members.map(v => v.type));
-        }
+        unionProperties = unionProperties || this.protoHelper.getUnionProperties(schema);
 
         // 有一失败则失败
         for (let i = 0, len = schema.members.length; i < len; ++i) {

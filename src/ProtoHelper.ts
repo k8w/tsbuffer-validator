@@ -1,13 +1,14 @@
 import { TSBufferSchema } from "tsbuffer-schema";
-import { InterfaceTypeSchema } from "tsbuffer-schema/src/schemas/InterfaceTypeSchema";
-import { TypeReference } from "tsbuffer-schema/src/TypeReference";
 import { InterfaceReference } from "tsbuffer-schema/src/InterfaceReference";
-import { PickTypeSchema } from "tsbuffer-schema/src/schemas/PickTypeSchema";
-import { PartialTypeSchema } from "tsbuffer-schema/src/schemas/PartialTypeSchema";
-import { OverwriteTypeSchema } from "tsbuffer-schema/src/schemas/OverwriteTypeSchema";
+import { InterfaceTypeSchema } from "tsbuffer-schema/src/schemas/InterfaceTypeSchema";
+import { IntersectionTypeSchema } from "tsbuffer-schema/src/schemas/IntersectionTypeSchema";
 import { OmitTypeSchema } from "tsbuffer-schema/src/schemas/OmitTypeSchema";
+import { OverwriteTypeSchema } from "tsbuffer-schema/src/schemas/OverwriteTypeSchema";
+import { PartialTypeSchema } from "tsbuffer-schema/src/schemas/PartialTypeSchema";
+import { PickTypeSchema } from "tsbuffer-schema/src/schemas/PickTypeSchema";
 import { ReferenceTypeSchema } from "tsbuffer-schema/src/schemas/ReferenceTypeSchema";
 import { UnionTypeSchema } from "tsbuffer-schema/src/schemas/UnionTypeSchema";
+import { TypeReference } from "tsbuffer-schema/src/TypeReference";
 import { TSBufferValidator } from "..";
 
 export class ProtoHelper {
@@ -106,12 +107,28 @@ export class ProtoHelper {
         return schema.type === 'Reference' || schema.type === 'IndexedAccess';
     }
 
+    private _schemaWithUuids: (TSBufferSchema & { uuid: number })[] = [];
+    private _getSchemaUuid(schema: TSBufferSchema) {
+        let schemaWithUuid: TSBufferSchema & { uuid?: number } = schema;
+        if (!schemaWithUuid.uuid) {
+            schemaWithUuid.uuid = this._schemaWithUuids.push(schemaWithUuid as TSBufferSchema & { uuid: number });
+        }
+        return schemaWithUuid.uuid;
+    }
+
+    private _unionPropertiesCache: { [uuid: number]: string[] } = {};
+    getUnionProperties(schema: UnionTypeSchema | IntersectionTypeSchema) {
+        let uuid = this._getSchemaUuid(schema);
+        if (!this._unionPropertiesCache[uuid]) {
+            this._unionPropertiesCache[uuid] = this._addUnionProperties([], schema.members.map(v => v.type));
+        }
+        return this._unionPropertiesCache[uuid];
+    }
+
     /**
      * unionProperties: 在Union或Intersection类型中，出现在任意member中的字段
-     * @param unionProperties 
-     * @param schemas 
      */
-    addUnionProperties(unionProperties: string[], schemas: TSBufferSchema[]): void {
+    private _addUnionProperties(unionProperties: string[], schemas: TSBufferSchema[]): string[] {
         for (let i = 0, len = schemas.length; i < len; ++i) {
             let schema = this.parseReference(schemas[i]);
 
@@ -129,25 +146,41 @@ export class ProtoHelper {
             }
             // Intersection/Union 递归合并unionProperties
             else if (schema.type === 'Intersection' || schema.type === 'Union') {
-                this.addUnionProperties(unionProperties, schema.members.map(v => v.type));
+                this._addUnionProperties(unionProperties, schema.members.map(v => v.type));
             }
         }
+        return unionProperties;
     }
 
     /**
-     * 将nonExcessProperties 扩展到 InterfaceTypeSchema中（optional的any类型）
+     * 将unionProperties 扩展到 InterfaceTypeSchema中（optional的any类型）
      * 以此来跳过对它们的检查（用于Intersection/Union）
      * @param schema 
-     * @param nonExcessProperties 
+     * @param unionProperties 
      */
-    applyNonExcessProperties(schema: FlatInterfaceTypeSchema, nonExcessProperties: string[]) {
-        let newProperties: FlatInterfaceTypeSchema['properties'] = [];
+    applyUnionProperties(schema: FlatInterfaceTypeSchema, unionProperties: string[]): FlatInterfaceTypeSchema {
+        let newSchema: FlatInterfaceTypeSchema = {
+            ...schema,
+            properties: schema.properties.slice()
+        };
 
-        for (let field of nonExcessProperties) {
-            if (!schema.properties.find(v => v.name === field)) {
-                newProperties.push({
+        for (let prop of unionProperties) {
+            if (prop === '[[String]]') {
+                newSchema.indexSignature = newSchema.indexSignature || {
+                    keyType: 'String',
+                    type: { type: 'Any' }
+                }
+            }
+            else if (prop === '[[Number]]') {
+                newSchema.indexSignature = newSchema.indexSignature || {
+                    keyType: 'Number',
+                    type: { type: 'Any' }
+                }
+            }
+            else if (!schema.properties.find(v => v.name === prop)) {
+                newSchema.properties.push({
                     id: -1,
-                    name: field,
+                    name: prop,
                     optional: true,
                     type: {
                         type: 'Any'
@@ -156,47 +189,40 @@ export class ProtoHelper {
             }
         }
 
-        newProperties.forEach(v => {
-            schema.properties.push(v);
-        });
-
-        if (!schema.indexSignature) {
-            if (nonExcessProperties.binarySearch('[[String]]') > -1) {
-                schema.indexSignature = {
-                    keyType: 'String',
-                    type: { type: 'Any' }
-                }
-            }
-            else if (nonExcessProperties.binarySearch('[[Number]]') > -1) {
-                schema.indexSignature = {
-                    keyType: 'Number',
-                    type: { type: 'Any' }
-                }
-            }
-        }
+        return newSchema;
     }
 
+    private _flatInterfaceSchemaCache: { [uuid: number]: FlatInterfaceTypeSchema } = {};
     /**
      * 将interface及其引用转换为展平的schema
      */
     getFlatInterfaceSchema(schema: InterfaceTypeSchema | InterfaceReference): FlatInterfaceTypeSchema {
+        let uuid = this._getSchemaUuid(schema);
+
+        // from cache
+        if (this._flatInterfaceSchemaCache[uuid]) {
+            return this._flatInterfaceSchemaCache[uuid];
+        }
+
         if (this.isTypeReference(schema)) {
             let parsed = this.parseReference(schema);
             if (parsed.type !== 'Interface') {
                 throw new Error(`Cannot flatten non interface type: ${parsed.type}`);
             }
-            return this.getFlatInterfaceSchema(parsed);
+            this._flatInterfaceSchemaCache[uuid] = this.getFlatInterfaceSchema(parsed);
         }
         else if (schema.type === 'Interface') {
-            return this.flattenInterface(schema);
+            this._flatInterfaceSchemaCache[uuid] = this._flattenInterface(schema);
         }
         else {
-            return this.flattenMappedType(schema);
+            this._flatInterfaceSchemaCache[uuid] = this._flattenMappedType(schema);
         }
+
+        return this._flatInterfaceSchemaCache[uuid];
     }
 
     // 展平interface
-    flattenInterface(schema: InterfaceTypeSchema): FlatInterfaceTypeSchema {
+    private _flattenInterface(schema: InterfaceTypeSchema): FlatInterfaceTypeSchema {
         let properties: {
             [name: string]: {
                 optional?: boolean;
@@ -261,7 +287,7 @@ export class ProtoHelper {
     }
 
     // 将MappedTypeSchema转换为展平的Interface
-    flattenMappedType(schema: PickTypeSchema | PartialTypeSchema | OverwriteTypeSchema | OmitTypeSchema): FlatInterfaceTypeSchema {
+    private _flattenMappedType(schema: PickTypeSchema | PartialTypeSchema | OverwriteTypeSchema | OmitTypeSchema): FlatInterfaceTypeSchema {
         // target 解引用
         let target: Exclude<PickTypeSchema['target'], ReferenceTypeSchema>;
         if (this.isTypeReference(schema.target)) {
@@ -275,10 +301,10 @@ export class ProtoHelper {
         let flatTarget: FlatInterfaceTypeSchema;
         // 内层仍然为MappedType 递归之
         if (target.type === 'Pick' || target.type === 'Partial' || target.type === 'Omit' || target.type === 'Overwrite') {
-            flatTarget = this.flattenMappedType(target);
+            flatTarget = this._flattenMappedType(target);
         }
         else if (target.type === 'Interface') {
-            flatTarget = this.flattenInterface(target);
+            flatTarget = this._flattenInterface(target);
         }
         else {
             throw new Error(`Invalid target.type: ${target.type}`)
@@ -348,7 +374,7 @@ export class ProtoHelper {
             parents.push(child);
             child = this.parseReference(child.target);
         }
-        while (child.type === 'Pick' || child.type === 'Omit' || child.type==='Partial'||child.type==='Overwrite');
+        while (child.type === 'Pick' || child.type === 'Omit' || child.type === 'Partial' || child.type === 'Overwrite');
 
         // Final
         if (child.type === 'Interface') {
