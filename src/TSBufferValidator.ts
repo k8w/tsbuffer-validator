@@ -134,24 +134,58 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
 
     /**
      * 修剪 Object，移除 Schema 中未定义的 Key
+     * 需要确保 value 类型合法
      * @param value 
      * @param unionProperties validate 的 options 输出
      * @returns 如果是object会返回一个value的浅拷贝，否则返回原始value
      */
-    private _prune<T>(value: T, unionProperties: string[]): T {
-        // TODO
-        // if (typeof value !== 'object' || value === null || Object.getPrototypeOf(value) !== Object.prototype) {
-        //     return value;
-        // }
+    prune<T>(value: T, schemaOrId: string | TSBufferSchema): T {
+        let schema: TSBufferSchema = typeof schemaOrId === 'string' ? this.proto[schemaOrId] : schemaOrId;
+        if (!schema) {
+            throw new Error('Cannot find schema: ' + schemaOrId);
+        }
 
-        // // remove excess properties
-        // let output: any = {};
-        // for (let property of unionProperties) {
-        //     if ((value as Object).hasOwnProperty(property)) {
-        //         output[property] = value[property as keyof T];
-        //     }
-        // }
-        // return output;
+        // prune interface
+        if (this.protoHelper.isInterface(schema)) {
+            let flatSchema = this.protoHelper.getFlatInterfaceSchema(schema);
+            if (flatSchema.indexSignature) {
+                return Object.assign({}, value);
+            }
+            return this._removeExcessProperties(value, flatSchema.properties.map(v => v.name));
+        }
+        // prune union or intersection
+        else if (schema.type === 'Union' || schema.type === 'Intersection') {
+            let unionProperties = this.protoHelper.getUnionProperties(schema);
+            // include a index signature, do not need prune
+            if (unionProperties.some(v => v.startsWith('[['))) {
+                return Object.assign({}, value);
+            }
+            return this._removeExcessProperties(value, unionProperties);
+        }
+        // prune tuple
+        else if (schema.type === 'Tuple') {
+            return (value as any as any[]).slice(0, schema.elementTypes.length) as any as T;
+        }
+        // do not need prune
+        else {
+            return value;
+        }
+    }
+
+    /**
+     * 
+     * @param value 
+     * @param nonExcessProperties 
+     * @returns shallow copy of value (pruned properties)
+     */
+    private _removeExcessProperties<T>(value: T, nonExcessProperties: string[]): T {
+        let output: any = {};
+        for (let property of nonExcessProperties) {
+            if ((value as Object).hasOwnProperty(property)) {
+                output[property] = value[property as keyof T];
+            }
+        }
+        return output;
     }
 
     private _validateBooleanType(value: any): ValidateResult {
