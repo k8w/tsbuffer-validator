@@ -3,10 +3,10 @@ import { TSBufferProto } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../../src/TSBufferValidator';
 import { ValidateResult, ValidateErrorCode } from '../../../src/ValidateResult';
 
-const proto: TSBufferProto = require('../../genTestSchemas/output');
-let validator = new TSBufferValidator(proto);
-
 describe('Interface Validate', function () {
+    const proto: TSBufferProto = require('../../genTestSchemas/output');
+    let validator = new TSBufferValidator(proto);
+
     it('Interface: basic properties', function () {
         // 正常
         assert.strictEqual(validator.validate({ a: 'aaa', b: 1 }, 'interface1/default').isSucc, true);

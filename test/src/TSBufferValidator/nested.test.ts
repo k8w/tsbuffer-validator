@@ -3,10 +3,10 @@ import { TSBufferProto } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../..';
 import { ValidateResult, ValidateErrorCode } from '../../../src/ValidateResult';
 
-const proto: TSBufferProto = require('../../genTestSchemas/output');
-let validator = new TSBufferValidator(proto);
-
 describe('NestedType', function () {
+    const proto: TSBufferProto = require('../../genTestSchemas/output');
+    let validator = new TSBufferValidator(proto);
+
     it('Array', function () {
         // succ
         assert.deepStrictEqual(validator.validate([], 'nested/ArrStr'), ValidateResult.success);

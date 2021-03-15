@@ -3,10 +3,10 @@ import { TSBufferProto } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../..';
 import { ValidateResult, ValidateErrorCode } from '../../../src/ValidateResult';
 
-const proto: TSBufferProto = require('../../genTestSchemas/output');
-let validator = new TSBufferValidator(proto);
-
 describe('LogicType', function () {
+    const proto: TSBufferProto = require('../../genTestSchemas/output');
+    let validator = new TSBufferValidator(proto);
+
     it('Union: Basic', function () {
         // C | D
         assert.deepStrictEqual(validator.validate({ c: 'cc' }, 'logic/CD'), ValidateResult.success);

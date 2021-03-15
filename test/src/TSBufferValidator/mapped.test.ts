@@ -3,10 +3,10 @@ import { TSBufferProto } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../..';
 import { ValidateResult, ValidateErrorCode } from '../../../src/ValidateResult';
 
-const proto: TSBufferProto = require('../../genTestSchemas/output');
-let validator = new TSBufferValidator(proto);
-
 describe('MappedType Validate', function () {
+    const proto: TSBufferProto = require('../../genTestSchemas/output');
+    let validator = new TSBufferValidator(proto);
+
     it('Pick', function () {
         // simple Pick
         assert.deepStrictEqual(validator.validate({ name: 'x' }, 'mapped/Pick1'), ValidateResult.success);
