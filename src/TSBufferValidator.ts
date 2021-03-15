@@ -56,7 +56,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
 
     readonly protoHelper: ProtoHelper;
     constructor(proto: Proto, options?: Partial<TSBufferValidatorOptions>) {
-        this.proto = proto;
+        this.proto = Object.merge({}, proto);
 
         if (options) {
             Object.assign(this.options, options);
