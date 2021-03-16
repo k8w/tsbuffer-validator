@@ -296,7 +296,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         }
 
         // validate length
-        if (value.length > schema.elementTypes.length) {
+        if (this.options.excessPropertyChecks && value.length > schema.elementTypes.length) {
             return ValidateResult.error(ValidateErrorCode.TupleOverlength);
         }
 

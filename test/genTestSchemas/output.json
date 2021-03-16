@@ -846,6 +846,187 @@
       }
     ]
   },
+  "logic/BaseME": {
+    "type": "Interface",
+    "properties": [
+      {
+        "id": 0,
+        "name": "common",
+        "type": {
+          "type": "Interface",
+          "properties": [
+            {
+              "id": 0,
+              "name": "value",
+              "type": {
+                "type": "String"
+              }
+            }
+          ]
+        },
+        "optional": true
+      }
+    ]
+  },
+  "logic/ME_1": {
+    "type": "Interface",
+    "extends": [
+      {
+        "id": 0,
+        "type": {
+          "type": "Reference",
+          "target": "logic/BaseME"
+        }
+      }
+    ],
+    "properties": [
+      {
+        "id": 0,
+        "name": "type",
+        "type": {
+          "type": "Literal",
+          "literal": "me1"
+        }
+      },
+      {
+        "id": 1,
+        "name": "value1",
+        "type": {
+          "type": "Interface",
+          "properties": [
+            {
+              "id": 0,
+              "name": "value",
+              "type": {
+                "type": "Number"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "logic/ME_2": {
+    "type": "Interface",
+    "extends": [
+      {
+        "id": 0,
+        "type": {
+          "type": "Reference",
+          "target": "logic/BaseME"
+        }
+      }
+    ],
+    "properties": [
+      {
+        "id": 0,
+        "name": "type",
+        "type": {
+          "type": "Literal",
+          "literal": "me2"
+        }
+      },
+      {
+        "id": 1,
+        "name": "value2",
+        "type": {
+          "type": "Interface",
+          "properties": [
+            {
+              "id": 0,
+              "name": "value",
+              "type": {
+                "type": "Tuple",
+                "elementTypes": [
+                  {
+                    "type": "Reference",
+                    "target": "logic/A"
+                  },
+                  {
+                    "type": "Reference",
+                    "target": "logic/B"
+                  },
+                  {
+                    "type": "Reference",
+                    "target": "logic/C"
+                  }
+                ],
+                "optionalStartIndex": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "logic/ME_3": {
+    "type": "Interface",
+    "extends": [
+      {
+        "id": 0,
+        "type": {
+          "type": "Reference",
+          "target": "logic/BaseME"
+        }
+      }
+    ],
+    "properties": [
+      {
+        "id": 0,
+        "name": "type",
+        "type": {
+          "type": "Literal",
+          "literal": "me2"
+        }
+      },
+      {
+        "id": 1,
+        "name": "value2",
+        "type": {
+          "type": "Interface",
+          "properties": [
+            {
+              "id": 0,
+              "name": "value",
+              "type": {
+                "type": "Array",
+                "elementType": {
+                  "type": "Reference",
+                  "target": "logic/AB"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "logic/ME_Final": {
+    "type": "Union",
+    "members": [
+      {
+        "id": 0,
+        "type": {
+          "type": "Reference",
+          "target": "logic/ME_1"
+        }
+      },
+      {
+        "id": 1,
+        "type": {
+          "type": "Reference",
+          "target": "logic/ME_2"
+        }
+      },
+      {
+        "id": 2,
+        "type": {
+          "type": "Reference",
+          "target": "logic/ME_3"
+        }
+      }
+    ]
+  },
   "mapped/Base": {
     "type": "Interface",
     "properties": [

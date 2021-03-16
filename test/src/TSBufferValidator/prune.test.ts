@@ -70,7 +70,23 @@ describe('prune', function () {
                 c: 'asdf',
                 d: 'ffd'
             });
-    })
+
+        validator.options.excessPropertyChecks = true;
+        assert.deepStrictEqual(
+            validator.validateAndPrune({
+                a: 'sss',
+                b: 'fff',
+                c: 'asdf',
+                d: 'ffd',
+            }, 'logic/ABCD2').pruneOutput,
+            {
+                a: 'sss',
+                b: 'fff',
+                c: 'asdf',
+                d: 'ffd',
+            });
+        validator.options.excessPropertyChecks = false;
+    });
 
     it('index signature', function () {
         assert.deepStrictEqual(
@@ -126,14 +142,129 @@ describe('prune', function () {
     })
 
     it('Array nest object', function () {
-
+        assert.deepStrictEqual(
+            validator.validateAndPrune([
+                { value: 'asdf' },
+                { value: 'ff', cc: '12' },
+                { value: 'ffa', asdf: 'asd' }
+            ], 'nested/ArrObj').pruneOutput,
+            [
+                { value: 'asdf' },
+                { value: 'ff' },
+                { value: 'ffa' }
+            ]
+        )
     })
 
     it('Tuple', function () {
-        // assert.deepStrictEqual(validator.validateAndPrune({
-        //     value4: 'asdf',
+        assert.deepStrictEqual(
+            validator.validateAndPrune([123, 'aaa', 333], 'nested/Tuple1').pruneOutput,
+            [123, 'aaa', 333]
+        )
+        assert.deepStrictEqual(
+            validator.validateAndPrune([123, 'aaa', undefined], 'nested/Tuple1').pruneOutput,
+            [123, 'aaa', undefined]
+        )
+        assert.deepStrictEqual(
+            validator.validateAndPrune([123, 'aaa'], 'nested/Tuple1').pruneOutput,
+            [123, 'aaa']
+        )
 
-        // }))
+        assert.deepStrictEqual(
+            validator.validateAndPrune([{ value: 'v', aa: 'aa' }], 'nested/Tuple2').pruneOutput,
+            [{ value: 'v' }]
+        )
+        assert.deepStrictEqual(
+            validator.validateAndPrune([{ value: 'v', aa: 'aa' }, undefined], 'nested/Tuple2').pruneOutput,
+            [{ value: 'v' }, undefined]
+        )
+        assert.deepStrictEqual(
+            validator.validateAndPrune([{ value: 'v', aa: 'aa' }, 'asdg'], 'nested/Tuple2').pruneOutput,
+            [{ value: 'v' }, 'asdg']
+        )
+        assert.deepStrictEqual(
+            validator.validateAndPrune([{ value: 'v', aa: 'aa' }, 'asdg', []], 'nested/Tuple2').pruneOutput,
+            [{ value: 'v' }, 'asdg', []]
+        )
+        assert.deepStrictEqual(
+            validator.validateAndPrune([{ value: 'v', aa: 'aa' }, 'asdg', [], 1, 2, 3, 4, 5], 'nested/Tuple2').pruneOutput,
+            [{ value: 'v' }, 'asdg', []]
+        )
+        assert.deepStrictEqual(
+            validator.validateAndPrune([{ value: 'v', aa: 'aa' }, 'asdg', [true], 1, 2, 3, 4, 5], 'nested/Tuple2').pruneOutput,
+            [{ value: 'v' }, 'asdg', [true]]
+        )
+        assert.deepStrictEqual(
+            validator.validateAndPrune([{ value: 'v', aa: 'aa' }, 'asdg', [true, false, 1, 2, 3, 4, 5], 1, 2, 3, 4, 5], 'nested/Tuple2').pruneOutput,
+            [{ value: 'v' }, 'asdg', [true, false]]
+        )
+        assert.deepStrictEqual(
+            validator.validateAndPrune([{ value: 'v', aa: 'aa' }, 'asdg', [undefined, true, 1, 2, 3], 1, 2, 3, 4, 5], 'nested/Tuple2').pruneOutput,
+            [{ value: 'v' }, 'asdg', [undefined, true]]
+        )
+        assert.deepStrictEqual(
+            validator.validateAndPrune([{ value: 'v', aa: 'aa' }, 'asdg', [true, undefined, 1, 2, 3], 1, 2, 3, 4, 5], 'nested/Tuple2').pruneOutput,
+            [{ value: 'v' }, 'asdg', [true, undefined]]
+        )
+        assert.deepStrictEqual(
+            validator.validateAndPrune([{ value: 'v', aa: 'aa' }, 'asdg', [undefined, undefined, 1, 2, 3], 1, 2, 3, 4, 5], 'nested/Tuple2').pruneOutput,
+            [{ value: 'v' }, 'asdg', [undefined, undefined]]
+        )
     })
 
+    it('mutual exclusion', function () {
+        assert.deepStrictEqual(
+            validator.validateAndPrune({
+                type: 'me1',
+                common: {
+                    value: 'aa',
+                    zz: 'zz'
+                },
+                value1: {
+                    value: 123
+                },
+                value2: {
+                    value: false
+                },
+                value3: 999
+
+            }, 'logic/ME_Final').pruneOutput,
+            {
+                type: 'me1',
+                common: {
+                    value: 'aa'
+                },
+                value1: {
+                    value: 123
+                }
+            }
+        );
+
+        assert.deepStrictEqual(
+            validator.validateAndPrune({
+                type: 'me2',
+                common: {
+                    value: 'aa',
+                    zz: 'zz'
+                },
+                value1: {
+                    value: 123
+                },
+                value2: {
+                    value: [{ a: 'asdf' }, { b: 'fasd' }, { c: 'xx' }, { d: 'ff' }]
+                },
+                value3: 999
+
+            }, 'logic/ME_Final').pruneOutput,
+            {
+                type: 'me2',
+                common: {
+                    value: 'aa'
+                },
+                value2: {
+                    value: [{ a: 'asdf' }, { b: 'fasd' }, { c: 'xx' }]
+                },
+            }
+        );
+    })
 })

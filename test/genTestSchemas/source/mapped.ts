@@ -1,3 +1,5 @@
+import { Overwrite } from "k8w-extend-native";
+
 export interface Base {
     name: string,
     orders?: number[],

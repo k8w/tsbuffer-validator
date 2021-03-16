@@ -19,3 +19,29 @@ export type Conflict = { value: string } & { value: number };
 export type Conflict2 = { type: 'string', value: string } | { type: 'number', value: number };
 
 let xx: ABCD4 = { a: 1, b: 1, c: 1 }
+
+// mutual exclusion
+export interface BaseME {
+    common?: {
+        value: string
+    }
+}
+export interface ME_1 extends BaseME {
+    type: 'me1',
+    value1: {
+        value: number
+    }
+}
+export interface ME_2 extends BaseME {
+    type: 'me2',
+    value2: {
+        value: [A, B, C?]
+    }
+}
+export interface ME_3 extends BaseME {
+    type: 'me3',
+    value2: {
+        value: AB[]
+    }
+}
+export type ME_Final = ME_1 | ME_2 | ME_3
