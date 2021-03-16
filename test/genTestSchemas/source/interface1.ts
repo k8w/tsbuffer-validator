@@ -22,3 +22,14 @@ export interface Interface3 {
     value1: Interface1,
     value2: Interface2
 }
+
+export interface Interface4 extends Interface3 {
+    value3: {
+        a: string,
+        b: string
+    },
+    value4?: {
+        c: string,
+        d: string
+    }
+}
