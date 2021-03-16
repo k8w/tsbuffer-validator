@@ -205,14 +205,14 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
             return ValidateResult.success;
         }
         else {
-            return ValidateResult.error(ValidateErrorCode.WrongType);
+            return ValidateResult.error(ValidateErrorCode.TypeofNotMatch);
         }
     }
 
     private _validateNumberType(value: any, schema: NumberTypeSchema): ValidateResult {
         // Wrong Type
         if (typeof value !== 'number' && typeof value !== 'bigint') {
-            return ValidateResult.error(ValidateErrorCode.WrongType);
+            return ValidateResult.error(ValidateErrorCode.TypeofNotMatch);
         }
 
         // 默认为double
@@ -240,13 +240,13 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
     }
 
     private _validateStringType(value: any): ValidateResult {
-        return typeof value === 'string' ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
+        return typeof value === 'string' ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.TypeofNotMatch);
     }
 
     private _validateArrayType(value: any, schema: ArrayTypeSchema, prune: ValidatePruneOptions | undefined): ValidateResult {
         // is Array type
         if (!Array.isArray(value)) {
-            return ValidateResult.error(ValidateErrorCode.WrongType);
+            return ValidateResult.error(ValidateErrorCode.NotArray);
         }
 
         // prune output
@@ -276,7 +276,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
     private _validateTupleType(value: any, schema: TupleTypeSchema, prune: ValidatePruneOptions | undefined): ValidateResult {
         // is Array type
         if (!Array.isArray(value)) {
-            return ValidateResult.error(ValidateErrorCode.WrongType);
+            return ValidateResult.error(ValidateErrorCode.NotArray);
         }
 
         // validate length
@@ -337,7 +337,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
     private _validateEnumType(value: any, schema: EnumTypeSchema): ValidateResult {
         // must be string or number
         if (typeof value !== 'string' && typeof value !== 'number') {
-            return ValidateResult.error(ValidateErrorCode.WrongType);
+            return ValidateResult.error(ValidateErrorCode.TypeofNotMatch);
         }
 
         // 有值与预设相同
@@ -363,12 +363,12 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
     }
 
     private _validateNonPrimitiveType(value: any): ValidateResult {
-        return typeof value === 'object' && value !== null ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
+        return typeof value === 'object' && value !== null ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.TypeofNotMatch);
     }
 
     private _validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference, unionProperties: string[] | undefined, prune: ValidatePruneOptions | undefined): ValidateResult {
         if (typeof value !== 'object' || value === null) {
-            return ValidateResult.error(ValidateErrorCode.WrongType);
+            return ValidateResult.error(ValidateErrorCode.TypeofNotMatch);
         }
 
         // 先展平
@@ -461,7 +461,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
                 let validProperties = schema.properties.map(v => v.name);
                 let firstExcessProperty = Object.keys(value).find(v => validProperties.indexOf(v) === -1);
                 if (firstExcessProperty) {
-                    return ValidateResult.error(ValidateErrorCode.InnerError, firstExcessProperty, ValidateResult.error(ValidateErrorCode.UnexpectedField))
+                    return ValidateResult.error(ValidateErrorCode.InnerError, firstExcessProperty, ValidateResult.error(ValidateErrorCode.ExcessProperty))
                 }
             }
         }
@@ -475,10 +475,10 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
             if (!typeArrayClass) {
                 throw new Error(`Error TypedArray type: ${schema.arrayType}`);
             }
-            return value instanceof typeArrayClass ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType)
+            return value instanceof typeArrayClass ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.NotInstanceOf)
         }
         else {
-            return value instanceof ArrayBuffer ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.WrongType);
+            return value instanceof ArrayBuffer ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.NotInstanceOf);
         }
     }
 
@@ -579,3 +579,16 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         return !(isNaN(int) || ('' + int) !== key);
     }
 }
+
+export type ResValidate = {
+    /** is validated */
+    isSucc: true,
+    /** validate error message */
+    errMsg?: undefined,
+    /** validate error property name */
+    errPropName?: undefined
+} | {
+    isSucc: false,
+    errMsg: string,
+    errPropName: string
+};

@@ -1,4 +1,4 @@
-import { TSBufferSchema } from "tsbuffer-schema";
+import { TSBufferProto, TSBufferSchema } from "tsbuffer-schema";
 import { InterfaceReference } from "tsbuffer-schema/src/InterfaceReference";
 import { InterfaceTypeSchema } from "tsbuffer-schema/src/schemas/InterfaceTypeSchema";
 import { IntersectionTypeSchema } from "tsbuffer-schema/src/schemas/IntersectionTypeSchema";
@@ -9,13 +9,12 @@ import { PickTypeSchema } from "tsbuffer-schema/src/schemas/PickTypeSchema";
 import { ReferenceTypeSchema } from "tsbuffer-schema/src/schemas/ReferenceTypeSchema";
 import { UnionTypeSchema } from "tsbuffer-schema/src/schemas/UnionTypeSchema";
 import { TypeReference } from "tsbuffer-schema/src/TypeReference";
-import { TSBufferValidator } from "..";
 
 export class ProtoHelper {
 
-    readonly proto: TSBufferValidator<any>['proto'];
+    readonly proto: TSBufferProto;
 
-    constructor(proto: TSBufferValidator<any>['proto']) {
+    constructor(proto: TSBufferProto) {
         this.proto = proto;
     }
 
