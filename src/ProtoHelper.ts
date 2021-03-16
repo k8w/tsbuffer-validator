@@ -13,21 +13,17 @@ import { TSBufferValidator } from "..";
 
 export class ProtoHelper {
 
-    private _proto: TSBufferValidator<any>['proto'];
-
-    get proto(): TSBufferValidator<any>['proto'] {
-        return this._proto;
-    }
+    readonly proto: TSBufferValidator<any>['proto'];
 
     constructor(proto: TSBufferValidator<any>['proto']) {
-        this._proto = proto;
+        this.proto = proto;
     }
 
     /** 将ReferenceTYpeSchema层层转换为它最终实际引用的类型 */
     parseReference(schema: TSBufferSchema): Exclude<TSBufferSchema, TypeReference> {
         // Reference
         if (schema.type === 'Reference') {
-            let parsedSchema = this._proto[schema.target];
+            let parsedSchema = this.proto[schema.target];
             if (!parsedSchema) {
                 throw new Error(`Cannot find reference target: ${schema.target}`);
             }

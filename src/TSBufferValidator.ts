@@ -200,22 +200,6 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         return vRes;
     }
 
-    /**
-     * 
-     * @param value 
-     * @param nonExcessProperties 
-     * @returns shallow copy of value (pruned properties)
-     */
-    private _removeExcessProperties<T>(value: T, nonExcessProperties: string[]): T {
-        let output: any = {};
-        for (let property of nonExcessProperties) {
-            if ((value as Object).hasOwnProperty(property)) {
-                output[property] = value[property as keyof T];
-            }
-        }
-        return output;
-    }
-
     private _validateBooleanType(value: any): ValidateResult {
         if (typeof value === 'boolean') {
             return ValidateResult.success;
@@ -372,7 +356,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
     private _validateLiteralType(value: any, schema: LiteralTypeSchema): ValidateResult {
         // 非 null undefined 严格模式，null undefined同等对待
         if (!this.options.strictNullChecks && (schema.literal === null || schema.literal === undefined)) {
-            return value === schema.literal ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.InvalidLiteralValue);
+            return value === null || value === undefined ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.InvalidLiteralValue);
         }
 
         return value === schema.literal ? ValidateResult.success : ValidateResult.error(ValidateErrorCode.InvalidLiteralValue);

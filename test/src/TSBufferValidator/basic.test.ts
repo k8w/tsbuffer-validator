@@ -230,6 +230,51 @@ describe('BasicType Validate', function () {
         assert.deepStrictEqual(validator4.validate(null, 'a/b'), ValidateResult.error(ValidateErrorCode.InvalidLiteralValue));
     })
 
+    it('strictNullChecks false', function () {
+        let validator = new TSBufferValidator({
+            'a/b': {
+                type: 'Literal',
+                literal: null
+            }
+        }, {
+            strictNullChecks: false
+        });
+        assert.deepStrictEqual(validator.validate(undefined, 'a/b'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate(null, 'a/b'), ValidateResult.success);
+
+        let validator1 = new TSBufferValidator({
+            'a/b': {
+                type: 'Literal',
+                literal: undefined
+            }
+        }, {
+            strictNullChecks: false
+        });
+        assert.deepStrictEqual(validator1.validate(undefined, 'a/b'), ValidateResult.success);
+        assert.deepStrictEqual(validator1.validate(null, 'a/b'), ValidateResult.success);
+
+        let validator2 = new TSBufferValidator({
+            'a/b': {
+                type: 'Interface',
+                properties: [
+                    {
+                        id: 0,
+                        name: 'value',
+                        type: {
+                            type: 'String'
+                        },
+                        optional: true
+                    }
+                ]
+            }
+        }, {
+            strictNullChecks: false
+        });
+        assert.deepStrictEqual(validator2.validate({ value: undefined }, 'a/b'), ValidateResult.success);
+        assert.deepStrictEqual(validator2.validate({ value: null }, 'a/b'), ValidateResult.success);
+        assert.deepStrictEqual(validator2.validate({}, 'a/b'), ValidateResult.success);
+    })
+
     it('NonPrimitive', function () {
         let validator = new TSBufferValidator({
             'a/b': {
