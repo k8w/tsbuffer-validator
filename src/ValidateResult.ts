@@ -1,103 +1,55 @@
 import { TSBufferSchema } from "tsbuffer-schema";
 
-export enum ValidateResultCode {
-    Succ = 0,
-
-    // 内部错误
-    InnerError,
-    NonConditionMet,
-
-    // 自身错误
-    TypeofNotMatch, // Typeof Property 'xxx' should be 
-    NotArray,
-    NotInstanceOf,
-    WrongScalarType,
-    TupleOverlength,
-    InvalidEnumValue,
-    InvalidLiteralValue,
-    MissingRequiredMember,
-    ExcessProperty,
-    InvalidNumberKey,
+export interface ValidateResultSucc {
+    isSucc: true
 }
-
-export type ValidateResultDataError = {
-    code: ValidateResultCode.InnerError,
-    innerError: {
-        fieldName: string,
-        error: ValidateResultDataError,
-    }
-} | {
-    code: ValidateResultCode.NonConditionMet,
-    memberErrors: ValidateResultDataError[]
-} | {
-    code: Exclude<ValidateResultCode, ValidateResultCode.Succ | ValidateResultCode.InnerError | ValidateResultCode.NonConditionMet>
+export interface ValidateResultError {
+    isSucc: false,
+    property?: string[],
+    // AtomError
+    errMsg: string,
+    value: any,
+    schema: TSBufferSchema,
+    memberResults?: ValidateResult[]
 }
-
-export type ValidateResultData = ValidateResultDataError | { code: ValidateResultCode.Succ };
+export type ValidateResultData = ValidateResultSucc | ValidateResultError;
 
 export class ValidateResult {
 
-    private _code: ValidateResultCode;
-    private _innerErrors?: {
-        fieldName: string,
-        error: ValidateResult
-    }[];
-    private _value: any;
-    private _schema: TSBufferSchema;
-
-    private constructor(code: ValidateResultCode, innerErrors?: ValidateResult['_innerErrors']) {
-        this._code = code;
-        this._innerErrors = innerErrors;
+    private _data: ValidateResultData;
+    private constructor(data: ValidateResultData) {
+        this._data = data;
     }
 
-    static readonly success = new ValidateResult(ValidateResultCode.Succ);
+    static readonly succ: ValidateResult = new ValidateResult({ isSucc: true });
 
-    static error(code: Exclude<ValidateResultCode, ValidateResultCode.Succ>): ValidateResult{ }
-    
-    get message(): string {
-        return '';
+    static error(errMsg: string, value: any, schema: TSBufferSchema): ValidateResult {
+        return new ValidateResult({
+            isSucc: false,
+            errMsg: errMsg,
+            value: value,
+            schema: schema
+        })
     }
 
-    //重载检测 fieldName和innerError要传必须一起
-    static error(code: ValidateResultCode, message: string): ValidateResult;
-    static error(code: ValidateResultCode.InnerError, fieldName: string, innerError: ValidateResult): ValidateResult;
-    static error(code: ValidateResultCode, fieldName?: string, innerError?: ValidateResult) {
-        return new ValidateResult(code, fieldName, innerError);
-    }
-
-    static innerError(fieldName: string, code: Exclude<ValidateResultCode, ValidateResultCode.InnerError>): ValidateResult {
-        let fields = fieldName.split('.');
-        let last = new ValidateResult(code);
-        for (let i = fields.length - 1; i > -1; --i) {
-            last = new ValidateResult(ValidateResultCode.InnerError, fields[i], last);
+    static innerError(property: string | string[], innerError: ValidateResult): ValidateResult {
+        if (!innerError.property) {
+            (innerError._data as ValidateResultError).property = [];
         }
-        return last;
-    }
 
-    /**
-     * 最里面的错误，如对上面 {a:{b:{c:"Wrong"}}} 的例子
-     * 返回为
-     * { code:BasicTypeNotMatch, fieldName:'a.b.c' }
-     * 返回中一定没有innerError
-     * @returns {ValidateResult}
-     */
-    get originalError(): ValidateResult {
-        let fieldNames: string[] = [];
-        let result: ValidateResult = this;
-        while (true) {
-            if (result.innerError) {
-                fieldNames.push(result.fieldName as string);
-                result = result.innerError;
-            }
-            else {
-                let output = new ValidateResult(result.code);
-                output.fieldName = fieldNames.join('.');
-                return output;
-            }
+        if (typeof property === 'string') {
+            innerError.property!.unshift(property);
         }
+        else {
+            innerError.property!.unshift(...property);
+        }
+
+        return innerError;
     }
 
-    get isSucc(): boolean {
-        return this._code === ValidateResultCode.Succ;
-    }
+    get isSucc() { return this._data.isSucc };
+    get property() { return (this._data as ValidateResultError).property };
+    get errMsg() { return (this._data as ValidateResultError).errMsg };
+    get value() { return (this._data as ValidateResultError).value };
+    get schema() { return (this._data as ValidateResultError).schema };
 }
