@@ -8,16 +8,19 @@ import { IndexedAccessTypeSchema } from 'tsbuffer-schema/src/schemas/IndexedAcce
 import { InterfaceTypeSchema } from 'tsbuffer-schema/src/schemas/InterfaceTypeSchema';
 import { IntersectionTypeSchema } from 'tsbuffer-schema/src/schemas/IntersectionTypeSchema';
 import { LiteralTypeSchema } from 'tsbuffer-schema/src/schemas/LiteralTypeSchema';
+import { NonPrimitiveTypeSchema } from 'tsbuffer-schema/src/schemas/NonPrimitiveTypeSchema';
 import { NumberTypeSchema } from 'tsbuffer-schema/src/schemas/NumberTypeSchema';
 import { OmitTypeSchema } from 'tsbuffer-schema/src/schemas/OmitTypeSchema';
 import { OverwriteTypeSchema } from 'tsbuffer-schema/src/schemas/OverwriteTypeSchema';
 import { PartialTypeSchema } from 'tsbuffer-schema/src/schemas/PartialTypeSchema';
 import { PickTypeSchema } from 'tsbuffer-schema/src/schemas/PickTypeSchema';
 import { ReferenceTypeSchema } from 'tsbuffer-schema/src/schemas/ReferenceTypeSchema';
+import { StringTypeSchema } from 'tsbuffer-schema/src/schemas/StringTypeSchema';
 import { TupleTypeSchema } from 'tsbuffer-schema/src/schemas/TupleTypeSchema';
 import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
+import { i18n } from './i18n';
 import { FlatInterfaceTypeSchema, ProtoHelper } from './ProtoHelper';
-import { ValidateResult } from './ValidateResult';
+import { ValidateResult, ValidateResultError, ValidateResultUtil } from './ValidateResultUtil';
 
 /** 单次validate的选项，会向下透传 */
 export interface ValidateOptions {
@@ -109,13 +112,13 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         // Validate
         switch (schema.type) {
             case 'Boolean':
-                vRes = this._validateBooleanType(value);
+                vRes = this._validateBooleanType(value, schema);
                 break;
             case 'Number':
                 vRes = this._validateNumberType(value, schema);
                 break;
             case 'String':
-                vRes = this._validateStringType(value);
+                vRes = this._validateStringType(value, schema);
                 break;
             case 'Array':
                 vRes = this._validateArrayType(value, schema, options?.prune);
@@ -133,7 +136,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
                 vRes = this._validateLiteralType(value, schema);
                 break;
             case 'NonPrimitive':
-                vRes = this._validateNonPrimitiveType(value);
+                vRes = this._validateNonPrimitiveType(value, schema);
                 break;
             case 'Interface':
                 vRes = this._validateInterfaceType(value, schema, options?.unionProperties, options?.prune);
@@ -204,51 +207,47 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
     private _validateBooleanType(value: any, schema: BooleanTypeSchema): ValidateResult {
         let type = this._getTypeof(value);
         if (type === 'boolean') {
-            return ValidateResult.succ;
+            return ValidateResultUtil.succ;
         }
         else {
-            return ValidateResult.error(`Type should be 'boolean', but actually '${type}'.`, value, schema);
+            return ValidateResultUtil.error(i18n.typeError('boolean', type), value, schema);
         }
     }
 
     private _validateNumberType(value: any, schema: NumberTypeSchema): ValidateResult {
-        // Wrong Type
-        if (typeof value !== 'number' && typeof value !== 'bigint') {
-            return ValidateResult.error(ValidateErrorCode.TypeofNotMatch);
-        }
-
         // 默认为double
         let scalarType = schema.scalarType || 'double';
 
+        // Wrong Type
+        let type = this._getTypeof(value);
+        let rightType = scalarType.indexOf('big') > -1 ? 'bigint' : 'number';
+        if (type !== rightType) {
+            return ValidateResultUtil.error(i18n.typeError(rightType, type), value, schema);
+        }
+
         // scalarType类型检测
         // 整形却为小数
-        if (scalarType !== 'double' && typeof value === 'number' && !Number.isInteger(value)) {
-            return ValidateResult.error(ValidateErrorCode.WrongScalarType);
+        if (scalarType !== 'double' && type === 'number' && !Number.isInteger(value)) {
+            return ValidateResultUtil.error(i18n.invalidScalarType(value, scalarType), value, schema);
         }
         // 无符号整形却为负数
         if (scalarType.indexOf('uint') > -1 && value < 0) {
-            return ValidateResult.error(ValidateErrorCode.WrongScalarType);
-        }
-        // 不是bigint却为bigint
-        if (scalarType.indexOf('big') === -1 && typeof value === 'bigint') {
-            return ValidateResult.error(ValidateErrorCode.WrongScalarType);
-        }
-        // 应该是bigint却不为bigint
-        if (scalarType.indexOf('big') > -1 && typeof value !== 'bigint') {
-            return ValidateResult.error(ValidateErrorCode.WrongScalarType);
+            return ValidateResultUtil.error(i18n.invalidScalarType(value, scalarType), value, schema);
         }
 
-        return ValidateResult.succ;
+        return ValidateResultUtil.succ;
     }
 
-    private _validateStringType(value: any): ValidateResult {
-        return typeof value === 'string' ? ValidateResult.succ : ValidateResult.error(ValidateErrorCode.TypeofNotMatch);
+    private _validateStringType(value: any, schema: StringTypeSchema): ValidateResult {
+        let type = this._getTypeof(value);
+        return type === 'string' ? ValidateResultUtil.succ : ValidateResultUtil.error(i18n.typeError('string', type), value, schema);
     }
 
     private _validateArrayType(value: any, schema: ArrayTypeSchema, prune: ValidatePruneOptions | undefined): ValidateResult {
         // is Array type
-        if (!Array.isArray(value)) {
-            return ValidateResult.error(ValidateErrorCode.NotArray);
+        let type = this._getTypeof(value);
+        if (type !== 'array') {
+            return ValidateResultUtil.error(i18n.typeError('array', type), value, schema);
         }
 
         // prune output
@@ -268,22 +267,23 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
             });
 
             if (!elemValidateResult.isSucc) {
-                return ValidateResult.error(ValidateErrorCode.InnerError, '' + i, elemValidateResult);
+                return ValidateResultUtil.innerError('' + i, elemValidateResult);
             }
         }
 
-        return ValidateResult.succ;
+        return ValidateResultUtil.succ;
     }
 
     private _validateTupleType(value: any, schema: TupleTypeSchema, prune: ValidatePruneOptions | undefined): ValidateResult {
         // is Array type
-        if (!Array.isArray(value)) {
-            return ValidateResult.error(ValidateErrorCode.NotArray);
+        let type = this._getTypeof(value);
+        if (type !== 'array') {
+            return ValidateResultUtil.error(i18n.typeError('array', type), value, schema);
         }
 
         // validate length
         if (this.options.excessPropertyChecks && value.length > schema.elementTypes.length) {
-            return ValidateResult.error(ValidateErrorCode.TupleOverlength);
+            return ValidateResultUtil.error(i18n.tupleOverLength(value.length, schema.elementTypes.length), value, schema);
         }
 
         // prune output
@@ -293,21 +293,19 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
 
         // validate elementType
         for (let i = 0; i < schema.elementTypes.length; ++i) {
+            // MissingRequiredProperty: NotOptional && is undefined
             if (value[i] === undefined || value[i] === null && !this.options.strictNullChecks) {
-                if (
-                    // Optional
-                    schema.optionalStartIndex !== undefined && i >= schema.optionalStartIndex
-                    // Can be undefined
-                    || this._canBeUndefined(schema.elementTypes[i])
-                ) {
+                let isOptional = schema.optionalStartIndex !== undefined && i >= schema.optionalStartIndex || this._canBeUndefined(schema.elementTypes[i]);
+                // skip undefined property
+                if (isOptional) {
                     continue;
                 }
-                // Missing Required
                 else {
-                    return ValidateResult.error(ValidateErrorCode.InnerError, '' + i, ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
+                    return ValidateResultUtil.error(i18n.missingRequiredProperty('' + i), value, schema.elementTypes[i]);
                 }
             }
 
+            // element type check
             let elemValidateResult = this._validate(value[i], schema.elementTypes[i], {
                 prune: prune?.output ? {
                     parent: {
@@ -317,11 +315,11 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
                 } : undefined
             });
             if (!elemValidateResult.isSucc) {
-                return ValidateResult.error(ValidateErrorCode.InnerError, '' + i, elemValidateResult);
+                return ValidateResultUtil.innerError('' + i, elemValidateResult);
             }
         }
 
-        return ValidateResult.succ;
+        return ValidateResultUtil.succ;
     }
 
     private _canBeUndefined(schema: TSBufferSchema): boolean {
@@ -338,39 +336,46 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
 
     private _validateEnumType(value: any, schema: EnumTypeSchema): ValidateResult {
         // must be string or number
-        if (typeof value !== 'string' && typeof value !== 'number') {
-            return ValidateResult.error(ValidateErrorCode.TypeofNotMatch);
+        let type = this._getTypeof(value);
+        if (type !== 'string' && type !== 'number') {
+            return ValidateResultUtil.error(i18n.typeError('string | number', type), value, schema);
         }
 
         // 有值与预设相同
         if (schema.members.some(v => v.value === value)) {
-            return ValidateResult.succ;
+            return ValidateResultUtil.succ;
         }
         else {
-            return ValidateResult.error(ValidateErrorCode.InvalidEnumValue);
+            return ValidateResultUtil.error(i18n.invalidEnumValue(value), value, schema);
         }
     }
 
     private _validateAnyType(value: any): ValidateResult {
-        return ValidateResult.succ;
+        return ValidateResultUtil.succ;
     }
 
     private _validateLiteralType(value: any, schema: LiteralTypeSchema): ValidateResult {
         // 非 null undefined 严格模式，null undefined同等对待
         if (!this.options.strictNullChecks && (schema.literal === null || schema.literal === undefined)) {
-            return value === null || value === undefined ? ValidateResult.succ : ValidateResult.error(ValidateErrorCode.InvalidLiteralValue);
+            return value === null || value === undefined ?
+                ValidateResultUtil.succ
+                : ValidateResultUtil.error(i18n.invalidLiteralValue(value, schema.literal), value, schema);
         }
 
-        return value === schema.literal ? ValidateResult.succ : ValidateResult.error(ValidateErrorCode.InvalidLiteralValue);
+        return value === schema.literal ?
+            ValidateResultUtil.succ
+            : ValidateResultUtil.error(i18n.invalidLiteralValue(value, schema.literal), value, schema);
     }
 
-    private _validateNonPrimitiveType(value: any): ValidateResult {
-        return typeof value === 'object' && value !== null ? ValidateResult.succ : ValidateResult.error(ValidateErrorCode.TypeofNotMatch);
+    private _validateNonPrimitiveType(value: any, schema: NonPrimitiveTypeSchema): ValidateResult {
+        let type = this._getTypeof(value);
+        return type === 'object' ? ValidateResultUtil.succ : ValidateResultUtil.error(i18n.typeError('object', type), value, schema);
     }
 
     private _validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference, unionProperties: string[] | undefined, prune: ValidatePruneOptions | undefined): ValidateResult {
-        if (typeof value !== 'object' || value === null) {
-            return ValidateResult.error(ValidateErrorCode.TypeofNotMatch);
+        let type = this._getTypeof(value);
+        if (type !== 'object') {
+            return ValidateResultUtil.error(i18n.typeError('object', type), value, schema);
         }
 
         // 先展平
@@ -400,7 +405,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         if (schema.indexSignature && schema.indexSignature.keyType === 'Number') {
             for (let key in value) {
                 if (!this._isNumberKey(key)) {
-                    return ValidateResult.error(ValidateErrorCode.InnerError, key, ValidateResult.error(ValidateErrorCode.InvalidNumberKey))
+                    return ValidateResultUtil.error(i18n.invalidNumberKey(key), value, schema);
                 }
             }
         }
@@ -412,13 +417,15 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         // 校验properties
         if (schema.properties) {
             for (let property of schema.properties) {
-                if (value[property.name] === undefined || !this.options.strictNullChecks && value[property.name] == undefined) {
-                    // Optional or Can be undefined
-                    if (property.optional || this._canBeUndefined(property.type)) {
+                // MissingRequiredProperty: is undefined && !isOptional
+                if (value[property.name] === undefined || value[property.name] === null && !this.options.strictNullChecks) {
+                    let isOptional = property.optional || this._canBeUndefined(property.type);
+                    // skip undefined optional property
+                    if (isOptional) {
                         continue;
                     }
                     else {
-                        return ValidateResult.error(ValidateErrorCode.InnerError, property.name, ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
+                        return ValidateResultUtil.error(i18n.missingRequiredProperty(property.name), value, schema);
                     }
                 }
 
@@ -432,7 +439,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
                     } : undefined
                 });
                 if (!vRes.isSucc) {
-                    return ValidateResult.error(ValidateErrorCode.InnerError, property.name, vRes);
+                    return ValidateResultUtil.innerError(property.name, vRes);
                 }
             }
         }
@@ -453,7 +460,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
                     } : undefined
                 });
                 if (!vRes.isSucc) {
-                    return ValidateResult.error(ValidateErrorCode.InnerError, key, vRes);
+                    return ValidateResultUtil.innerError(key, vRes);
                 }
             }
         }
@@ -463,12 +470,12 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
                 let validProperties = schema.properties.map(v => v.name);
                 let firstExcessProperty = Object.keys(value).find(v => validProperties.indexOf(v) === -1);
                 if (firstExcessProperty) {
-                    return ValidateResult.error(ValidateErrorCode.InnerError, firstExcessProperty, ValidateResult.error(ValidateErrorCode.ExcessProperty))
+                    return ValidateResultUtil.error(i18n.excessProperty(firstExcessProperty), value, schema);
                 }
             }
         }
 
-        return ValidateResult.succ;
+        return ValidateResultUtil.succ;
     }
 
     private _validateBufferType(value: any, schema: BufferTypeSchema): ValidateResult {
@@ -477,10 +484,10 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
             if (!typeArrayClass) {
                 throw new Error(`Error TypedArray type: ${schema.arrayType}`);
             }
-            return value instanceof typeArrayClass ? ValidateResult.succ : ValidateResult.error(ValidateErrorCode.NotInstanceOf)
+            return value instanceof typeArrayClass ? ValidateResultUtil.succ : ValidateResultUtil.error(i18n.notInstanceof(schema.arrayType), value, schema);
         }
         else {
-            return value instanceof ArrayBuffer ? ValidateResult.succ : ValidateResult.error(ValidateErrorCode.NotInstanceOf);
+            return value instanceof ArrayBuffer ? ValidateResultUtil.succ : ValidateResultUtil.error(i18n.notInstanceof('ArrayBuffer'), value, schema);
         }
     }
 
@@ -499,6 +506,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
 
         // 有一成功则成功
         let isSomeSucc: boolean = false;
+        let memberErrors: ValidateResultError[] = [];
         for (let member of schema.members) {
             let memberType = this.protoHelper.isTypeReference(member.type) ? this.protoHelper.parseReference(member.type) : member.type;
             let memberPrune: ValidatePruneOptions | undefined = prune ? {} : undefined;
@@ -510,18 +518,24 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
             if (vRes.isSucc) {
                 isSomeSucc = true;
 
-                // if prune object, must prune all members
+                // if prune object: must prune all members
                 if (isObjectPrune) {
                     Object.assign(prune!.output, memberPrune!.output);
                 }
+                // not prune object: stop checking after 1st member matched
                 else {
                     break;
                 }
             }
+            else {
+                memberErrors.push(vRes as ValidateResultError);
+            }
         }
 
         // 有一成功则成功; 否则全失败，则失败
-        return isSomeSucc ? ValidateResult.succ : ValidateResult.error(ValidateErrorCode.NonConditionMet);
+        return isSomeSucc ? ValidateResultUtil.succ : ValidateResultUtil.error(i18n.noMatchedUnionMember, value, schema, {
+            memberErrors: memberErrors
+        });
     }
 
     private _validateIntersectionType(value: any, schema: IntersectionTypeSchema, unionProperties: string[] | undefined, prune: ValidatePruneOptions | undefined): ValidateResult {
@@ -544,27 +558,11 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
                 unionProperties: unionProperties,
                 prune: memberPrune
             });
-            // // interface 加入unionFIelds去validate
-            // if (this.protoHelper.isInterface(memberType)) {
-            //     vRes = this._validateInterfaceType(value, memberType, unionProperties, memberPrune);
-            // }
-            // // LogicType 递归unionFields
-            // else if (memberType.type === 'Union') {
-            //     vRes = this._validateUnionType(value, memberType, unionProperties, memberPrune);
-            // }
-            // else if (memberType.type === 'Intersection') {
-            //     vRes = this._validateIntersectionType(value, memberType, unionProperties, memberPrune);
-            // }
-            // // 其它类型 直接validate
-            // else {
-            //     vRes = this._validate(value, memberType, {
-            //         prune: memberPrune
-            //     });
-            // }
 
             // 有一失败则失败
             if (!vRes.isSucc) {
-                return ValidateResult.error(ValidateErrorCode.InnerError, `<Condition${i}>`, vRes);
+                vRes.errorMemberIndex = i;
+                return vRes;
             }
 
             if (isObjectPrune) {
@@ -573,7 +571,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         }
 
         // 全成功则成功
-        return ValidateResult.succ;
+        return ValidateResultUtil.succ;
     }
 
     private _isNumberKey(key: string): boolean {
