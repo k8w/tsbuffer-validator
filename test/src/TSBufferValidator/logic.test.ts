@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { TSBufferProto } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../..';
-import { ValidateResult, ValidateErrorCode } from '../../../src/ValidateResult';
+import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
 
 describe('LogicType', function () {
     const proto: TSBufferProto = require('../../genTestSchemas/output');
@@ -9,11 +9,11 @@ describe('LogicType', function () {
 
     it('Union: Basic', function () {
         // C | D
-        assert.deepStrictEqual(validator.validate({ c: 'cc' }, 'logic/CD'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ d: 'dd' }, 'logic/CD'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ c: 'cc' }, 'logic/CD'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ d: 'dd' }, 'logic/CD'), ValidateResultUtil.succ);
         // excess check
-        assert.deepStrictEqual(validator.validate({ c: 'cc', d: 123 }, 'logic/CD'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ c: 123, d: 'ddd' }, 'logic/CD'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ c: 'cc', d: 123 }, 'logic/CD'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ c: 123, d: 'ddd' }, 'logic/CD'), ValidateResultUtil.succ);
         // fail
         assert.deepStrictEqual(validator.validate({ c: 'c', d: 'd', e: 'e' }, 'logic/CD'),
             ValidateResult.error(ValidateErrorCode.NonConditionMet));
@@ -23,12 +23,12 @@ describe('LogicType', function () {
             ValidateResult.error(ValidateErrorCode.NonConditionMet));
 
         // B | C | D
-        assert.deepStrictEqual(validator.validate({ d: 'd' }, 'logic/BCD'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ b: 'b', c: 'c' }, 'logic/BCD'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ b: 'b', c: 'c', d: 'd' }, 'logic/BCD'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ d: 'd' }, 'logic/BCD'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ b: 'b', c: 'c' }, 'logic/BCD'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ b: 'b', c: 'c', d: 'd' }, 'logic/BCD'), ValidateResultUtil.succ);
         // excess
-        assert.deepStrictEqual(validator.validate({ b: 'b', c: 123, d: null }, 'logic/BCD'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ c: 123, d: 'ddd' }, 'logic/BCD'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ b: 'b', c: 123, d: null }, 'logic/BCD'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ c: 123, d: 'ddd' }, 'logic/BCD'), ValidateResultUtil.succ);
         // fail
         assert.deepStrictEqual(validator.validate({ b: 'b', c: 'c', d: 'd', e: 'e' }, 'logic/BCD'),
             ValidateResult.error(ValidateErrorCode.NonConditionMet));
@@ -36,10 +36,10 @@ describe('LogicType', function () {
             ValidateResult.error(ValidateErrorCode.NonConditionMet));
 
         // A & B | C & D
-        assert.deepStrictEqual(validator.validate({ a: 'aaa', b: 'bb' }, 'logic/ABCD'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ c: 'c', d: 'd' }, 'logic/ABCD'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ a: 'aaa', b: 'bb' }, 'logic/ABCD'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ c: 'c', d: 'd' }, 'logic/ABCD'), ValidateResultUtil.succ);
         // excess
-        assert.deepStrictEqual(validator.validate({ a: 4, b: null, c: 'c', d: 'd' }, 'logic/ABCD'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ a: 4, b: null, c: 'c', d: 'd' }, 'logic/ABCD'), ValidateResultUtil.succ);
         // fail
         assert.deepStrictEqual(validator.validate({ a: 'a' }, 'logic/ABCD'),
             ValidateResult.error(ValidateErrorCode.NonConditionMet));
@@ -51,13 +51,13 @@ describe('LogicType', function () {
             ValidateResult.error(ValidateErrorCode.NonConditionMet));
 
         // A | B&C | D
-        assert.deepStrictEqual(validator.validate({ a: 'aaa' }, 'logic/ABCD1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ b: 'b', c: 'c' }, 'logic/ABCD1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ d: 'd' }, 'logic/ABCD1'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ a: 'aaa' }, 'logic/ABCD1'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ b: 'b', c: 'c' }, 'logic/ABCD1'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ d: 'd' }, 'logic/ABCD1'), ValidateResultUtil.succ);
         // excess
-        assert.deepStrictEqual(validator.validate({ a: 'a', b: 1, c: true, d: null }, 'logic/ABCD1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ a: null, b: 1, c: true, d: 'd' }, 'logic/ABCD1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ a: null, b: 'b', c: 'c', d: 12 }, 'logic/ABCD1'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ a: 'a', b: 1, c: true, d: null }, 'logic/ABCD1'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ a: null, b: 1, c: true, d: 'd' }, 'logic/ABCD1'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ a: null, b: 'b', c: 'c', d: 12 }, 'logic/ABCD1'), ValidateResultUtil.succ);
         // fail
         assert.deepStrictEqual(validator.validate({ a: 'a', e: 'e' }, 'logic/ABCD1'),
             ValidateResult.error(ValidateErrorCode.NonConditionMet));
@@ -67,10 +67,10 @@ describe('LogicType', function () {
             ValidateResult.error(ValidateErrorCode.NonConditionMet));
 
         // A&B | B&C | C&D
-        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x' }, 'logic/ABCD2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ b: 'x', c: 'x' }, 'logic/ABCD2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ c: 'x', d: 'x' }, 'logic/ABCD2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ c: 'x', d: 'x', a: 1, b: 2 }, 'logic/ABCD2'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x' }, 'logic/ABCD2'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ b: 'x', c: 'x' }, 'logic/ABCD2'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ c: 'x', d: 'x' }, 'logic/ABCD2'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ c: 'x', d: 'x', a: 1, b: 2 }, 'logic/ABCD2'), ValidateResultUtil.succ);
         // fail
         assert.deepStrictEqual(validator.validate({ a: 'x', c: 'x' }, 'logic/ABCD2'),
             ValidateResult.error(ValidateErrorCode.NonConditionMet));
@@ -80,15 +80,15 @@ describe('LogicType', function () {
             ValidateResult.error(ValidateErrorCode.NonConditionMet));
 
         // A | null
-        assert.strictEqual(validator.validate({ a: 'sss' }, 'logic/AOrNull'), ValidateResult.success);
-        assert.strictEqual(validator.validate(null, 'logic/AOrNull'), ValidateResult.success);
-        assert.strictEqual(validator.validate([{ a: 'sss' }], 'logic/AOrNullArr'), ValidateResult.success);
-        assert.strictEqual(validator.validate([null], 'logic/AOrNullArr'), ValidateResult.success);
+        assert.strictEqual(validator.validate({ a: 'sss' }, 'logic/AOrNull'), ValidateResultUtil.succ);
+        assert.strictEqual(validator.validate(null, 'logic/AOrNull'), ValidateResultUtil.succ);
+        assert.strictEqual(validator.validate([{ a: 'sss' }], 'logic/AOrNullArr'), ValidateResultUtil.succ);
+        assert.strictEqual(validator.validate([null], 'logic/AOrNullArr'), ValidateResultUtil.succ);
     });
 
     it('Intersection: Basic', function () {
         // A & B
-        assert.deepStrictEqual(validator.validate({ a: 'aa', b: 'bb' }, 'logic/AB'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ a: 'aa', b: 'bb' }, 'logic/AB'), ValidateResultUtil.succ);
         assert.deepStrictEqual(validator.validate({ a: 'aa', b: 'bb', c: 'cc' }, 'logic/AB'), ValidateResult.error(
             ValidateErrorCode.InnerError, '<Condition0>', ValidateResult.error(ValidateErrorCode.InnerError, 'c', ValidateResult.error(ValidateErrorCode.UnexpectedField))
         ));
@@ -100,16 +100,16 @@ describe('LogicType', function () {
         ));
 
         // A & B & C
-        assert.deepStrictEqual(validator.validate({ a: 'a', b: 'b', c: 'c' }, 'logic/ABC'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ a: 'a', b: 'b', c: 'c' }, 'logic/ABC'), ValidateResultUtil.succ);
         assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x' }, 'logic/ABC'), ValidateResult.innerError('<Condition1>.c', ValidateErrorCode.MissingRequiredMember));
         assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', c: 'x', d: 1223 }, 'logic/ABC'), ValidateResult.innerError('<Condition0>.<Condition0>.d', ValidateErrorCode.UnexpectedField))
         assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', c: 123 }, 'logic/ABC'), ValidateResult.innerError('<Condition1>.c', ValidateErrorCode.WrongType));
 
         // A & (B|C) & D
-        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', d: 'x' }, 'logic/ABCD3'), ValidateResult.success)
-        assert.deepStrictEqual(validator.validate({ a: 'x', c: 'x', d: 'x', e: 1, f: 'x' }, 'logic/ABCD3'), ValidateResult.success)
-        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', c: 1, d: 'x' }, 'logic/ABCD3'), ValidateResult.success)
-        assert.deepStrictEqual(validator.validate({ a: 'x', b: 1, c: 'x', d: 'x' }, 'logic/ABCD3'), ValidateResult.success)
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', d: 'x' }, 'logic/ABCD3'), ValidateResultUtil.succ)
+        assert.deepStrictEqual(validator.validate({ a: 'x', c: 'x', d: 'x', e: 1, f: 'x' }, 'logic/ABCD3'), ValidateResultUtil.succ)
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', c: 1, d: 'x' }, 'logic/ABCD3'), ValidateResultUtil.succ)
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: 1, c: 'x', d: 'x' }, 'logic/ABCD3'), ValidateResultUtil.succ)
         assert.deepStrictEqual(validator.validate({ a: 'x', d: 'x' }, 'logic/ABCD3'), ValidateResult.innerError('<Condition1>', ValidateErrorCode.NonConditionMet))
         assert.deepStrictEqual(validator.validate({ a: 'x', b: true, c: 'x', d: 'x' }, 'logic/ABCD3'), ValidateResult.innerError('<Condition3>.b', ValidateErrorCode.NonConditionMet))
 
@@ -125,19 +125,19 @@ describe('LogicType', function () {
     });
 
     it('Union: mutual exclusion', function () {
-        assert.deepStrictEqual(validator.validate({ type: 'string', value: 'x' }, 'logic/Conflict2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ type: 'number', value: 123 }, 'logic/Conflict2'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ type: 'string', value: 'x' }, 'logic/Conflict2'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ type: 'number', value: 123 }, 'logic/Conflict2'), ValidateResultUtil.succ);
         assert.deepStrictEqual(validator.validate({ type: 'string', value: 123 }, 'logic/Conflict2'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
         assert.deepStrictEqual(validator.validate({ type: 'number', value: 'x' }, 'logic/Conflict2'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
         assert.deepStrictEqual(validator.validate({}, 'logic/Conflict2'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
     })
 
     it('Union: indexSignature & excess check', function () {
-        assert.deepStrictEqual(validator.validate({ a: 'x', b: true, c: 'x', d: 'x' }, 'logic/ABCD4'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ a: 'x', b: true, c: true }, 'logic/ABCD4'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: true, c: 'x', d: 'x' }, 'logic/ABCD4'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ a: 'x', b: true, c: true }, 'logic/ABCD4'), ValidateResultUtil.succ);
         assert.deepStrictEqual(validator.validate({ a: true, b: true, c: true }, 'logic/ABCD4'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
         assert.deepStrictEqual(validator.validate({ a: true, b: true, c: 1 }, 'logic/ABCD4'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
-        assert.deepStrictEqual(validator.validate({ a: 1, b: 1, c: 1 }, 'logic/ABCD4'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({ a: 1, b: 1, c: 1 }, 'logic/ABCD4'), ValidateResultUtil.succ);
     })
 
     it('Basic Intersection', function () {
@@ -158,8 +158,8 @@ describe('LogicType', function () {
             }
         });
 
-        assert.deepStrictEqual(validator.validate('abc', 'a/a1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate('abc', 'a/a2'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate('abc', 'a/a1'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate('abc', 'a/a2'), ValidateResultUtil.succ);
         assert.deepStrictEqual(validator.validate(123, 'a/a1'), ValidateResult.innerError('<Condition0>', ValidateErrorCode.WrongType));
         assert.deepStrictEqual(validator.validate(123, 'a/a2'), ValidateResult.innerError('<Condition0>', ValidateErrorCode.WrongType));
     });

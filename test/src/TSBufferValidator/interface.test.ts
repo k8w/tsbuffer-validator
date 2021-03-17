@@ -1,11 +1,24 @@
 import * as assert from 'assert';
 import { TSBufferProto } from 'tsbuffer-schema';
+import { i18n } from '../../../src/i18n';
 import { TSBufferValidator } from '../../../src/TSBufferValidator';
-import { ValidateResult, ValidateErrorCode } from '../../../src/ValidateResult';
+import { ValidateResultError, ValidateResultUtil } from '../../../src/ValidateResultUtil';
 
 describe('Interface Validate', function () {
     const proto: TSBufferProto = require('../../genTestSchemas/output');
     let validator = new TSBufferValidator(proto);
+
+    function assertValidErr(value: any, schemaId: string, errMsg: string, property?: string[], other?: Partial<ValidateResultError>) {
+        let vRes = validator.validate(value, schemaId);
+        assert.deepStrictEqual(vRes.errMsg, errMsg);
+        assert.deepStrictEqual(vRes.property, property);
+        if (other) {
+            for (let key in other) {
+                let _key = key as keyof ValidateResultError;
+                assert.deepStrictEqual(vRes[_key], other[_key]);
+            }
+        }
+    }
 
     it('Interface: basic properties', function () {
         // 正常
@@ -13,34 +26,25 @@ describe('Interface Validate', function () {
         assert.strictEqual(validator.validate({ a: 'aaa', b: 1 }, 'interface1/Interface1').isSucc, true);
 
         // 缺少必须字段
-        assert.deepStrictEqual(
-            validator.validate({ a: 'aaa' }, 'interface1/Interface1'),
-            ValidateResult.error(ValidateErrorCode.InnerError, 'b', ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
-        );
+        assertValidErr({ a: 'aaa' }, 'interface1/Interface1', i18n.missingRequiredProperty('b'))
 
         // 字段类型错误
         // 缺少必须字段
-        assert.deepStrictEqual(
-            validator.validate({ a: 'aaa', b: '123' }, 'interface1/Interface1'),
-            ValidateResult.error(ValidateErrorCode.InnerError, 'b', ValidateResult.error(ValidateErrorCode.WrongType))
-        )
+        assertValidErr({ a: 'aaa', b: '123' }, 'interface1/Interface1', i18n.typeError('number', 'string'), ['b'])
     });
 
     it('Interface: optional fields', function () {
         // 可选字段
         assert.deepStrictEqual(
             validator.validate({ c: true }, 'interface1/Interface2'),
-            ValidateResult.success
+            ValidateResultUtil.succ
         )
         assert.strictEqual(validator.validate({ c: true }, 'interface1/Interface2').isSucc, true);
         assert.strictEqual(validator.validate({ c: true, d: undefined }, 'interface1/Interface2').isSucc, true);
         assert.strictEqual(validator.validate({ c: true, d: 'abc' }, 'interface1/Interface2').isSucc, true);
 
         // 字段类型错误
-        assert.deepStrictEqual(
-            validator.validate({ c: false, d: 123 }, 'interface1/Interface2'),
-            ValidateResult.error(ValidateErrorCode.InnerError, 'd', ValidateResult.error(ValidateErrorCode.WrongType))
-        )
+        assertValidErr({ c: false, d: 123 }, 'interface1/Interface2', i18n.typeError('string', 'number'), ['d']);
     });
 
     it('Interface: indexSignature: string key', function () {
@@ -50,36 +54,24 @@ describe('Interface Validate', function () {
             b: 'bbbbb',
             name: 'test123',
             sex: 'm'
-        }, 'interface1/Interface2_1'), ValidateResult.success);
+        }, 'interface1/Interface2_1'), ValidateResultUtil.succ);
 
         // 缺少必须字段
-        assert.deepStrictEqual(
-            validator.validate({ name: 'test' }, 'interface1/Interface2_1'),
-            ValidateResult.error(ValidateErrorCode.InnerError, 'sex', ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
-        );
-        assert.deepStrictEqual(
-            validator.validate({ sex: 'm' }, 'interface1/Interface2_1'),
-            ValidateResult.error(ValidateErrorCode.InnerError, 'name', ValidateResult.error(ValidateErrorCode.MissingRequiredMember))
-        );
+        assertValidErr({ name: 'test' }, 'interface1/Interface2_1', i18n.missingRequiredProperty('sex'))
+        assertValidErr({ sex: 'm' }, 'interface1/Interface2_1', i18n.missingRequiredProperty('name'))
 
         // property优先级高于indexSignature
-        assert.deepStrictEqual(
-            validator.validate({
-                name: 'xxxx',
-                sex: 'yyyy'
-            }, 'interface1/Interface2_1'),
-            ValidateResult.error(ValidateErrorCode.InnerError, 'sex', ValidateResult.error(ValidateErrorCode.NonConditionMet))
-        );
+        assertValidErr({
+            name: 'xxxx',
+            sex: 'yyyy'
+        }, 'interface1/Interface2_1', i18n.noMatchedUnionMember, ['sex'])
 
         // index类型错误
-        assert.deepStrictEqual(
-            validator.validate({
-                name: 'test',
-                sex: 'm',
-                other: 123
-            }, 'interface1/Interface2_1'),
-            ValidateResult.error(ValidateErrorCode.InnerError, 'other', ValidateResult.error(ValidateErrorCode.WrongType))
-        );
+        assertValidErr({
+            name: 'test',
+            sex: 'm',
+            other: 123
+        }, 'interface1/Interface2_1', i18n.typeError('string', 'number'), ['other'])
     });
 
     it('Interface: indexSignature: number key', function () {
@@ -87,39 +79,26 @@ describe('Interface Validate', function () {
         assert.deepStrictEqual(validator.validate({
             0: 'aaa',
             123: 'xxxx'
-        }, 'interface1/Interface2_2'), ValidateResult.success);
+        }, 'interface1/Interface2_2'), ValidateResultUtil.succ);
 
         // Infinity和NaN不可作为NumberKey
-        assert.deepStrictEqual(validator.validate({
+        assertValidErr({
             0: 'aaa',
             123: 'xxxx',
             Infinity: 'xxx'
-        }, 'interface1/Interface2_2'), ValidateResult.error(ValidateErrorCode.InnerError, 'Infinity',
-            ValidateResult.error(ValidateErrorCode.InvalidNumberKey)
-        ));
-        assert.deepStrictEqual(validator.validate({
-            0: 'aaa',
-            123: 'xxxx',
-            NaN: 'xxx'
-        }, 'interface1/Interface2_2'), ValidateResult.error(ValidateErrorCode.InnerError, 'NaN',
-            ValidateResult.error(ValidateErrorCode.InvalidNumberKey)
-        ));
+        }, 'interface1/Interface2_2', i18n.invalidNumberKey('Infinity'))
 
         // 字符串不可用作为Key
-        assert.deepStrictEqual(validator.validate({
+        assertValidErr({
             0: 'aaa',
             123: 'xxxx',
             test123: 'xxx'
-        }, 'interface1/Interface2_2'), ValidateResult.error(ValidateErrorCode.InnerError, 'test123',
-            ValidateResult.error(ValidateErrorCode.InvalidNumberKey)
-        ));
-        assert.deepStrictEqual(validator.validate({
+        }, 'interface1/Interface2_2', i18n.invalidNumberKey('test123'))
+        assertValidErr({
             0: 'aaa',
             123: 'xxxx',
             '000': 'xxx'
-        }, 'interface1/Interface2_2'), ValidateResult.error(ValidateErrorCode.InnerError, '000',
-            ValidateResult.error(ValidateErrorCode.InvalidNumberKey)
-        ));
+        }, 'interface1/Interface2_2', i18n.invalidNumberKey('000'))
     });
 
     it('Interface: extends properties', function () {
@@ -135,7 +114,7 @@ describe('Interface Validate', function () {
             },
             value3: 'xxxxxx',
             value4: { value: 0 }
-        }, 'interface2/Interface6'), ValidateResult.success);
+        }, 'interface2/Interface6'), ValidateResultUtil.succ);
 
         // 缺少必要字段
         ['value1', 'value2', 'value3', 'value4'].forEach(v => {
@@ -152,15 +131,11 @@ describe('Interface Validate', function () {
                 value4: { value: 0 }
             };
             delete value[v];
-            assert.deepStrictEqual(validator.validate(value, 'interface2/Interface6'), ValidateResult.error(
-                ValidateErrorCode.InnerError,
-                v,
-                ValidateResult.error(ValidateErrorCode.MissingRequiredMember)
-            ));
+            assertValidErr(value, 'interface2/Interface6', i18n.missingRequiredProperty(v))
         });
 
         // 字段类型错误
-        assert.deepStrictEqual(validator.validate({
+        assertValidErr({
             value1: {
                 a: 1,
                 b: 1
@@ -170,11 +145,7 @@ describe('Interface Validate', function () {
             },
             value3: 'xxxxxx',
             value4: { value: 0 }
-        }, 'interface2/Interface6'), ValidateResult.error(
-            ValidateErrorCode.InnerError,
-            'value1',
-            ValidateResult.error(ValidateErrorCode.InnerError, 'a', ValidateResult.error(ValidateErrorCode.WrongType))
-        ));
+        }, 'interface2/Interface6', i18n.typeError('string', 'number'), ['value1', 'a'])
     });
 
     it('Interface: extends indexSignature', function () {
@@ -184,21 +155,20 @@ describe('Interface Validate', function () {
             value4: 'abcd',
             is1: 'xxx',
             is2: 'xxx'
-        }, 'interface2/Interface8'), ValidateResult.success);
+        }, 'interface2/Interface8'), ValidateResultUtil.succ);
 
         // property内字段，property对，但indexSignature错误
-        assert.deepStrictEqual(validator.validate({
+        assertValidErr({
             value3: 1234,
             value4: 'abcd'
-        }, 'interface2/Interface8'), ValidateResult.error(ValidateErrorCode.InnerError, 'value3', ValidateResult.error(ValidateErrorCode.WrongType)));
+        }, 'interface2/Interface8', i18n.typeError('string', 'number'), ['value3'])
 
         // indexSignature错误
-        assert.deepStrictEqual(validator.validate({
+        assertValidErr({
             value3: '1234',
             value4: 'abcd',
             aaaa: 1234
-        }, 'interface2/Interface8'), ValidateResult.error(ValidateErrorCode.InnerError, 'aaaa', ValidateResult.error(ValidateErrorCode.WrongType)));
-
+        }, 'interface2/Interface8', i18n.typeError('string', 'number'), ['aaaa']);
     })
 
     it('Interface: nested interface', function () {
@@ -214,11 +184,11 @@ describe('Interface Validate', function () {
                 }
             },
             value2: 'b'
-        }, 'interface2/Interface4'), ValidateResult.success);
+        }, 'interface2/Interface4'), ValidateResultUtil.succ);
 
         // 内部错误
         // 成功
-        assert.deepStrictEqual(validator.validate({
+        assertValidErr({
             value1: {
                 value1: {
                     a: 1,
@@ -229,27 +199,10 @@ describe('Interface Validate', function () {
                 }
             },
             value2: 'b'
-        }, 'interface2/Interface4'), ValidateResult.error(ValidateErrorCode.InnerError, 'value1',
-            ValidateResult.error(ValidateErrorCode.InnerError, 'value1', ValidateResult.error(ValidateErrorCode.InnerError, 'a',
-                ValidateResult.error(ValidateErrorCode.WrongType)
-            ))
-        ));
-
-        // originalError
-        let originalError = validator.validate({
-            value1: {
-                value1: {
-                    a: 1,
-                    b: 1
-                },
-                value2: {
-                    c: true
-                }
-            },
-            value2: 'b'
-        }, 'interface2/Interface4').originalError
-        assert.deepStrictEqual(originalError, new ValidateResult(ValidateErrorCode.WrongType, 'value1.value1.a'));
-        assert.deepStrictEqual(originalError.message, 'value1.value1.a: WrongType');
+        }, 'interface2/Interface4', i18n.typeError('string', 'number'), ['value1', 'value1', 'a'], {
+            value: 1,
+            schema: { type: 'String' }
+        })
     })
 
     it('Cannot extend from non-interface', function () {
@@ -302,7 +255,7 @@ describe('Interface Validate', function () {
             }
         })
 
-        assert.deepStrictEqual(validator.validate({}, 'a/b'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ value: 'aaa' }, 'a/b'), ValidateResult.success);
+        assert.deepStrictEqual(validator.validate({}, 'a/b'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ value: 'aaa' }, 'a/b'), ValidateResultUtil.succ);
     })
 })
