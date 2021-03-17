@@ -10,7 +10,7 @@ describe('Interface Validate', function () {
 
     function assertValidErr(value: any, schemaId: string, errMsg: string, property?: string[], other?: Partial<ValidateResultError>) {
         let vRes = validator.validate(value, schemaId);
-        assert.deepStrictEqual(vRes.errMsg, errMsg);
+        assert.deepStrictEqual(vRes.errMsg, ValidateResultError.getErrMsg(errMsg, property));
         assert.deepStrictEqual(vRes.property, property);
         if (other) {
             for (let key in other) {

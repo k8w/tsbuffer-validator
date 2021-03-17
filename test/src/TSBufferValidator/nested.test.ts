@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { TSBufferProto } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../..';
-import { ValidateResult, ValidateErrorCode } from '../../../src/ValidateResult';
+import { ValidateResult, ValidateErrorCode } from '../../../src/ValidateResultUtil';
 
 describe('NestedType', function () {
     const proto: TSBufferProto = require('../../genTestSchemas/output');

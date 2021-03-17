@@ -4,7 +4,8 @@ export interface ValidateResultSucc {
     isSucc: true,
     errMsg?: undefined
 }
-export interface ValidateResultError {
+
+export interface ValidateResultErrorData {
     isSucc: false,
     property?: string[],
     // AtomError
@@ -14,19 +15,51 @@ export interface ValidateResultError {
     memberErrors?: ValidateResultError[],
     errorMemberIndex?: number
 }
+export class ValidateResultError implements ValidateResultErrorData {
+    isSucc: false = false;
+
+    // AtomError
+    _errMsg!: string;
+    property?: string[];
+    value!: any;
+    schema!: TSBufferSchema;
+    memberErrors?: ValidateResultError[];
+    errorMemberIndex?: number;
+
+    constructor(data: ValidateResultErrorData) {
+        Object.assign(this, data);
+    }
+
+    get errMsg(): string {
+        return ValidateResultError.getErrMsg(this._errMsg, this.property);
+    }
+    set errMsg(v: string) {
+        this._errMsg = v;
+    }
+
+    static getErrMsg(errMsg: string, property: string[] | undefined) {
+        if (property?.length) {
+            return `Property ${property.join('.')}: ${errMsg}`
+        }
+        else {
+            return errMsg;
+        }
+    }
+}
+
 export type ValidateResult = ValidateResultSucc | ValidateResultError;
 
 export class ValidateResultUtil {
-    static readonly succ: ValidateResult = { isSucc: true };
+    static readonly succ: ValidateResultSucc = { isSucc: true };
 
     static error(errMsg: string, value: any, schema: TSBufferSchema, extra?: Partial<ValidateResultError>): ValidateResultError {
-        return {
+        return new ValidateResultError({
             isSucc: false,
             errMsg: errMsg,
             value: value,
             schema: schema,
             ...extra
-        }
+        })
     }
 
     static innerError(property: string | string[], innerError: ValidateResultError): ValidateResultError {

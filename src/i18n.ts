@@ -1,5 +1,5 @@
 export const i18n = {
-    typeError: (expect: string, actual: string) => `Type is expected to be '${expect}', but actually '${actual}'.`,
+    typeError: (expect: string, actual: string) => `Expected type is '${expect}', but actually '${actual}'.`,
     notInstanceof: (expect: string) => `Value is expected to be instance of '${expect}', but actually not.`,
     invalidScalarType: (value: number | bigint, scalarType: string) => `'${value}' is not a valid '${scalarType}'.`,
     tupleOverLength: (valueLength: Number, schemaLength: number) => `Value has ${valueLength} elements but schema allows only ${schemaLength}.`,
