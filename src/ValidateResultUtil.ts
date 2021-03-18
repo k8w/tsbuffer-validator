@@ -1,4 +1,5 @@
 import { TSBufferSchema } from "tsbuffer-schema";
+import { IntersectionTypeSchema } from "tsbuffer-schema/src/schemas/IntersectionTypeSchema";
 
 export interface ValidateResultSucc {
     isSucc: true,
@@ -12,8 +13,13 @@ export interface ValidateResultErrorData {
     errMsg: string,
     value: any,
     schema: TSBufferSchema,
-    memberErrors?: ValidateResultError[],
-    errorMemberIndex?: number
+    /** Union Member Error (all) */
+    unionMemberErrors?: ValidateResultError[];
+    /** Intersection Member Error (any one) */
+    intersection?: {
+        schema: IntersectionTypeSchema,
+        errorMemberIndex: number
+    }
 }
 export class ValidateResultError implements ValidateResultErrorData {
     isSucc: false = false;
@@ -23,8 +29,13 @@ export class ValidateResultError implements ValidateResultErrorData {
     property?: string[];
     value!: any;
     schema!: TSBufferSchema;
-    memberErrors?: ValidateResultError[];
-    errorMemberIndex?: number;
+    /** Union Member Error (all) */
+    unionMemberErrors?: ValidateResultError[];
+    /** Intersection Member Error (any one) */
+    fromIntersection?: {
+        schema: IntersectionTypeSchema,
+        errorMemberIndex: number
+    };
 
     constructor(data: ValidateResultErrorData) {
         Object.assign(this, data);

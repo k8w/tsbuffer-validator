@@ -507,7 +507,8 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         // 有一成功则成功
         let isSomeSucc: boolean = false;
         let memberErrors: ValidateResultError[] = [];
-        for (let member of schema.members) {
+        for (let i = 0; i < schema.members.length; ++i) {
+            let member = schema.members[i];
             let memberType = this.protoHelper.isTypeReference(member.type) ? this.protoHelper.parseReference(member.type) : member.type;
             let memberPrune: ValidatePruneOptions | undefined = prune ? {} : undefined;
             let vRes: ValidateResult = this._validate(value, memberType, {
@@ -534,7 +535,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
 
         // 有一成功则成功; 否则全失败，则失败
         return isSomeSucc ? ValidateResultUtil.succ : ValidateResultUtil.error(i18n.noMatchedUnionMember, value, schema, {
-            memberErrors: memberErrors
+            unionMemberErrors: memberErrors
         });
     }
 
@@ -561,7 +562,10 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
 
             // 有一失败则失败
             if (!vRes.isSucc) {
-                vRes.errorMemberIndex = i;
+                vRes.fromIntersection = {
+                    schema: schema,
+                    errorMemberIndex: i
+                };
                 return vRes;
             }
 
@@ -585,7 +589,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
             if (value === null) {
                 return 'null';
             }
-            else if (Array.isArray(type)) {
+            else if (Array.isArray(value)) {
                 return 'array';
             }
             else {
