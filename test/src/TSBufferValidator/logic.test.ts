@@ -163,27 +163,27 @@ describe('LogicType', function () {
         assertValidErr({ a: 1, b: 1, c: 1 }, 'logic/ABCD4', undefined);
     })
 
-    // it('Basic Intersection', function () {
-    //     let validator = new TSBufferValidator({
-    //         'a/a1': {
-    //             type: 'Intersection',
-    //             members: [
-    //                 { id: 0, type: { type: 'String' } },
-    //                 { id: 1, type: { type: 'String' } },
-    //             ]
-    //         },
-    //         'a/a2': {
-    //             type: 'Intersection',
-    //             members: [
-    //                 { id: 0, type: { type: 'String' } },
-    //                 { id: 1, type: { type: 'Any' } },
-    //             ]
-    //         }
-    //     });
+    it('Basic Intersection', function () {
+        let validator = new TSBufferValidator({
+            'a/a1': {
+                type: 'Intersection',
+                members: [
+                    { id: 0, type: { type: 'String' } },
+                    { id: 1, type: { type: 'String' } },
+                ]
+            },
+            'a/a2': {
+                type: 'Intersection',
+                members: [
+                    { id: 0, type: { type: 'String' } },
+                    { id: 1, type: { type: 'Any' } },
+                ]
+            }
+        });
 
-    //     assert.deepStrictEqual(validator.validate('abc', 'a/a1'), ValidateResultUtil.succ);
-    //     assert.deepStrictEqual(validator.validate('abc', 'a/a2'), ValidateResultUtil.succ);
-    //     assert.deepStrictEqual(validator.validate(123, 'a/a1'), ValidateResultUtil.innerError('<Condition0>', ValidateErrorCode.WrongType));
-    //     assert.deepStrictEqual(validator.validate(123, 'a/a2'), ValidateResultUtil.innerError('<Condition0>', ValidateErrorCode.WrongType));
-    // });
+        assert.deepStrictEqual(validator.validate('abc', 'a/a1'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate('abc', 'a/a2'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate(123, 'a/a1').errMsg, ErrorMsg.typeError('string', 'number'));
+        assert.deepStrictEqual(validator.validate(123, 'a/a2').errMsg, ErrorMsg.typeError('string', 'number'));
+    });
 })
