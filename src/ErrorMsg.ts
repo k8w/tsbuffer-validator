@@ -9,7 +9,7 @@ export const ErrorMsg = {
     invalidNumberKey: (key: string) => `\`${key}\` is not a valid key, the key here should be a \`number\`.`,
 
     // Union
-    unionNoLiteralMatch: (value: any, literals: string[]) => `\`${stringify(value)}\` is not matched to \`${literals.join(' | ')}\``,
+    unionTypesNotMatch: (value: any, types: string[]) => `\`${stringify(value)}\` is not matched to \`${types.join(' | ')}\``,
     unionNoMemberMatch: (memberErrors: { errMsg: string }[]) => `No union member matched, detail:\n${memberErrors.map((v, i) => `  <${i}> ${v.errMsg}`).join('\n')}`,
 };
 

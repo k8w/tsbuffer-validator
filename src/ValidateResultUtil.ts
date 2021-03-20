@@ -36,7 +36,7 @@ export class ValidateResultError<T extends ErrorType = ErrorType>  {
         let errMsg = (ErrorMsg[error.type] as any)(...error.params)
 
         if (error.inner?.property.length) {
-            return `Property '${error.inner.property.join('.')}': ${errMsg}`
+            return `Property \`${error.inner.property.join('.')}\`: ${errMsg}`
         }
         else {
             return errMsg;

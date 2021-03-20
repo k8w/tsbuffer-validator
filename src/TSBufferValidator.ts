@@ -544,20 +544,19 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         // 任一失败，则失败
         else {
             // All member error without inner: show simple msg
-            if (memberErrors.every(v => !v.error.inner)) {
+            if (memberErrors.every(v => !v.error.inner && (v.error.type === 'typeError' || v.error.type === 'invalidLiteralValue'))) {
+                let valueType = this._getTypeof(value);
+                let expectedTypes = memberErrors.map(v => v.error.type === 'typeError' ? v.error.params[0] : this._getTypeof(v.error.params[1])).distinct();
+
                 // Expected type A|B|C, actually type D
-                if (memberErrors.every(v => v.error.type === 'typeError')) {
-                    let expectedTypes = memberErrors.map(v => v.error.params[0] as string).distinct();
+                if (expectedTypes.indexOf(valueType) === -1) {
                     return ValidateResultUtil.error('typeError', expectedTypes.join(' | '), this._getTypeof(value))
                 }
 
                 // `'D'` is not matched to `'A'|'B'|'C'`
-                let valueType = this._getTypeof(value);
-                if ((valueType !== 'Object' && valueType !== 'Array')
-                    && memberErrors.every(v => v.error.type === 'typeError' || v.error.type === 'invalidLiteralValue')
-                ) {
-                    let literals = memberErrors.map(v => v.error.type === 'typeError' ? v.error.params[0] : stringify(v.error.params[1])).distinct();
-                    return ValidateResultUtil.error('unionNoLiteralMatch', value, literals);
+                if (valueType !== 'Object' && valueType !== 'Array') {
+                    let types = memberErrors.map(v => v.error.type === 'typeError' ? v.error.params[0] : stringify(v.error.params[1])).distinct();
+                    return ValidateResultUtil.error('unionTypesNotMatch', value, types);
                 }
             }
 
