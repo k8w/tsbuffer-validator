@@ -64,6 +64,7 @@ export interface B {
 export type AB = A | B;
 export type PickAB = Pick<AB, 'type' | 'common'>;
 export type OmitAB = Omit<AB, 'common' | 'common1'>;
+// only common
 export type NestedAB = Pick<Omit<Pick<AB, 'type' | 'common' | 'common1'>, 'common1' | 'type'>, 'common'>
 export type PartialAB = Partial<AB>;
 export type PartialPick = Partial<PickAB>;

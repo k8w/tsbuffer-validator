@@ -1,5 +1,5 @@
 export const ErrorMsg = {
-    typeError: (expect: string, actual: string) => `Expected to be \`${expect}\`, actually \`${actual}\`.`,
+    typeError: (expect: string, actual: string) => `Expected type to be \`${expect}\`, actually \`${actual}\`.`,
     invalidScalarType: (value: number | bigint, scalarType: string) => `\`${value}\` is not a valid \`${scalarType}\`.`,
     tupleOverLength: (valueLength: Number, schemaLength: number) => `Value has ${valueLength} elements but schema allows only ${schemaLength}.`,
     invalidEnumValue: (value: string | number) => `\`${value}\` is not a valid enum member.`,

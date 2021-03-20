@@ -1,62 +1,52 @@
 import * as assert from 'assert';
 import { TSBufferProto } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../..';
-import { ValidateResult, ValidateErrorCode } from '../../../src/ValidateResultUtil';
+import { ErrorMsg } from '../../../src/ErrorMsg';
 
 describe('NestedType', function () {
     const proto: TSBufferProto = require('../../genTestSchemas/output');
     let validator = new TSBufferValidator(proto);
 
+    function validateAndAssert(value: any, schemaId: string, errMsg: string | undefined, property?: string[]) {
+        let vRes = validator.validate(value, schemaId);
+        if (property) {
+            assert.strictEqual(vRes.errMsg, `Property \`${property.join('.')}\`: ${errMsg}`);
+        }
+        else {
+            assert.strictEqual(vRes.errMsg, errMsg)
+        }
+    }
+
     it('Array', function () {
         // succ
-        assert.deepStrictEqual(validator.validate([], 'nested/ArrStr'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate(['a', 'b', 'c'], 'nested/ArrStr'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate([{ value: 'xxx' }, { value: 'xxx' }], 'nested/ArrObj'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate([[{ value: 'xxx' }], [{ value: 'xxx' }]], 'nested/ArrArr'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate([123, 'xx', 123, 'xx'], 'nested/UnionArr'), ValidateResult.success);
+        validateAndAssert([], 'nested/ArrStr', undefined);
+        validateAndAssert(['a', 'b', 'c'], 'nested/ArrStr', undefined);
+        validateAndAssert([{ value: 'xxx' }, { value: 'xxx' }], 'nested/ArrObj', undefined);
+        validateAndAssert([[{ value: 'xxx' }], [{ value: 'xxx' }]], 'nested/ArrArr', undefined);
+        validateAndAssert([123, 'xx', 123, 'xx'], 'nested/UnionArr', undefined);
         // fail
-        assert.deepStrictEqual(validator.validate(null, 'nested/ArrStr'), ValidateResult.error(ValidateErrorCode.WrongType));
-        assert.deepStrictEqual(validator.validate(['a', 123, 'c'], 'nested/ArrStr'), ValidateResult.error(
-            ValidateErrorCode.InnerError, '1', ValidateResult.error(ValidateErrorCode.WrongType)
-        ));
-        assert.deepStrictEqual(validator.validate([0, { value: 'xxx' }], 'nested/ArrObj'), ValidateResult.error(
-            ValidateErrorCode.InnerError, '0', ValidateResult.error(ValidateErrorCode.WrongType)
-        ));
-        assert.deepStrictEqual(validator.validate([[{ value: 'xxx' }], [{ value: 123 }]], 'nested/ArrArr'), ValidateResult.error(
-            ValidateErrorCode.InnerError, '1', ValidateResult.error(
-                ValidateErrorCode.InnerError, '0', ValidateResult.error(
-                    ValidateErrorCode.InnerError, 'value', ValidateResult.error(ValidateErrorCode.WrongType)
-                )
-            )
-        ));
-        assert.deepStrictEqual(validator.validate([123, 'xx', null, 'xx'], 'nested/UnionArr'), ValidateResult.error(
-            ValidateErrorCode.InnerError, '2', ValidateResult.error(ValidateErrorCode.NonConditionMet)
-        ));
+        validateAndAssert(null, 'nested/ArrStr', ErrorMsg.typeError('Array', 'null'));
+        validateAndAssert(['a', 123, 'c'], 'nested/ArrStr', ErrorMsg.typeError('string', 'number'), ['1']);
+        validateAndAssert([0, { value: 'xxx' }], 'nested/ArrObj', ErrorMsg.typeError('Object', 'number'), ['0']);
+        validateAndAssert([[{ value: 'xxx' }], [{ value: 123 }]], 'nested/ArrArr', ErrorMsg.typeError('string', 'number'), ['1', '0', 'value']);
+        validateAndAssert([123, 'xx', null, 'xx'], 'nested/UnionArr', ErrorMsg.typeError('string | number', 'null'), ['2']);
     })
 
     it('Tuple', function () {
         // succ
-        assert.deepStrictEqual(validator.validate([123, 'x'], 'nested/Tuple1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate([123, 'x', 123], 'nested/Tuple1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate([{ value: 'x' }, 'x', [true, false]], 'nested/Tuple2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate([{ value: 'x' }, 'x', []], 'nested/Tuple2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate([{ value: 'x' }, 'x', [false, undefined]], 'nested/Tuple2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate([{ value: 'x' }, 'x'], 'nested/Tuple2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate([{ value: 'x' }], 'nested/Tuple2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate([{ value: 'x' }, undefined, [undefined, true]], 'nested/Tuple2'), ValidateResult.success);
+        validateAndAssert([123, 'x'], 'nested/Tuple1', undefined);
+        validateAndAssert([123, 'x', 123], 'nested/Tuple1', undefined);
+        validateAndAssert([{ value: 'x' }, 'x', [true, false]], 'nested/Tuple2', undefined);
+        validateAndAssert([{ value: 'x' }, 'x', []], 'nested/Tuple2', undefined);
+        validateAndAssert([{ value: 'x' }, 'x', [false, undefined]], 'nested/Tuple2', undefined);
+        validateAndAssert([{ value: 'x' }, 'x'], 'nested/Tuple2', undefined);
+        validateAndAssert([{ value: 'x' }], 'nested/Tuple2', undefined);
+        validateAndAssert([{ value: 'x' }, undefined, [undefined, true]], 'nested/Tuple2', undefined);
         // fail
-        assert.deepStrictEqual(validator.validate(123, 'nested/Tuple1'), ValidateResult.error(ValidateErrorCode.WrongType));
-        assert.deepStrictEqual(validator.validate([123, 123], 'nested/Tuple1'), ValidateResult.error(
-            ValidateErrorCode.InnerError, '1', ValidateResult.error(ValidateErrorCode.WrongType)
-        ));
-        assert.deepStrictEqual(validator.validate([{ value: 'x' }, 'x', [1, false]], 'nested/Tuple2'), ValidateResult.error(
-            ValidateErrorCode.InnerError, '2', ValidateResult.error(
-                ValidateErrorCode.InnerError, '0', ValidateResult.error(ValidateErrorCode.WrongType)
-            )
-        ));
-        assert.deepStrictEqual(validator.validate([{ value: 'x' }, 'x', [], 123], 'nested/Tuple2'), ValidateResult.error(ValidateErrorCode.TupleOverlength));
-        assert.deepStrictEqual(validator.validate([], 'nested/Tuple2'), ValidateResult.error(
-            ValidateErrorCode.InnerError, '0', ValidateResult.error(ValidateErrorCode.MissingRequiredMember)
-        ));
+        validateAndAssert(123, 'nested/Tuple1', ErrorMsg.typeError('Array', 'number'));
+        validateAndAssert([123, 123], 'nested/Tuple1', ErrorMsg.typeError('string', 'number'), ['1']);
+        validateAndAssert([{ value: 'x' }, 'x', [1, false]], 'nested/Tuple2', ErrorMsg.typeError('boolean', 'number'), ['2', '0']);
+        validateAndAssert([{ value: 'x' }, 'x', [], 123], 'nested/Tuple2', ErrorMsg.tupleOverLength(4, 3));
+        validateAndAssert([], 'nested/Tuple2', ErrorMsg.missingRequiredProperty('0'));
     })
 })

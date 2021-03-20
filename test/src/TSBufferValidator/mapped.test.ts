@@ -1,200 +1,213 @@
 import * as assert from 'assert';
 import { TSBufferProto } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../..';
-import { ValidateResult, ValidateErrorCode } from '../../../src/ValidateResultUtil';
+import { ErrorMsg } from '../../../src/ErrorMsg';
 
 describe('MappedType Validate', function () {
     const proto: TSBufferProto = require('../../genTestSchemas/output');
     let validator = new TSBufferValidator(proto);
 
+    function validateAndAssert(value: any, schemaId: string, errMsg: string | undefined, property?: string[]) {
+        let vRes = validator.validate(value, schemaId);
+        if (property) {
+            assert.strictEqual(vRes.errMsg, `Property \`${property.join('.')}\`: ${errMsg}`);
+        }
+        else {
+            assert.strictEqual(vRes.errMsg, errMsg)
+        }
+    }
+
     it('Pick', function () {
         // simple Pick
-        assert.deepStrictEqual(validator.validate({ name: 'x' }, 'mapped/Pick1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ name: 'x', orders: [] }, 'mapped/Pick1'),
-            ValidateResult.innerError('orders', ValidateErrorCode.UnexpectedField));
-        assert.deepStrictEqual(validator.validate({}, 'mapped/Pick1'),
-            ValidateResult.innerError('name', ValidateErrorCode.MissingRequiredMember));
+        validateAndAssert({ name: 'x' }, 'mapped/Pick1', undefined);
+        validateAndAssert({ name: 'x', orders: [] }, 'mapped/Pick1', ErrorMsg.excessProperty('orders'));
+        validateAndAssert({}, 'mapped/Pick1', ErrorMsg.missingRequiredProperty('name'));
 
         // Pick fields
-        assert.deepStrictEqual(validator.validate({ name: 'x' }, 'mapped/Pick2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ name: 'x', orders: [1, 2, 3] }, 'mapped/Pick2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ name: 'x', orders: [1, 2, 3], sex: { value: 'm' } }, 'mapped/Pick2'),
-            ValidateResult.innerError('sex', ValidateErrorCode.UnexpectedField));
+        validateAndAssert({ name: 'x' }, 'mapped/Pick2', undefined);
+        validateAndAssert({ name: 'x', orders: [1, 2, 3] }, 'mapped/Pick2', undefined);
+        validateAndAssert({ name: 'x', orders: [1, 2, 3], sex: { value: 'm' } }, 'mapped/Pick2',
+            ErrorMsg.excessProperty('sex'));
 
         // Pick<Pick>
-        assert.deepStrictEqual(validator.validate({ orders: [1, 2, 3] }, 'mapped/Pick3'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({}, 'mapped/Pick3'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ name: 'x', orders: [1] }, 'mapped/Pick3'), ValidateResult.innerError('name', ValidateErrorCode.UnexpectedField));
+        validateAndAssert({ orders: [1, 2, 3] }, 'mapped/Pick3', undefined);
+        validateAndAssert({}, 'mapped/Pick3', undefined);
+        validateAndAssert({ name: 'x', orders: [1] }, 'mapped/Pick3', ErrorMsg.excessProperty('name'));
 
         // indexSignature
-        assert.deepStrictEqual(validator.validate({ a: 'x', c: 'x' }, 'mapped/IPick'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ a: 'x', c: 1 }, 'mapped/IPick'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ a: 'x', c: undefined }, 'mapped/IPick'), ValidateResult.innerError('c', ValidateErrorCode.MissingRequiredMember));
-        assert.deepStrictEqual(validator.validate({ a: 'x', c: null }, 'mapped/IPick'), ValidateResult.innerError('c', ValidateErrorCode.NonConditionMet));
+        validateAndAssert({ a: 'x', c: 'x' }, 'mapped/IPick', undefined);
+        validateAndAssert({ a: 'x', c: 1 }, 'mapped/IPick', undefined);
+        validateAndAssert({ a: 'x', c: undefined }, 'mapped/IPick', ErrorMsg.missingRequiredProperty('c'));
+        validateAndAssert({ a: 'x', c: null }, 'mapped/IPick', ErrorMsg.typeError('string | number', 'null'), ['c']);
 
         // Pick<A|B>
-        assert.deepStrictEqual(validator.validate({
+        validateAndAssert({
             type: 'A',
             common: 'xxx'
-        }, 'mapped/PickAB'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/PickAB', undefined);
+        validateAndAssert({
             type: 'B',
             common: 'xxx'
-        }, 'mapped/PickAB'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/PickAB', undefined);
+        validateAndAssert({
             type: 'A',
             common: 'xxx',
             valueA: 'asdg'
-        }, 'mapped/PickAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/PickAB', ErrorMsg.excessProperty('valueA'));
+        validateAndAssert({
             common: 'xxx',
-        }, 'mapped/PickAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+        }, 'mapped/PickAB', ErrorMsg.missingRequiredProperty('type'));
     });
 
     it('Partial', function () {
         // Partial1
-        assert.deepStrictEqual(validator.validate({}, 'mapped/Partial1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ name: 'x' }, 'mapped/Partial1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ sex: undefined }, 'mapped/Partial1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ a: 1 }, 'mapped/Partial1'), ValidateResult.innerError('a', ValidateErrorCode.UnexpectedField));
+        validateAndAssert({}, 'mapped/Partial1', undefined);
+        validateAndAssert({ name: 'x' }, 'mapped/Partial1', undefined);
+        validateAndAssert({ sex: undefined }, 'mapped/Partial1', undefined);
+        validateAndAssert({ a: 1 }, 'mapped/Partial1', ErrorMsg.excessProperty('a'));
 
         // Partial2
-        assert.deepStrictEqual(validator.validate({}, 'mapped/Partial2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ name: 'xxx' }, 'mapped/Partial2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ orders: [1] }, 'mapped/Partial2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ name: 'x', orders: [1] }, 'mapped/Partial2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ name: 'x', orders: [1], sex: { value: 'm' } }, 'mapped/Partial2'), ValidateResult.innerError('sex', ValidateErrorCode.UnexpectedField));
-        assert.deepStrictEqual(validator.validate({ name: 123 }, 'mapped/Partial2'), ValidateResult.innerError('name', ValidateErrorCode.WrongType));
+        validateAndAssert({}, 'mapped/Partial2', undefined);
+        validateAndAssert({ name: 'xxx' }, 'mapped/Partial2', undefined);
+        validateAndAssert({ orders: [1] }, 'mapped/Partial2', undefined);
+        validateAndAssert({ name: 'x', orders: [1] }, 'mapped/Partial2', undefined);
+        validateAndAssert({ name: 'x', orders: [1], sex: { value: 'm' } }, 'mapped/Partial2', ErrorMsg.excessProperty('sex'));
+        validateAndAssert({ name: 123 }, 'mapped/Partial2', ErrorMsg.typeError('string', 'number'), ['name']);
 
         // indexSignature
-        assert.deepStrictEqual(validator.validate({ a: 'x', c: 'x' }, 'mapped/IPartial'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ c: 1 }, 'mapped/IPartial'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ a: 'x', c: undefined }, 'mapped/IPartial'), ValidateResult.innerError('c', ValidateErrorCode.NonConditionMet));
-    
+        validateAndAssert({ a: 'x', c: 'x' }, 'mapped/IPartial', undefined);
+        validateAndAssert({ c: 1 }, 'mapped/IPartial', undefined);
+        validateAndAssert({ a: 'x', c: undefined }, 'mapped/IPartial', ErrorMsg.typeError('string | number', 'undefined'), ['c']);
+
         // PartialAB
-        assert.deepStrictEqual(validator.validate({ type: 'A', valueA: 'AAA', common: 'xxx' }, 'mapped/PartialAB'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ type: 'A', valueA: 'AAA' }, 'mapped/PartialAB'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ type: 'B' }, 'mapped/PartialAB'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ common1: 'string' }, 'mapped/PartialAB'), ValidateResult.success);
+        validateAndAssert({ type: 'A', valueA: 'AAA', common: 'xxx' }, 'mapped/PartialAB', undefined);
+        validateAndAssert({ type: 'A', valueA: 'AAA' }, 'mapped/PartialAB', undefined);
+        validateAndAssert({ type: 'B' }, 'mapped/PartialAB', undefined);
+        validateAndAssert({ common1: 'string' }, 'mapped/PartialAB', undefined);
     });
 
     it('Omit', function () {
         // Omit1
-        assert.deepStrictEqual(validator.validate({ name: 'x' }, 'mapped/Omit1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ name: 'x', orders: [1] }, 'mapped/Omit1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ name: 'x', orders: [1], sex: { value: 'm' } }, 'mapped/Omit1'), ValidateResult.innerError('sex', ValidateErrorCode.UnexpectedField));
+        validateAndAssert({ name: 'x' }, 'mapped/Omit1', undefined);
+        validateAndAssert({ name: 'x', orders: [1] }, 'mapped/Omit1', undefined);
+        validateAndAssert({ name: 'x', orders: [1], sex: { value: 'm' } }, 'mapped/Omit1', ErrorMsg.excessProperty('sex'));
 
         // Omit2
-        assert.deepStrictEqual(validator.validate({ name: 'x' }, 'mapped/Omit2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ name: 'x', orders: [1] }, 'mapped/Omit2'), ValidateResult.innerError('orders', ValidateErrorCode.UnexpectedField));
-        assert.deepStrictEqual(validator.validate({ name: 'x', sex: { value: 'f' } }, 'mapped/Omit2'), ValidateResult.innerError('sex', ValidateErrorCode.UnexpectedField));
-        assert.deepStrictEqual(validator.validate({}, 'mapped/Omit2'), ValidateResult.innerError('name', ValidateErrorCode.MissingRequiredMember));
+        validateAndAssert({ name: 'x' }, 'mapped/Omit2', undefined);
+        validateAndAssert({ name: 'x', orders: [1] }, 'mapped/Omit2', ErrorMsg.excessProperty('orders'));
+        validateAndAssert({ name: 'x', sex: { value: 'f' } }, 'mapped/Omit2', ErrorMsg.excessProperty('sex'));
+        validateAndAssert({}, 'mapped/Omit2', ErrorMsg.missingRequiredProperty('name'));
 
         // Omit3
-        assert.deepStrictEqual(validator.validate({}, 'mapped/Omit3'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ orders: [1] }, 'mapped/Omit3'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ name: 'x' }, 'mapped/Omit3'), ValidateResult.innerError('name', ValidateErrorCode.UnexpectedField));
-        assert.deepStrictEqual(validator.validate({ sex: 'x' }, 'mapped/Omit3'), ValidateResult.innerError('sex', ValidateErrorCode.UnexpectedField));
+        validateAndAssert({}, 'mapped/Omit3', undefined);
+        validateAndAssert({ orders: [1] }, 'mapped/Omit3', undefined);
+        validateAndAssert({ name: 'x' }, 'mapped/Omit3', ErrorMsg.excessProperty('name'));
+        validateAndAssert({ sex: 'x' }, 'mapped/Omit3', ErrorMsg.excessProperty('sex'));
 
         // indexSignature
-        assert.deepStrictEqual(validator.validate({ a: 'x', d: 'x' }, 'mapped/IOmit'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ a: 'x' }, 'mapped/IOmit'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ a: 'x', b: 1 }, 'mapped/IOmit'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'b', c: 'c' }, 'mapped/IOmit'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ a: 'x', c: null }, 'mapped/IOmit'), ValidateResult.innerError('c', ValidateErrorCode.NonConditionMet));
-    
+        validateAndAssert({ a: 'x', d: 'x' }, 'mapped/IOmit', undefined);
+        validateAndAssert({ a: 'x' }, 'mapped/IOmit', undefined);
+        validateAndAssert({ a: 'x', b: 1 }, 'mapped/IOmit', undefined);
+        validateAndAssert({ a: 'x', b: 'b', c: 'c' }, 'mapped/IOmit', undefined);
+        validateAndAssert({ a: 'x', c: null }, 'mapped/IOmit', ErrorMsg.typeError('string | number', 'null'), ['c']);
+
         // Omit<A|B>
-        assert.deepStrictEqual(validator.validate({
+        validateAndAssert({
             type: 'A',
             valueA: 'AAA'
-        }, 'mapped/OmitAB'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/OmitAB', undefined);
+        validateAndAssert({
             type: 'B',
             valueB: 'BBB',
             common2: 'xxx'
-        }, 'mapped/OmitAB'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/OmitAB', undefined);
+        validateAndAssert({
             type: 'A',
             valueB: 'BBB'
-        }, 'mapped/OmitAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/OmitAB', ErrorMsg.unionMembersNotMatch([
+            { errMsg: ErrorMsg.missingRequiredProperty('valueA') },
+            { errMsg: 'Property `type`: ' + ErrorMsg.invalidLiteralValue('B', 'A') }
+        ]));
+        validateAndAssert({
             type: 'A',
-        }, 'mapped/OmitAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/OmitAB', ErrorMsg.unionMembersNotMatch([
+            { errMsg: ErrorMsg.missingRequiredProperty('valueA') },
+            { errMsg: 'Property `type`: ' + ErrorMsg.invalidLiteralValue('B', 'A') }
+        ]));
+        validateAndAssert({
             type: 'A',
             valueA: 'AAA',
             common: 'asdg'
-        }, 'mapped/OmitAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+        }, 'mapped/OmitAB', ErrorMsg.excessProperty('common'));
     });
 
     it('Nested Pick<A|B> Omit<A|B>', function () {
-        assert.deepStrictEqual(validator.validate({
+        validateAndAssert({
             common: 'asdg'
-        }, 'mapped/NestedAB'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/NestedAB', undefined);
+        validateAndAssert({
             type: 'A',
             common: 'asdg'
-        }, 'mapped/NestedAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/NestedAB', ErrorMsg.excessProperty('type'));
+        validateAndAssert({
             type: 'A',
             valueA: 'asdg',
             common: 'asdg'
-        }, 'mapped/NestedAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/NestedAB', ErrorMsg.excessProperty('type'));
+        validateAndAssert({
             common: 'asdg',
             common2: 'asdg'
-        }, 'mapped/NestedAB'), ValidateResult.error(ValidateErrorCode.NonConditionMet));
+        }, 'mapped/NestedAB', ErrorMsg.excessProperty('common2'));
     })
 
     it('Overwrite', function () {
         // Overwrite1
-        assert.deepStrictEqual(validator.validate({
+        validateAndAssert({
             name: 'x',
             orders: [1, 2],
             sex: 'm',
             other: 'xx'
-        }, 'mapped/Overwrite1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/Overwrite1', undefined);
+        validateAndAssert({
             name: 'x',
             sex: 'm',
             other: 'xx'
-        }, 'mapped/Overwrite1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/Overwrite1', undefined);
+        validateAndAssert({
             name: 'x',
             sex: { value: 'm' },
             other: 'xx'
-        }, 'mapped/Overwrite1'), ValidateResult.innerError('sex', ValidateErrorCode.NonConditionMet));
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/Overwrite1', 'Property `sex`: ' + ErrorMsg.typeError('string', 'Object'));
+        validateAndAssert({
             name: 'x',
             other: 'xx'
-        }, 'mapped/Overwrite1'), ValidateResult.innerError('sex', ValidateErrorCode.MissingRequiredMember));
+        }, 'mapped/Overwrite1', ErrorMsg.missingRequiredProperty('sex'));
 
         // Overwrite2
-        assert.deepStrictEqual(validator.validate({
+        validateAndAssert({
             name: 'x',
             sex: 'm',
             other: 'xx'
-        }, 'mapped/Overwrite2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/Overwrite2', undefined);
+        validateAndAssert({
             name: 'x',
             other: 'xx'
-        }, 'mapped/Overwrite2'), ValidateResult.innerError('sex', ValidateErrorCode.MissingRequiredMember));
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/Overwrite2', ErrorMsg.missingRequiredProperty('sex'));
+        validateAndAssert({
             sex: 'f',
             other: 'xx'
-        }, 'mapped/Overwrite2'), ValidateResult.innerError('name', ValidateErrorCode.MissingRequiredMember));
-        assert.deepStrictEqual(validator.validate({
+        }, 'mapped/Overwrite2', ErrorMsg.missingRequiredProperty('name'));
+        validateAndAssert({
             name: 'x',
             orders: [1, 2],
             sex: 'm',
             other: 'xx'
-        }, 'mapped/Overwrite2'), ValidateResult.innerError('orders', ValidateErrorCode.UnexpectedField));
+        }, 'mapped/Overwrite2', ErrorMsg.excessProperty('orders'));
 
         // indexSignature
-        assert.deepStrictEqual(validator.validate({ a: 1, b: 'x', c: 'x' }, 'mapped/IOverwrite1'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ a: '1', b: 2 }, 'mapped/IOverwrite1'), ValidateResult.innerError('a', ValidateErrorCode.WrongType));
-        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', c: 'x' }, 'mapped/IOverwrite2'), ValidateResult.success);
-        assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', c: 1 }, 'mapped/IOverwrite2'), ValidateResult.innerError('c', ValidateErrorCode.WrongType));
-
+        validateAndAssert({ a: 1, b: 'x', c: 'x' }, 'mapped/IOverwrite1', undefined);
+        validateAndAssert({ a: '1', b: 2 }, 'mapped/IOverwrite1', ErrorMsg.typeError('number', 'string'), ['a']);
+        validateAndAssert({ a: 'x', b: 'x', c: 'x' }, 'mapped/IOverwrite2', undefined);
+        validateAndAssert({ a: 'x', b: 'x', c: 1 }, 'mapped/IOverwrite2', ErrorMsg.typeError('string', 'number'), ['c']);
     });
 });
