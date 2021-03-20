@@ -976,12 +976,12 @@
         "name": "type",
         "type": {
           "type": "Literal",
-          "literal": "me2"
+          "literal": "me3"
         }
       },
       {
         "id": 1,
-        "name": "value2",
+        "name": "value3",
         "type": {
           "type": "Interface",
           "properties": [

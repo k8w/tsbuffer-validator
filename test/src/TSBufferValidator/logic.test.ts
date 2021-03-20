@@ -136,14 +136,8 @@ describe('LogicType', function () {
     it('Union: mutual exclusion', function () {
         assert.deepStrictEqual(validator.validate({ type: 'string', value: 'x' }, 'logic/Conflict2'), ValidateResultUtil.succ);
         assert.deepStrictEqual(validator.validate({ type: 'number', value: 123 }, 'logic/Conflict2'), ValidateResultUtil.succ);
-        assertValidErr({ type: 'string', value: 123 }, 'logic/Conflict2', ErrorMsg.unionMembersNotMatch([
-            { errMsg: 'Property `value`: ' + ErrorMsg.typeError('string', 'number') },
-            { errMsg: 'Property `type`: ' + ErrorMsg.invalidLiteralValue('number', 'string') },
-        ]));
-        assertValidErr({ type: 'number', value: 'x' }, 'logic/Conflict2', ErrorMsg.unionMembersNotMatch([
-            { errMsg: 'Property `type`: ' + ErrorMsg.invalidLiteralValue('string', 'number') },
-            { errMsg: 'Property `value`: ' + ErrorMsg.typeError('number', 'string') },
-        ]));
+        assertValidErr({ type: 'string', value: 123 }, 'logic/Conflict2', ErrorMsg.typeError('string', 'number'), ['value']);
+        assertValidErr({ type: 'number', value: 'x' }, 'logic/Conflict2', ErrorMsg.typeError('number', 'string'), ['value']);
         assertValidErr({}, 'logic/Conflict2', ErrorMsg.missingRequiredProperty('type'));
     })
 
@@ -186,4 +180,21 @@ describe('LogicType', function () {
         assert.deepStrictEqual(validator.validate(123, 'a/a1').errMsg, ErrorMsg.typeError('string', 'number'));
         assert.deepStrictEqual(validator.validate(123, 'a/a2').errMsg, ErrorMsg.typeError('string', 'number'));
     });
+
+    it('unionTypesNotMatch', function () {
+        assertValidErr([1, 2, 3], 'logic/ME_Final', ErrorMsg.typeError('Object', 'Array'));
+        assertValidErr({
+            type: 'me2',
+            value2: {
+                value: [{ a: 'xx' }, { b: 'xx' }]
+            },
+            value1: 123,
+            value3: 1234
+        }, 'logic/ME_Final', undefined);
+        assertValidErr({
+            type: 'me2',
+            value1: 123,
+            value3: 1234
+        }, 'logic/ME_Final', ErrorMsg.missingRequiredProperty('value2'));
+    })
 })

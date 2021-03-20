@@ -548,6 +548,12 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
                 return memberErrors[0];
             }
 
+            // mutual exclusion: return the only one
+            let nonLiteralErrors = memberErrors.filter(v => v.error.type !== 'invalidLiteralValue');
+            if (nonLiteralErrors.length === 1) {
+                return nonLiteralErrors[0];
+            }
+
             // All member error without inner: show simple msg
             if (memberErrors.every(v => !v.error.inner && (v.error.type === 'typeError' || v.error.type === 'invalidLiteralValue'))) {
                 let valueType = this._getTypeof(value);

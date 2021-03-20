@@ -38,7 +38,7 @@ export interface ME_2 extends BaseME {
 }
 export interface ME_3 extends BaseME {
     type: 'me3',
-    value2: {
+    value3: {
         value: AB[]
     }
 }

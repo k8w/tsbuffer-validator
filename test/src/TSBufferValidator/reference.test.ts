@@ -149,7 +149,7 @@ describe('TypeReference Validate', function () {
 
         assert.deepStrictEqual(validator.validate('abc', 'a/b1'), ValidateResultUtil.succ);
         assert.deepStrictEqual(validator.validate(undefined, 'a/b1'), ValidateResultUtil.succ);
-        assert.deepStrictEqual(validator.validate(123, 'a/b1').errMsg, ErrorMsg.typeError('string | undefined', 'number'));
+        assert.deepStrictEqual(validator.validate(123, 'a/b1').errMsg, ErrorMsg.typeError('string', 'number'));
     });
 
     it('IndexedAccess a optional fields with | undefined', function () {
@@ -183,6 +183,6 @@ describe('TypeReference Validate', function () {
 
         assert.deepStrictEqual(validator.validate('abc', 'a/b1'), ValidateResultUtil.succ);
         assert.deepStrictEqual(validator.validate(undefined, 'a/b1'), ValidateResultUtil.succ);
-        assert.deepStrictEqual(validator.validate(123, 'a/b1').errMsg, ErrorMsg.typeError('string | undefined', 'number'));
+        assert.deepStrictEqual(validator.validate(123, 'a/b1').errMsg, ErrorMsg.typeError('string', 'number'));
     })
 })

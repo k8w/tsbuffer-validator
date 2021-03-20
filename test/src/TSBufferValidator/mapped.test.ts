@@ -124,16 +124,10 @@ describe('MappedType Validate', function () {
         validateAndAssert({
             type: 'A',
             valueB: 'BBB'
-        }, 'mapped/OmitAB', ErrorMsg.unionMembersNotMatch([
-            { errMsg: ErrorMsg.missingRequiredProperty('valueA') },
-            { errMsg: 'Property `type`: ' + ErrorMsg.invalidLiteralValue('B', 'A') }
-        ]));
+        }, 'mapped/OmitAB', ErrorMsg.missingRequiredProperty('valueA'));
         validateAndAssert({
             type: 'A',
-        }, 'mapped/OmitAB', ErrorMsg.unionMembersNotMatch([
-            { errMsg: ErrorMsg.missingRequiredProperty('valueA') },
-            { errMsg: 'Property `type`: ' + ErrorMsg.invalidLiteralValue('B', 'A') }
-        ]));
+        }, 'mapped/OmitAB', ErrorMsg.missingRequiredProperty('valueA'));
         validateAndAssert({
             type: 'A',
             valueA: 'AAA',
