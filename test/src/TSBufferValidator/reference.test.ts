@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { TSBufferValidator } from '../../..';
-import { i18n } from '../../../src/i18n';
+import { i18n } from '../../../src/ErrorMsg';
 import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
 
 describe('TypeReference Validate', function () {

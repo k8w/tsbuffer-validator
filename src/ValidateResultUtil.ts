@@ -1,56 +1,42 @@
 import { TSBufferSchema } from "tsbuffer-schema";
-import { IntersectionTypeSchema } from "tsbuffer-schema/src/schemas/IntersectionTypeSchema";
+import { ErrorMsg } from "./ErrorMsg";
 
 export interface ValidateResultSucc {
     isSucc: true,
-    errMsg?: undefined
+    errMsg?: undefined,
+    error?: undefined
 }
 
-export interface ValidateResultErrorData {
-    isSucc: false,
-    property?: string[],
-    // AtomError
-    errMsg: string,
-    value: any,
-    schema: TSBufferSchema,
-    /** Union Member Error (all) */
-    unionMemberErrors?: ValidateResultError[];
-    /** Intersection Member Error (any one) */
-    intersection?: {
-        schema: IntersectionTypeSchema,
-        errorMemberIndex: number
+export type ErrorType = keyof typeof ErrorMsg;
+
+export class ValidateResultError<T extends ErrorType = ErrorType>  {
+    readonly isSucc: false = false;
+
+    // Atom Error
+    error: {
+        type: T,
+        params: Parameters<(typeof ErrorMsg)[T]>,
+        // Error is from inner
+        inner?: {
+            property: string[],
+            value: any,
+            schema: TSBufferSchema
+        }
     }
-}
-export class ValidateResultError implements ValidateResultErrorData {
-    isSucc: false = false;
 
-    // AtomError
-    _errMsg!: string;
-    property?: string[];
-    value!: any;
-    schema!: TSBufferSchema;
-    /** Union Member Error (all) */
-    unionMemberErrors?: ValidateResultError[];
-    /** Intersection Member Error (any one) */
-    fromIntersection?: {
-        schema: IntersectionTypeSchema,
-        errorMemberIndex: number
-    };
-
-    constructor(data: ValidateResultErrorData) {
-        Object.assign(this, data);
+    constructor(error: ValidateResultError<T>['error']) {
+        this.error = error;
     }
 
     get errMsg(): string {
-        return ValidateResultError.getErrMsg(this._errMsg, this.property);
-    }
-    set errMsg(v: string) {
-        this._errMsg = v;
+        return ValidateResultError.getErrMsg(this.error);
     }
 
-    static getErrMsg(errMsg: string, property: string[] | undefined) {
-        if (property?.length) {
-            return `Property ${property.join('.')}: ${errMsg}`
+    static getErrMsg<T extends keyof typeof ErrorMsg>(error: ValidateResultError<T>['error']) {
+        let errMsg = (ErrorMsg[error.type] as any)(...error.params)
+
+        if (error.inner?.property.length) {
+            return `Property '${error.inner.property.join('.')}': ${errMsg}`
         }
         else {
             return errMsg;
@@ -63,28 +49,30 @@ export type ValidateResult = ValidateResultSucc | ValidateResultError;
 export class ValidateResultUtil {
     static readonly succ: ValidateResultSucc = { isSucc: true };
 
-    static error(errMsg: string, value: any, schema: TSBufferSchema, extra?: Partial<ValidateResultError>): ValidateResultError {
+    static error<T extends ErrorType>(type: T, ...params: Parameters<(typeof ErrorMsg)[T]>): ValidateResultError {
         return new ValidateResultError({
-            isSucc: false,
-            errMsg: errMsg,
-            value: value,
-            schema: schema,
-            ...extra
+            type: type,
+            params: params
         })
     }
 
-    static innerError(property: string | string[], innerError: ValidateResultError): ValidateResultError {
-        if (!innerError.property) {
-            innerError.property = [];
-        }
-
-        if (typeof property === 'string') {
-            innerError.property!.unshift(property);
+    static innerError(property: string | string[], value: any, schema: TSBufferSchema, error: ValidateResultError): ValidateResultError {
+        if (error.error.inner) {
+            if (typeof property === 'string') {
+                error.error.inner.property.unshift(property);
+            }
+            else {
+                error.error.inner.property.unshift(...property);
+            }
         }
         else {
-            innerError.property!.unshift(...property);
+            error.error.inner = {
+                property: typeof property === 'string' ? [property] : property,
+                value: value,
+                schema: schema
+            };
         }
 
-        return innerError;
+        return error;
     }
 }

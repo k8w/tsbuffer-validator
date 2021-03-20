@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { TSBufferProto } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../..';
-import { i18n } from '../../../src/i18n';
+import { i18n } from '../../../src/ErrorMsg';
 import { ValidateResultError, ValidateResultUtil } from '../../../src/ValidateResultUtil';
 
 describe('LogicType', function () {
@@ -120,10 +120,10 @@ describe('LogicType', function () {
         assert.deepStrictEqual(validator.validate({ a: 'x', b: 'x', c: 1, d: 'x' }, 'logic/ABCD3'), ValidateResultUtil.succ)
         assert.deepStrictEqual(validator.validate({ a: 'x', b: 1, c: 'x', d: 'x' }, 'logic/ABCD3'), ValidateResultUtil.succ)
         assertValidErr({ a: 'x', d: 'x' }, 'logic/ABCD3', i18n.noMatchedUnionMember, undefined, {
-            unionMemberErrors: [
-                ValidateResultUtil.error(i18n.missingRequiredProperty('b'), { a: 'x', d: 'x' }, validator.proto['logic/B']),
-                ValidateResultUtil.error(i18n.missingRequiredProperty('c'), { a: 'x', d: 'x' }, validator.proto['logic/C']),
-            ],
+            // unionMemberErrors: [
+            //     ValidateResultUtil.error(i18n.missingRequiredProperty('b'), { a: 'x', d: 'x' }, validator.proto['logic/B']),
+            //     ValidateResultUtil.error(i18n.missingRequiredProperty('c'), { a: 'x', d: 'x' }, validator.proto['logic/C']),
+            // ],
             fromIntersection: {
                 schema: validator.proto['logic/ABCD3'] as any,
                 errorMemberIndex: 1

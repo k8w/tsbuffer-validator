@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { TSBufferProto } from 'tsbuffer-schema';
-import { i18n } from '../../../src/i18n';
+import { i18n } from '../../../src/ErrorMsg';
 import { TSBufferValidator } from '../../../src/TSBufferValidator';
 import { ValidateResultError, ValidateResultUtil } from '../../../src/ValidateResultUtil';
 
