@@ -3,14 +3,14 @@ export const ErrorMsg = {
     invalidScalarType: (value: number | bigint, scalarType: string) => `\`${value}\` is not a valid \`${scalarType}\`.`,
     tupleOverLength: (valueLength: Number, schemaLength: number) => `Value has ${valueLength} elements but schema allows only ${schemaLength}.`,
     invalidEnumValue: (value: string | number) => `\`${value}\` is not a valid enum member.`,
-    invalidLiteralValue: (value: any, literal: any) => `Expected to equals \`${stringify(literal)}\`, actually \`${stringify(value)}\``,
+    invalidLiteralValue: (expected: any, actual: any) => `Expected to equals \`${stringify(expected)}\`, actually \`${stringify(actual)}\``,
     missingRequiredProperty: (propName: string | number) => `Missing required property \`${propName}\`.`,
     excessProperty: (propName: string | number) => `Unexpected property \`${propName}\`.`,
     invalidNumberKey: (key: string) => `\`${key}\` is not a valid key, the key here should be a \`number\`.`,
 
     // Union
     unionTypesNotMatch: (value: any, types: string[]) => `\`${stringify(value)}\` is not matched to \`${types.join(' | ')}\``,
-    unionNoMemberMatch: (memberErrors: { errMsg: string }[]) => `No union member matched, detail:\n${memberErrors.map((v, i) => `  <${i}> ${v.errMsg}`).join('\n')}`,
+    unionMembersNotMatch: (memberErrors: { errMsg: string }[]) => `No union member matched, detail:\n${memberErrors.map((v, i) => `  <${i}> ${v.errMsg}`).join('\n')}`,
 };
 
 export function stringify(value: any) {

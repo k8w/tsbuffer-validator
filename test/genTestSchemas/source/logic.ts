@@ -18,8 +18,6 @@ export type AOrNullArr = AOrNull[];
 export type Conflict = { value: string } & { value: number };
 export type Conflict2 = { type: 'string', value: string } | { type: 'number', value: number };
 
-let xx: ABCD4 = { a: 1, b: 1, c: 1 }
-
 // mutual exclusion
 export interface BaseME {
     common?: {

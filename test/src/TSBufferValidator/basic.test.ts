@@ -210,9 +210,9 @@ describe('BasicType Validate', function () {
             'a/b': schema
         });
         assert.strictEqual(validator.validate('123', 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator.validate(123, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', 123, schema.literal).errMsg);
-        assert.deepStrictEqual(validator.validate(null, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', null, schema.literal).errMsg);
-        assert.deepStrictEqual(validator.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', undefined, schema.literal).errMsg);
+        assert.deepStrictEqual(validator.validate(123, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', schema.literal,123, ).errMsg);
+        assert.deepStrictEqual(validator.validate(null, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue',  schema.literal,null,).errMsg);
+        assert.deepStrictEqual(validator.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue',  schema.literal,undefined,).errMsg);
 
         let schema1: LiteralTypeSchema = {
             type: 'Literal',
@@ -222,7 +222,7 @@ describe('BasicType Validate', function () {
             'a/b': schema1
         });
         assert.strictEqual(validator1.validate(123, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator1.validate('123', 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', '123', schema1.literal).errMsg);
+        assert.deepStrictEqual(validator1.validate('123', 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', schema1.literal, '123').errMsg);
 
         let schema2: LiteralTypeSchema = {
             type: 'Literal',
@@ -232,7 +232,7 @@ describe('BasicType Validate', function () {
             'a/b': schema2
         });
         assert.strictEqual(validator2.validate(true, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator2.validate(1, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', 1, schema2.literal).errMsg);
+        assert.deepStrictEqual(validator2.validate(1, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', schema2.literal, 1).errMsg);
 
         let schema3: LiteralTypeSchema = {
             type: 'Literal',
@@ -242,7 +242,7 @@ describe('BasicType Validate', function () {
             'a/b': schema3
         });
         assert.strictEqual(validator3.validate(null, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator3.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', undefined, schema3.literal).errMsg);
+        assert.deepStrictEqual(validator3.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', schema3.literal, undefined).errMsg);
 
         let schema4: LiteralTypeSchema = {
             type: 'Literal',
@@ -252,7 +252,7 @@ describe('BasicType Validate', function () {
             'a/b': schema4
         });
         assert.strictEqual(validator4.validate(undefined, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator4.validate(null, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', null, schema4.literal).errMsg);
+        assert.deepStrictEqual(validator4.validate(null, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', schema4.literal, null).errMsg);
     })
 
     it('strictNullChecks false', function () {

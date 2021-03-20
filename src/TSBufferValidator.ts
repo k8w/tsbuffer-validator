@@ -359,12 +359,12 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         if (!this.options.strictNullChecks && (schema.literal === null || schema.literal === undefined)) {
             return value === null || value === undefined ?
                 ValidateResultUtil.succ
-                : ValidateResultUtil.error('invalidLiteralValue', value, schema.literal);
+                : ValidateResultUtil.error('invalidLiteralValue', schema.literal, value);
         }
 
         return value === schema.literal ?
             ValidateResultUtil.succ
-            : ValidateResultUtil.error('invalidLiteralValue', value, schema.literal);
+            : ValidateResultUtil.error('invalidLiteralValue', schema.literal, value);
     }
 
     private _validateNonPrimitiveType(value: any, schema: NonPrimitiveTypeSchema): ValidateResult {
@@ -414,6 +414,15 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
             prune.output = {};
         }
 
+        // Excess property check
+        if (this.options.excessPropertyChecks && !schema.indexSignature) {
+            let validProperties = schema.properties.map(v => v.name);
+            let firstExcessProperty = Object.keys(value).find(v => validProperties.indexOf(v) === -1);
+            if (firstExcessProperty) {
+                return ValidateResultUtil.error('excessProperty', firstExcessProperty);
+            }
+        }
+
         // 校验properties
         if (schema.properties) {
             for (let property of schema.properties) {
@@ -461,16 +470,6 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
                 });
                 if (!vRes.isSucc) {
                     return ValidateResultUtil.innerError(key, value[key], schema.indexSignature.type, vRes);
-                }
-            }
-        }
-        else {
-            // 超出字段检测
-            if (this.options.excessPropertyChecks) {
-                let validProperties = schema.properties.map(v => v.name);
-                let firstExcessProperty = Object.keys(value).find(v => validProperties.indexOf(v) === -1);
-                if (firstExcessProperty) {
-                    return ValidateResultUtil.error('excessProperty', firstExcessProperty);
                 }
             }
         }
@@ -533,7 +532,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
                 }
             }
             else {
-                memberErrors.push(vRes as ValidateResultError);
+                memberErrors.push(vRes);
             }
         }
 
@@ -541,12 +540,18 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         if (isSomeSucc) {
             return ValidateResultUtil.succ
         }
-        // 任一失败，则失败
+        // 全部失败，则失败
         else {
+            // All member error is the same, return the first
+            let msg0 = memberErrors[0].errMsg;
+            if (memberErrors.every(v => v.errMsg === msg0)) {
+                return memberErrors[0];
+            }
+
             // All member error without inner: show simple msg
             if (memberErrors.every(v => !v.error.inner && (v.error.type === 'typeError' || v.error.type === 'invalidLiteralValue'))) {
                 let valueType = this._getTypeof(value);
-                let expectedTypes = memberErrors.map(v => v.error.type === 'typeError' ? v.error.params[0] : this._getTypeof(v.error.params[1])).distinct();
+                let expectedTypes = memberErrors.map(v => v.error.type === 'typeError' ? v.error.params[0] : this._getTypeof(v.error.params[0])).distinct();
 
                 // Expected type A|B|C, actually type D
                 if (expectedTypes.indexOf(valueType) === -1) {
@@ -555,13 +560,13 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
 
                 // `'D'` is not matched to `'A'|'B'|'C'`
                 if (valueType !== 'Object' && valueType !== 'Array') {
-                    let types = memberErrors.map(v => v.error.type === 'typeError' ? v.error.params[0] : stringify(v.error.params[1])).distinct();
+                    let types = memberErrors.map(v => v.error.type === 'typeError' ? v.error.params[0] : stringify(v.error.params[0])).distinct();
                     return ValidateResultUtil.error('unionTypesNotMatch', value, types);
                 }
             }
 
             // other errors
-            return ValidateResultUtil.error('unionNoMemberMatch', memberErrors);
+            return ValidateResultUtil.error('unionMembersNotMatch', memberErrors);
         }
     }
 
