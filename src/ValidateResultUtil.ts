@@ -1,13 +1,11 @@
 import { TSBufferSchema } from "tsbuffer-schema";
-import { ErrorMsg } from "./ErrorMsg";
+import { ErrorMsg, ErrorType } from "./ErrorMsg";
 
 export interface ValidateResultSucc {
     isSucc: true,
     errMsg?: undefined,
     error?: undefined
 }
-
-export type ErrorType = keyof typeof ErrorMsg;
 
 export class ValidateResultError<T extends ErrorType = ErrorType>  {
     readonly isSucc: false = false;

@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import { TSBufferSchema } from 'tsbuffer-schema';
 import { LiteralTypeSchema } from 'tsbuffer-schema/src/schemas/LiteralTypeSchema';
+import { ErrorType } from '../../../src/ErrorMsg';
 import { TSBufferValidator } from '../../../src/TSBufferValidator';
 import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
 
@@ -51,11 +52,11 @@ describe('BasicType Validate', function () {
 
         assert.strictEqual(validator.validate(true, 'a/b').isSucc, true);
         assert.strictEqual(validator.validate(false, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator.validate(null, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'boolean', 'null').errMsg);
-        assert.deepStrictEqual(validator.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'boolean', 'undefined').errMsg);
-        assert.deepStrictEqual(validator.validate(123, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'boolean', 'number').errMsg);
-        assert.deepStrictEqual(validator.validate({}, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'boolean', 'Object').errMsg);
-        assert.deepStrictEqual(validator.validate('123', 'a/b').errMsg, ValidateResultUtil.error('typeError', 'boolean', 'string').errMsg);
+        assert.deepStrictEqual(validator.validate(null, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'boolean', 'null').errMsg);
+        assert.deepStrictEqual(validator.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'boolean', 'undefined').errMsg);
+        assert.deepStrictEqual(validator.validate(123, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'boolean', 'number').errMsg);
+        assert.deepStrictEqual(validator.validate({}, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'boolean', 'Object').errMsg);
+        assert.deepStrictEqual(validator.validate('123', 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'boolean', 'string').errMsg);
     })
 
     it('Number: number', function () {
@@ -71,14 +72,14 @@ describe('BasicType Validate', function () {
 
             assert.strictEqual(validator.validate(123, 'a/b').isSucc, true);
             assert.strictEqual(validator.validate(-123.4, 'a/b').isSucc, true);
-            assert.deepStrictEqual(validator.validate(BigInt(1234), 'a/b').errMsg, ValidateResultUtil.error('typeError', 'number', 'bigint').errMsg);
-            assert.deepStrictEqual(validator.validate(null, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'number', 'null').errMsg);
-            assert.deepStrictEqual(validator.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'number', 'undefined').errMsg);
-            assert.deepStrictEqual(validator.validate(true, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'number', 'boolean').errMsg);
-            assert.deepStrictEqual(validator.validate({}, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'number', 'Object').errMsg);
-            assert.deepStrictEqual(validator.validate('123', 'a/b').errMsg, ValidateResultUtil.error('typeError', 'number', 'string').errMsg);
-            assert.deepStrictEqual(validator.validate('0', 'a/b').errMsg, ValidateResultUtil.error('typeError', 'number', 'string').errMsg);
-            assert.deepStrictEqual(validator.validate('', 'a/b').errMsg, ValidateResultUtil.error('typeError', 'number', 'string').errMsg);
+            assert.deepStrictEqual(validator.validate(BigInt(1234), 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'number', 'bigint').errMsg);
+            assert.deepStrictEqual(validator.validate(null, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'number', 'null').errMsg);
+            assert.deepStrictEqual(validator.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'number', 'undefined').errMsg);
+            assert.deepStrictEqual(validator.validate(true, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'number', 'boolean').errMsg);
+            assert.deepStrictEqual(validator.validate({}, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'number', 'Object').errMsg);
+            assert.deepStrictEqual(validator.validate('123', 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'number', 'string').errMsg);
+            assert.deepStrictEqual(validator.validate('0', 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'number', 'string').errMsg);
+            assert.deepStrictEqual(validator.validate('', 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'number', 'string').errMsg);
         }
     });
 
@@ -98,7 +99,7 @@ describe('BasicType Validate', function () {
 
             // Unsigned
             if (scalarType.startsWith('u') || scalarType.startsWith('fixed')) {
-                assert.deepStrictEqual(validator.validate(-123, 'a/b').errMsg, ValidateResultUtil.error('invalidScalarType', -123, scalarType).errMsg);
+                assert.deepStrictEqual(validator.validate(-123, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidScalarType, -123, scalarType).errMsg);
             }
             // Signed
             else {
@@ -106,11 +107,11 @@ describe('BasicType Validate', function () {
             }
 
             // not BigInt
-            assert.deepStrictEqual(validator.validate(BigInt(1234), 'a/b').errMsg, ValidateResultUtil.error('typeError', 'number', 'bigint').errMsg);
+            assert.deepStrictEqual(validator.validate(BigInt(1234), 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'number', 'bigint').errMsg);
 
             // 小数
-            assert.deepStrictEqual(validator.validate(1.234, 'a/b').errMsg, ValidateResultUtil.error('invalidScalarType', 1.234, scalarType).errMsg);
-            assert.deepStrictEqual(validator.validate(-1.234, 'a/b').errMsg, ValidateResultUtil.error('invalidScalarType', -1.234, scalarType).errMsg);
+            assert.deepStrictEqual(validator.validate(1.234, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidScalarType, 1.234, scalarType).errMsg);
+            assert.deepStrictEqual(validator.validate(-1.234, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidScalarType, -1.234, scalarType).errMsg);
         }
     });
 
@@ -124,11 +125,11 @@ describe('BasicType Validate', function () {
                 'a/b': schema
             });
             assert.deepStrictEqual(validator.validate(BigInt(1234), 'a/b'), ValidateResultUtil.succ);
-            assert.deepStrictEqual(validator.validate(1234, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'bigint', 'number').errMsg);
-            assert.deepStrictEqual(validator.validate(1.234, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'bigint', 'number').errMsg);
-            assert.deepStrictEqual(validator.validate(true, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'bigint', 'boolean').errMsg);
-            assert.deepStrictEqual(validator.validate('', 'a/b').errMsg, ValidateResultUtil.error('typeError', 'bigint', 'string').errMsg);
-            assert.deepStrictEqual(validator.validate('123', 'a/b').errMsg, ValidateResultUtil.error('typeError', 'bigint', 'string').errMsg);
+            assert.deepStrictEqual(validator.validate(1234, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'bigint', 'number').errMsg);
+            assert.deepStrictEqual(validator.validate(1.234, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'bigint', 'number').errMsg);
+            assert.deepStrictEqual(validator.validate(true, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'bigint', 'boolean').errMsg);
+            assert.deepStrictEqual(validator.validate('', 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'bigint', 'string').errMsg);
+            assert.deepStrictEqual(validator.validate('123', 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'bigint', 'string').errMsg);
 
         })
     })
@@ -149,7 +150,7 @@ describe('BasicType Validate', function () {
             [123, 'number'],
             [{}, 'Object'],
         ] as [any, string][]).forEach(v => {
-            assert.deepStrictEqual(validator.validate(v[0], 'a/b').errMsg, ValidateResultUtil.error('typeError', 'string', v[1]).errMsg);
+            assert.deepStrictEqual(validator.validate(v[0], 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'string', v[1]).errMsg);
         })
     })
 
@@ -174,7 +175,7 @@ describe('BasicType Validate', function () {
             '1',
             123
         ] as any[]).forEach(v => {
-            assert.deepStrictEqual(validator.validate(v, 'a/b').errMsg, ValidateResultUtil.error('invalidEnumValue', v).errMsg);
+            assert.deepStrictEqual(validator.validate(v, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidEnumValue, v).errMsg);
         });
         ([
             [{}, 'Object'],
@@ -182,7 +183,7 @@ describe('BasicType Validate', function () {
             [null, 'null'],
             [undefined, 'undefined']
         ] as [any, string][]).forEach(v => {
-            assert.deepStrictEqual(validator.validate(v[0], 'a/b').errMsg, ValidateResultUtil.error('typeError', 'string | number', v[1]).errMsg);
+            assert.deepStrictEqual(validator.validate(v[0], 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'string | number', v[1]).errMsg);
         });
     })
 
@@ -210,9 +211,9 @@ describe('BasicType Validate', function () {
             'a/b': schema
         });
         assert.strictEqual(validator.validate('123', 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator.validate(123, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', schema.literal,123, ).errMsg);
-        assert.deepStrictEqual(validator.validate(null, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue',  schema.literal,null,).errMsg);
-        assert.deepStrictEqual(validator.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue',  schema.literal,undefined,).errMsg);
+        assert.deepStrictEqual(validator.validate(123, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema.literal, 123,).errMsg);
+        assert.deepStrictEqual(validator.validate(null, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema.literal, null,).errMsg);
+        assert.deepStrictEqual(validator.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema.literal, undefined,).errMsg);
 
         let schema1: LiteralTypeSchema = {
             type: 'Literal',
@@ -222,7 +223,7 @@ describe('BasicType Validate', function () {
             'a/b': schema1
         });
         assert.strictEqual(validator1.validate(123, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator1.validate('123', 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', schema1.literal, '123').errMsg);
+        assert.deepStrictEqual(validator1.validate('123', 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema1.literal, '123').errMsg);
 
         let schema2: LiteralTypeSchema = {
             type: 'Literal',
@@ -232,7 +233,7 @@ describe('BasicType Validate', function () {
             'a/b': schema2
         });
         assert.strictEqual(validator2.validate(true, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator2.validate(1, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', schema2.literal, 1).errMsg);
+        assert.deepStrictEqual(validator2.validate(1, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema2.literal, 1).errMsg);
 
         let schema3: LiteralTypeSchema = {
             type: 'Literal',
@@ -242,7 +243,7 @@ describe('BasicType Validate', function () {
             'a/b': schema3
         });
         assert.strictEqual(validator3.validate(null, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator3.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', schema3.literal, undefined).errMsg);
+        assert.deepStrictEqual(validator3.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema3.literal, undefined).errMsg);
 
         let schema4: LiteralTypeSchema = {
             type: 'Literal',
@@ -252,7 +253,7 @@ describe('BasicType Validate', function () {
             'a/b': schema4
         });
         assert.strictEqual(validator4.validate(undefined, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator4.validate(null, 'a/b').errMsg, ValidateResultUtil.error('invalidLiteralValue', schema4.literal, null).errMsg);
+        assert.deepStrictEqual(validator4.validate(null, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema4.literal, null).errMsg);
     })
 
     it('strictNullChecks false', function () {
@@ -309,12 +310,12 @@ describe('BasicType Validate', function () {
         });
 
         assert.strictEqual(validator.validate({ a: 1 }, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator.validate([1, 2, 3], 'a/b').errMsg, ValidateResultUtil.error('typeError', 'Object', 'Array').errMsg);
-        assert.deepStrictEqual(validator.validate(null, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'Object', 'null').errMsg);
-        assert.deepStrictEqual(validator.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'Object', 'undefined').errMsg);
-        assert.deepStrictEqual(validator.validate(123, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'Object', 'number').errMsg);
-        assert.deepStrictEqual(validator.validate(true, 'a/b').errMsg, ValidateResultUtil.error('typeError', 'Object', 'boolean').errMsg);
-        assert.deepStrictEqual(validator.validate('123', 'a/b').errMsg, ValidateResultUtil.error('typeError', 'Object', 'string').errMsg);
+        assert.deepStrictEqual(validator.validate([1, 2, 3], 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Object', 'Array').errMsg);
+        assert.deepStrictEqual(validator.validate(null, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Object', 'null').errMsg);
+        assert.deepStrictEqual(validator.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Object', 'undefined').errMsg);
+        assert.deepStrictEqual(validator.validate(123, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Object', 'number').errMsg);
+        assert.deepStrictEqual(validator.validate(true, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Object', 'boolean').errMsg);
+        assert.deepStrictEqual(validator.validate('123', 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Object', 'string').errMsg);
     })
 
     it('Buffer', function () {
@@ -345,7 +346,7 @@ describe('BasicType Validate', function () {
             [{}, 'Object'],
             [[], 'Array'],
         ].forEach((v: any) => {
-            assert.deepStrictEqual(validator.validate(v[0], 'a/b').errMsg, ValidateResultUtil.error('typeError', 'ArrayBuffer', v[1]).errMsg);
+            assert.deepStrictEqual(validator.validate(v[0], 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'ArrayBuffer', v[1]).errMsg);
         })
 
         let typedArrays = ['Int8Array', 'Int16Array', 'Int32Array', 'BigInt64Array', 'Uint8Array', 'Uint16Array', 'Uint32Array', 'BigUint64Array', 'Float32Array', 'Float64Array'] as const;
@@ -360,12 +361,12 @@ describe('BasicType Validate', function () {
 
             let typedArray = eval(arrayType);
             assert.strictEqual(validator.validate(new typedArray(10), 'a/b').isSucc, true);
-            assert.deepStrictEqual(validator.validate(new ArrayBuffer(10), 'a/b').errMsg, ValidateResultUtil.error('typeError', arrayType, 'ArrayBuffer').errMsg);
+            assert.deepStrictEqual(validator.validate(new ArrayBuffer(10), 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, arrayType, 'ArrayBuffer').errMsg);
             if (arrayType !== 'Uint8Array') {
-                assert.deepStrictEqual(validator.validate(new Uint8Array(10), 'a/b').errMsg, ValidateResultUtil.error('typeError', arrayType, 'Uint8Array').errMsg);
+                assert.deepStrictEqual(validator.validate(new Uint8Array(10), 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, arrayType, 'Uint8Array').errMsg);
             }
             else {
-                assert.deepStrictEqual(validator.validate(new Uint16Array(10), 'a/b').errMsg, ValidateResultUtil.error('typeError', arrayType, 'Uint16Array').errMsg);
+                assert.deepStrictEqual(validator.validate(new Uint16Array(10), 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, arrayType, 'Uint16Array').errMsg);
             }
         }
     })

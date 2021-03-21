@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { TSBufferValidator } from '../../..';
-import { ErrorMsg } from '../../../src/ErrorMsg';
+import { ErrorMsg, ErrorType } from '../../../src/ErrorMsg';
 import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
 
 describe('TypeReference Validate', function () {
@@ -44,12 +44,12 @@ describe('TypeReference Validate', function () {
         assert.strictEqual(validator.validate(true, 'b/b1').isSucc, true);
         assert.strictEqual(validator.validate(true, 'b/b2').isSucc, true);
         assert.strictEqual(validator.validate(true, 'c/c1').isSucc, true);
-        assert.deepStrictEqual(validator.validate(123, 'a/a1').errMsg, ErrorMsg.typeError('boolean', 'number'));
-        assert.deepStrictEqual(validator.validate(123, 'a/a2').errMsg, ErrorMsg.typeError('boolean', 'number'));
-        assert.deepStrictEqual(validator.validate(123, 'a/a3').errMsg, ErrorMsg.typeError('boolean', 'number'));
-        assert.deepStrictEqual(validator.validate(123, 'b/b1').errMsg, ErrorMsg.typeError('boolean', 'number'));
-        assert.deepStrictEqual(validator.validate(123, 'b/b2').errMsg, ErrorMsg.typeError('boolean', 'number'));
-        assert.deepStrictEqual(validator.validate(123, 'c/c1').errMsg, ErrorMsg.typeError('boolean', 'number'));
+        assert.deepStrictEqual(validator.validate(123, 'a/a1').errMsg, ErrorMsg[ErrorType.TypeError]('boolean', 'number'));
+        assert.deepStrictEqual(validator.validate(123, 'a/a2').errMsg, ErrorMsg[ErrorType.TypeError]('boolean', 'number'));
+        assert.deepStrictEqual(validator.validate(123, 'a/a3').errMsg, ErrorMsg[ErrorType.TypeError]('boolean', 'number'));
+        assert.deepStrictEqual(validator.validate(123, 'b/b1').errMsg, ErrorMsg[ErrorType.TypeError]('boolean', 'number'));
+        assert.deepStrictEqual(validator.validate(123, 'b/b2').errMsg, ErrorMsg[ErrorType.TypeError]('boolean', 'number'));
+        assert.deepStrictEqual(validator.validate(123, 'c/c1').errMsg, ErrorMsg[ErrorType.TypeError]('boolean', 'number'));
     });
 
     it('IndexedAccess', function () {
@@ -107,14 +107,14 @@ describe('TypeReference Validate', function () {
         });
 
         assert.strictEqual(validator.validate(true, 'b/b1').isSucc, true);
-        assert.deepStrictEqual(validator.validate(123, 'b/b1').errMsg, ErrorMsg.typeError('boolean', 'number'));
-        assert.deepStrictEqual(validator.validate(null, 'b/b1').errMsg, ErrorMsg.typeError('boolean', 'null'));
-        assert.deepStrictEqual(validator.validate(undefined, 'b/b1').errMsg, ErrorMsg.typeError('boolean', 'undefined'));
+        assert.deepStrictEqual(validator.validate(123, 'b/b1').errMsg, ErrorMsg[ErrorType.TypeError]('boolean', 'number'));
+        assert.deepStrictEqual(validator.validate(null, 'b/b1').errMsg, ErrorMsg[ErrorType.TypeError]('boolean', 'null'));
+        assert.deepStrictEqual(validator.validate(undefined, 'b/b1').errMsg, ErrorMsg[ErrorType.TypeError]('boolean', 'undefined'));
 
         assert.strictEqual(validator.validate(true, 'b/b2').isSucc, true);
-        assert.deepStrictEqual(validator.validate(123, 'b/b2').errMsg, ErrorMsg.typeError('boolean', 'number'));
-        assert.deepStrictEqual(validator.validate(null, 'b/b2').errMsg, ErrorMsg.typeError('boolean', 'null'));
-        assert.deepStrictEqual(validator.validate(undefined, 'b/b2').errMsg, ErrorMsg.typeError('boolean', 'undefined'));
+        assert.deepStrictEqual(validator.validate(123, 'b/b2').errMsg, ErrorMsg[ErrorType.TypeError]('boolean', 'number'));
+        assert.deepStrictEqual(validator.validate(null, 'b/b2').errMsg, ErrorMsg[ErrorType.TypeError]('boolean', 'null'));
+        assert.deepStrictEqual(validator.validate(undefined, 'b/b2').errMsg, ErrorMsg[ErrorType.TypeError]('boolean', 'undefined'));
 
         assert.throws(() => {
             validator.validate(123, 'e/e1');
@@ -149,7 +149,7 @@ describe('TypeReference Validate', function () {
 
         assert.deepStrictEqual(validator.validate('abc', 'a/b1'), ValidateResultUtil.succ);
         assert.deepStrictEqual(validator.validate(undefined, 'a/b1'), ValidateResultUtil.succ);
-        assert.deepStrictEqual(validator.validate(123, 'a/b1').errMsg, ErrorMsg.typeError('string', 'number'));
+        assert.deepStrictEqual(validator.validate(123, 'a/b1').errMsg, ErrorMsg[ErrorType.TypeError]('string', 'number'));
     });
 
     it('IndexedAccess a optional fields with | undefined', function () {
@@ -183,6 +183,6 @@ describe('TypeReference Validate', function () {
 
         assert.deepStrictEqual(validator.validate('abc', 'a/b1'), ValidateResultUtil.succ);
         assert.deepStrictEqual(validator.validate(undefined, 'a/b1'), ValidateResultUtil.succ);
-        assert.deepStrictEqual(validator.validate(123, 'a/b1').errMsg, ErrorMsg.typeError('string', 'number'));
+        assert.deepStrictEqual(validator.validate(123, 'a/b1').errMsg, ErrorMsg[ErrorType.TypeError]('string', 'number'));
     })
 })

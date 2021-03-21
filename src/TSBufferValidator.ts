@@ -18,7 +18,7 @@ import { ReferenceTypeSchema } from 'tsbuffer-schema/src/schemas/ReferenceTypeSc
 import { StringTypeSchema } from 'tsbuffer-schema/src/schemas/StringTypeSchema';
 import { TupleTypeSchema } from 'tsbuffer-schema/src/schemas/TupleTypeSchema';
 import { UnionTypeSchema } from 'tsbuffer-schema/src/schemas/UnionTypeSchema';
-import { stringify } from './ErrorMsg';
+import { ErrorType, stringify } from './ErrorMsg';
 import { FlatInterfaceTypeSchema, ProtoHelper } from './ProtoHelper';
 import { ValidateResult, ValidateResultError, ValidateResultUtil } from './ValidateResultUtil';
 
@@ -210,7 +210,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
             return ValidateResultUtil.succ;
         }
         else {
-            return ValidateResultUtil.error('typeError', 'boolean', type);
+            return ValidateResultUtil.error(ErrorType.TypeError, 'boolean', type);
         }
     }
 
@@ -222,17 +222,17 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         let type = this._getTypeof(value);
         let rightType = scalarType.indexOf('big') > -1 ? 'bigint' : 'number';
         if (type !== rightType) {
-            return ValidateResultUtil.error('typeError', rightType, type);
+            return ValidateResultUtil.error(ErrorType.TypeError, rightType, type);
         }
 
         // scalarType类型检测
         // 整形却为小数
         if (scalarType !== 'double' && type === 'number' && !Number.isInteger(value)) {
-            return ValidateResultUtil.error('invalidScalarType', value, scalarType);
+            return ValidateResultUtil.error(ErrorType.InvalidScalarType, value, scalarType);
         }
         // 无符号整形却为负数
         if (scalarType.indexOf('uint') > -1 && value < 0) {
-            return ValidateResultUtil.error('invalidScalarType', value, scalarType);
+            return ValidateResultUtil.error(ErrorType.InvalidScalarType, value, scalarType);
         }
 
         return ValidateResultUtil.succ;
@@ -240,14 +240,14 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
 
     private _validateStringType(value: any, schema: StringTypeSchema): ValidateResult {
         let type = this._getTypeof(value);
-        return type === 'string' ? ValidateResultUtil.succ : ValidateResultUtil.error('typeError', 'string', type);
+        return type === 'string' ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.TypeError, 'string', type);
     }
 
     private _validateArrayType(value: any, schema: ArrayTypeSchema, prune: ValidatePruneOptions | undefined): ValidateResult {
         // is Array type
         let type = this._getTypeof(value);
         if (type !== 'Array') {
-            return ValidateResultUtil.error('typeError', 'Array', type);
+            return ValidateResultUtil.error(ErrorType.TypeError, 'Array', type);
         }
 
         // prune output
@@ -278,12 +278,12 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         // is Array type
         let type = this._getTypeof(value);
         if (type !== 'Array') {
-            return ValidateResultUtil.error('typeError', 'Array', type);
+            return ValidateResultUtil.error(ErrorType.TypeError, 'Array', type);
         }
 
         // validate length
         if (this.options.excessPropertyChecks && value.length > schema.elementTypes.length) {
-            return ValidateResultUtil.error('tupleOverLength', value.length, schema.elementTypes.length);
+            return ValidateResultUtil.error(ErrorType.TupleOverLength, value.length, schema.elementTypes.length);
         }
 
         // prune output
@@ -301,7 +301,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
                     continue;
                 }
                 else {
-                    return ValidateResultUtil.error('missingRequiredProperty', i);
+                    return ValidateResultUtil.error(ErrorType.MissingRequiredProperty, i);
                 }
             }
 
@@ -338,7 +338,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         // must be string or number
         let type = this._getTypeof(value);
         if (type !== 'string' && type !== 'number') {
-            return ValidateResultUtil.error('typeError', 'string | number', type);
+            return ValidateResultUtil.error(ErrorType.TypeError, 'string | number', type);
         }
 
         // 有值与预设相同
@@ -346,7 +346,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
             return ValidateResultUtil.succ;
         }
         else {
-            return ValidateResultUtil.error('invalidEnumValue', value);
+            return ValidateResultUtil.error(ErrorType.InvalidEnumValue, value);
         }
     }
 
@@ -359,23 +359,23 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         if (!this.options.strictNullChecks && (schema.literal === null || schema.literal === undefined)) {
             return value === null || value === undefined ?
                 ValidateResultUtil.succ
-                : ValidateResultUtil.error('invalidLiteralValue', schema.literal, value);
+                : ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema.literal, value);
         }
 
         return value === schema.literal ?
             ValidateResultUtil.succ
-            : ValidateResultUtil.error('invalidLiteralValue', schema.literal, value);
+            : ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema.literal, value);
     }
 
     private _validateNonPrimitiveType(value: any, schema: NonPrimitiveTypeSchema): ValidateResult {
         let type = this._getTypeof(value);
-        return type === 'Object' ? ValidateResultUtil.succ : ValidateResultUtil.error('typeError', 'Object', type);
+        return type === 'Object' ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.TypeError, 'Object', type);
     }
 
     private _validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference, unionProperties: string[] | undefined, prune: ValidatePruneOptions | undefined): ValidateResult {
         let type = this._getTypeof(value);
         if (type !== 'Object') {
-            return ValidateResultUtil.error('typeError', 'Object', type);
+            return ValidateResultUtil.error(ErrorType.TypeError, 'Object', type);
         }
 
         // 先展平
@@ -405,7 +405,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         if (schema.indexSignature && schema.indexSignature.keyType === 'Number') {
             for (let key in value) {
                 if (!this._isNumberKey(key)) {
-                    return ValidateResultUtil.error('invalidNumberKey', key);
+                    return ValidateResultUtil.error(ErrorType.InvalidNumberKey, key);
                 }
             }
         }
@@ -419,7 +419,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
             let validProperties = schema.properties.map(v => v.name);
             let firstExcessProperty = Object.keys(value).find(v => validProperties.indexOf(v) === -1);
             if (firstExcessProperty) {
-                return ValidateResultUtil.error('excessProperty', firstExcessProperty);
+                return ValidateResultUtil.error(ErrorType.ExcessProperty, firstExcessProperty);
             }
         }
 
@@ -434,7 +434,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
                         continue;
                     }
                     else {
-                        return ValidateResultUtil.error('missingRequiredProperty', property.name);
+                        return ValidateResultUtil.error(ErrorType.MissingRequiredProperty, property.name);
                     }
                 }
 
@@ -480,17 +480,17 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
     private _validateBufferType(value: any, schema: BufferTypeSchema): ValidateResult {
         let type = this._getTypeof(value);
         if (type !== 'Object') {
-            return ValidateResultUtil.error('typeError', schema.arrayType || 'ArrayBuffer', type);
+            return ValidateResultUtil.error(ErrorType.TypeError, schema.arrayType || 'ArrayBuffer', type);
         }
         else if (schema.arrayType) {
             let typeArrayClass = typedArrays[schema.arrayType];
             if (!typeArrayClass) {
                 throw new Error(`Error TypedArray type: ${schema.arrayType}`);
             }
-            return value instanceof typeArrayClass ? ValidateResultUtil.succ : ValidateResultUtil.error('typeError', schema.arrayType, value?.constructor?.name);
+            return value instanceof typeArrayClass ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.TypeError, schema.arrayType, value?.constructor?.name);
         }
         else {
-            return value instanceof ArrayBuffer ? ValidateResultUtil.succ : ValidateResultUtil.error('typeError', 'ArrayBuffer', value?.constructor?.name);
+            return value instanceof ArrayBuffer ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.TypeError, 'ArrayBuffer', value?.constructor?.name);
         }
     }
 
@@ -549,30 +549,30 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
             }
 
             // mutual exclusion: return the only one
-            let nonLiteralErrors = memberErrors.filter(v => v.error.type !== 'invalidLiteralValue');
+            let nonLiteralErrors = memberErrors.filter(v => v.error.type !== ErrorType.InvalidLiteralValue);
             if (nonLiteralErrors.length === 1) {
                 return nonLiteralErrors[0];
             }
 
             // All member error without inner: show simple msg
-            if (memberErrors.every(v => !v.error.inner && (v.error.type === 'typeError' || v.error.type === 'invalidLiteralValue'))) {
+            if (memberErrors.every(v => !v.error.inner && (v.error.type === ErrorType.TypeError || v.error.type === ErrorType.InvalidLiteralValue))) {
                 let valueType = this._getTypeof(value);
-                let expectedTypes = memberErrors.map(v => v.error.type === 'typeError' ? v.error.params[0] : this._getTypeof(v.error.params[0])).distinct();
+                let expectedTypes = memberErrors.map(v => v.error.type === ErrorType.TypeError ? v.error.params[0] : this._getTypeof(v.error.params[0])).distinct();
 
                 // Expected type A|B|C, actually type D
                 if (expectedTypes.indexOf(valueType) === -1) {
-                    return ValidateResultUtil.error('typeError', expectedTypes.join(' | '), this._getTypeof(value))
+                    return ValidateResultUtil.error(ErrorType.TypeError, expectedTypes.join(' | '), this._getTypeof(value))
                 }
 
                 // `'D'` is not matched to `'A'|'B'|'C'`
                 if (valueType !== 'Object' && valueType !== 'Array') {
-                    let types = memberErrors.map(v => v.error.type === 'typeError' ? v.error.params[0] : stringify(v.error.params[0])).distinct();
-                    return ValidateResultUtil.error('unionTypesNotMatch', value, types);
+                    let types = memberErrors.map(v => v.error.type === ErrorType.TypeError ? v.error.params[0] : stringify(v.error.params[0])).distinct();
+                    return ValidateResultUtil.error(ErrorType.UnionTypesNotMatch, value, types);
                 }
             }
 
             // other errors
-            return ValidateResultUtil.error('unionMembersNotMatch', memberErrors);
+            return ValidateResultUtil.error(ErrorType.UnionMembersNotMatch, memberErrors);
         }
     }
 

@@ -1,16 +1,29 @@
+export enum ErrorType {
+    TypeError,
+    InvalidScalarType,
+    TupleOverLength,
+    InvalidEnumValue,
+    InvalidLiteralValue,
+    MissingRequiredProperty,
+    ExcessProperty,
+    InvalidNumberKey,
+    UnionTypesNotMatch,
+    UnionMembersNotMatch,
+}
+
 export const ErrorMsg = {
-    typeError: (expect: string, actual: string) => `Expected type to be \`${expect}\`, actually \`${actual}\`.`,
-    invalidScalarType: (value: number | bigint, scalarType: string) => `\`${value}\` is not a valid \`${scalarType}\`.`,
-    tupleOverLength: (valueLength: Number, schemaLength: number) => `Value has ${valueLength} elements but schema allows only ${schemaLength}.`,
-    invalidEnumValue: (value: string | number) => `\`${value}\` is not a valid enum member.`,
-    invalidLiteralValue: (expected: any, actual: any) => `Expected to equals \`${stringify(expected)}\`, actually \`${stringify(actual)}\``,
-    missingRequiredProperty: (propName: string | number) => `Missing required property \`${propName}\`.`,
-    excessProperty: (propName: string | number) => `Unexpected property \`${propName}\`.`,
-    invalidNumberKey: (key: string) => `\`${key}\` is not a valid key, the key here should be a \`number\`.`,
+    [ErrorType.TypeError]: (expect: string, actual: string) => `Expected type to be \`${expect}\`, actually \`${actual}\`.`,
+    [ErrorType.InvalidScalarType]: (value: number | bigint, scalarType: string) => `\`${value}\` is not a valid \`${scalarType}\`.`,
+    [ErrorType.TupleOverLength]: (valueLength: Number, schemaLength: number) => `Value has ${valueLength} elements but schema allows only ${schemaLength}.`,
+    [ErrorType.InvalidEnumValue]: (value: string | number) => `\`${value}\` is not a valid enum member.`,
+    [ErrorType.InvalidLiteralValue]: (expected: any, actual: any) => `Expected to equals \`${stringify(expected)}\`, actually \`${stringify(actual)}\``,
+    [ErrorType.MissingRequiredProperty]: (propName: string | number) => `Missing required property \`${propName}\`.`,
+    [ErrorType.ExcessProperty]: (propName: string | number) => `Unexpected property \`${propName}\`.`,
+    [ErrorType.InvalidNumberKey]: (key: string) => `\`${key}\` is not a valid key, the key here should be a \`number\`.`,
 
     // Union
-    unionTypesNotMatch: (value: any, types: string[]) => `\`${stringify(value)}\` is not matched to \`${types.join(' | ')}\``,
-    unionMembersNotMatch: (memberErrors: { errMsg: string }[]) => `No union member matched, detail:\n${memberErrors.map((v, i) => `  <${i}> ${v.errMsg}`).join('\n')}`,
+    [ErrorType.UnionTypesNotMatch]: (value: any, types: string[]) => `\`${stringify(value)}\` is not matched to \`${types.join(' | ')}\``,
+    [ErrorType.UnionMembersNotMatch]: (memberErrors: { errMsg: string }[]) => `No union member matched, detail:\n${memberErrors.map((v, i) => `  <${i}> ${v.errMsg}`).join('\n')}`,
 };
 
 export function stringify(value: any) {

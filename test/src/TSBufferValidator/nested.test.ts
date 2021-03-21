@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { TSBufferProto } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../..';
-import { ErrorMsg } from '../../../src/ErrorMsg';
+import { ErrorMsg, ErrorType } from '../../../src/ErrorMsg';
 
 describe('NestedType', function () {
     const proto: TSBufferProto = require('../../genTestSchemas/output');
@@ -25,11 +25,11 @@ describe('NestedType', function () {
         validateAndAssert([[{ value: 'xxx' }], [{ value: 'xxx' }]], 'nested/ArrArr', undefined);
         validateAndAssert([123, 'xx', 123, 'xx'], 'nested/UnionArr', undefined);
         // fail
-        validateAndAssert(null, 'nested/ArrStr', ErrorMsg.typeError('Array', 'null'));
-        validateAndAssert(['a', 123, 'c'], 'nested/ArrStr', ErrorMsg.typeError('string', 'number'), ['1']);
-        validateAndAssert([0, { value: 'xxx' }], 'nested/ArrObj', ErrorMsg.typeError('Object', 'number'), ['0']);
-        validateAndAssert([[{ value: 'xxx' }], [{ value: 123 }]], 'nested/ArrArr', ErrorMsg.typeError('string', 'number'), ['1', '0', 'value']);
-        validateAndAssert([123, 'xx', null, 'xx'], 'nested/UnionArr', ErrorMsg.typeError('string | number', 'null'), ['2']);
+        validateAndAssert(null, 'nested/ArrStr', ErrorMsg[ErrorType.TypeError]('Array', 'null'));
+        validateAndAssert(['a', 123, 'c'], 'nested/ArrStr', ErrorMsg[ErrorType.TypeError]('string', 'number'), ['1']);
+        validateAndAssert([0, { value: 'xxx' }], 'nested/ArrObj', ErrorMsg[ErrorType.TypeError]('Object', 'number'), ['0']);
+        validateAndAssert([[{ value: 'xxx' }], [{ value: 123 }]], 'nested/ArrArr', ErrorMsg[ErrorType.TypeError]('string', 'number'), ['1', '0', 'value']);
+        validateAndAssert([123, 'xx', null, 'xx'], 'nested/UnionArr', ErrorMsg[ErrorType.TypeError]('string | number', 'null'), ['2']);
     })
 
     it('Tuple', function () {
@@ -43,10 +43,10 @@ describe('NestedType', function () {
         validateAndAssert([{ value: 'x' }], 'nested/Tuple2', undefined);
         validateAndAssert([{ value: 'x' }, undefined, [undefined, true]], 'nested/Tuple2', undefined);
         // fail
-        validateAndAssert(123, 'nested/Tuple1', ErrorMsg.typeError('Array', 'number'));
-        validateAndAssert([123, 123], 'nested/Tuple1', ErrorMsg.typeError('string', 'number'), ['1']);
-        validateAndAssert([{ value: 'x' }, 'x', [1, false]], 'nested/Tuple2', ErrorMsg.typeError('boolean', 'number'), ['2', '0']);
-        validateAndAssert([{ value: 'x' }, 'x', [], 123], 'nested/Tuple2', ErrorMsg.tupleOverLength(4, 3));
-        validateAndAssert([], 'nested/Tuple2', ErrorMsg.missingRequiredProperty('0'));
+        validateAndAssert(123, 'nested/Tuple1', ErrorMsg[ErrorType.TypeError]('Array', 'number'));
+        validateAndAssert([123, 123], 'nested/Tuple1', ErrorMsg[ErrorType.TypeError]('string', 'number'), ['1']);
+        validateAndAssert([{ value: 'x' }, 'x', [1, false]], 'nested/Tuple2', ErrorMsg[ErrorType.TypeError]('boolean', 'number'), ['2', '0']);
+        validateAndAssert([{ value: 'x' }, 'x', [], 123], 'nested/Tuple2', ErrorMsg[ErrorType.TupleOverLength](4, 3));
+        validateAndAssert([], 'nested/Tuple2', ErrorMsg[ErrorType.MissingRequiredProperty]('0'));
     })
 })
