@@ -24,7 +24,7 @@ export default [
             terser({
                 mangle: {
                     properties: {
-                        regex: /^_/
+                        regex: /^(_|[A-Z])/
                     }
                 },
                 format: {
