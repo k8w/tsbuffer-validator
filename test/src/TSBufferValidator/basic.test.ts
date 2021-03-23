@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { TSBufferSchema } from 'tsbuffer-schema';
-import { LiteralTypeSchema } from 'tsbuffer-schema/src/schemas/LiteralTypeSchema';
+import { LiteralTypeSchema } from 'tsbuffer-schema';
 import { ErrorType } from '../../../src/ErrorMsg';
 import { TSBufferValidator } from '../../../src/TSBufferValidator';
 import { ValidateResultUtil } from '../../../src/ValidateResultUtil';

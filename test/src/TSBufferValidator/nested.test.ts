@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { TSBufferProto } from 'tsbuffer-schema';
-import { TSBufferValidator } from '../../..';
+import { TSBufferValidator } from '../../../src';
 import { ErrorMsg, ErrorType } from '../../../src/ErrorMsg';
 
 describe('NestedType', function () {

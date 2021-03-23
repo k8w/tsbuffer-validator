@@ -1,16 +1,18 @@
+/** @internal */
 export enum ErrorType {
-    TypeError,
-    InvalidScalarType,
-    TupleOverLength,
-    InvalidEnumValue,
-    InvalidLiteralValue,
-    MissingRequiredProperty,
-    ExcessProperty,
-    InvalidNumberKey,
-    UnionTypesNotMatch,
-    UnionMembersNotMatch,
+    TypeError = 'TypeError',
+    InvalidScalarType = 'InvalidScalarType',
+    TupleOverLength = 'TupleOverLength',
+    InvalidEnumValue = 'InvalidEnumValue',
+    InvalidLiteralValue = 'InvalidLiteralValue',
+    MissingRequiredProperty = 'MissingRequiredProperty',
+    ExcessProperty = 'ExcessProperty',
+    InvalidNumberKey = 'InvalidNumberKey',
+    UnionTypesNotMatch = 'UnionTypesNotMatch',
+    UnionMembersNotMatch = 'UnionMembersNotMatch',
 }
 
+/** @internal */
 export const ErrorMsg = {
     [ErrorType.TypeError]: (expect: string, actual: string) => `Expected type to be \`${expect}\`, actually \`${actual}\`.`,
     [ErrorType.InvalidScalarType]: (value: number | bigint, scalarType: string) => `\`${value}\` is not a valid \`${scalarType}\`.`,
@@ -26,6 +28,7 @@ export const ErrorMsg = {
     [ErrorType.UnionMembersNotMatch]: (memberErrors: { errMsg: string }[]) => `No union member matched, detail:\n${memberErrors.map((v, i) => `  <${i}> ${v.errMsg}`).join('\n')}`,
 };
 
+/** @internal */
 export function stringify(value: any) {
     if (typeof value === 'string') {
         let output = JSON.stringify(value);

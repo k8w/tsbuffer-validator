@@ -1,12 +1,14 @@
 import { TSBufferSchema } from "tsbuffer-schema";
 import { ErrorMsg, ErrorType } from "./ErrorMsg";
 
+/** @internal */
 export interface ValidateResultSucc {
     isSucc: true,
     errMsg?: undefined,
     error?: undefined
 }
 
+/** @internal */
 export class ValidateResultError<T extends ErrorType = ErrorType>  {
     readonly isSucc: false = false;
 
@@ -42,8 +44,10 @@ export class ValidateResultError<T extends ErrorType = ErrorType>  {
     }
 }
 
+/** @internal  */
 export type ValidateResult = ValidateResultSucc | ValidateResultError;
 
+/** @internal  */
 export class ValidateResultUtil {
     static readonly succ: ValidateResultSucc = { isSucc: true };
 

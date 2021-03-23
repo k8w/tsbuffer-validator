@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { TSBufferValidator } from '../../..';
+import { TSBufferValidator } from '../../../src';
 import { ErrorMsg, ErrorType } from '../../../src/ErrorMsg';
 import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
 
