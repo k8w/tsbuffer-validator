@@ -141,8 +141,6 @@ export class ProtoHelper {
     /**
      * 将unionProperties 扩展到 InterfaceTypeSchema中（optional的any类型）
      * 以此来跳过对它们的检查（用于Intersection/Union）
-     * @param schema 
-     * @param unionProperties 
      */
     applyUnionProperties(schema: FlatInterfaceTypeSchema, unionProperties: string[]): FlatInterfaceTypeSchema {
         let newSchema: FlatInterfaceTypeSchema = {
@@ -398,6 +396,7 @@ export class ProtoHelper {
     }
 }
 
+/** @public */
 export interface FlatInterfaceTypeSchema {
     type: InterfaceTypeSchema['type'],
     properties: NonNullable<InterfaceTypeSchema['properties']>,

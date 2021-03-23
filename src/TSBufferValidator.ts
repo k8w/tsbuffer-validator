@@ -47,7 +47,9 @@ const typedArrays = {
     Float64Array: Float64Array
 };
 
-/** @public */
+/**
+ * @public
+ */
 export class TSBufferValidator<Proto extends TSBufferProto> {
     /** 默认配置 */
     options: TSBufferValidatorOptions = {
@@ -58,6 +60,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
     proto: TSBufferProto;
 
     readonly protoHelper: ProtoHelper;
+
     constructor(proto: Proto, options?: Partial<TSBufferValidatorOptions>) {
         this.proto = Object.merge({}, proto);
 
@@ -69,8 +72,8 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
 
     /**
      * 验证
-     * @param value 
-     * @param schemaId 例如 a/b.ts 里的 Test类型 则ID为 a/b/Test
+     * @param value - 待验证的值
+     * @param schemaId - 例如 a/b.ts 里的 Test类型 则ID为 a/b/Test
      */
     validate(value: any, schemaOrId: keyof Proto | TSBufferSchema): ValidatorOutput {
         let schema: TSBufferSchema;
@@ -169,8 +172,8 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
     /**
      * 修剪 Object，移除 Schema 中未定义的 Key
      * 需要确保 value 类型合法
-     * @param value 
-     * @param unionProperties validate 的 options 输出
+     * @param value - value to be validated
+     * @param unionProperties - validate 的 options 输出
      * @returns Return a shallow copy when prune occur, otherwise return the original value
      */
     validateAndPrune<T>(value: T, schemaOrId: string | TSBufferSchema): ValidatorOutput & { pruneOutput: T | undefined } {

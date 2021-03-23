@@ -65,3 +65,5 @@ typings/
 .next
 
 package-lock.json
+
+temp

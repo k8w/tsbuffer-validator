@@ -7,9 +7,11 @@ export default [
         output: [{
             format: 'cjs',
             file: './dist/index.cjs',
+            banner: require('./scripts/copyright')
         }, {
             format: 'es',
-            file: './dist/index.mjs'
+            file: './dist/index.mjs',
+            banner: require('./scripts/copyright')
         }],
         plugins: [
             typescript({
@@ -28,7 +30,7 @@ export default [
                     }
                 },
                 format: {
-                    comments: false
+                    comments: /^!/
                 }
             })
         ]

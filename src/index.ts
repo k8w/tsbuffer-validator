@@ -1,2 +1,3 @@
 import 'k8w-extend-native';
-export { TSBufferValidator, ValidatorOutput } from "./TSBufferValidator";
+export { ProtoHelper, FlatInterfaceTypeSchema } from './ProtoHelper';
+export { TSBufferValidator, TSBufferValidatorOptions, ValidatorOutput } from "./TSBufferValidator";

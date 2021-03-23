@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer-validator",
-  "version": "1.0.12",
+  "version": "1.1.0",
   "description": "Validator for TSBuffer values",
   "main": "index.cjs",
   "exports": {
@@ -13,7 +13,7 @@
     "coverage": "nyc mocha test/**/*.test.ts && start coverage\\index.html",
     "build": "npm run build:js && npm run build:dts && cp package.json LICENSE README.md dist/",
     "build:js": "rm -rf dist && npx rollup -c",
-    "build:dts": "rm -rf lib && npx tsc && npx api-extractor run --local --verbose && node scripts/removePrivate.js",
+    "build:dts": "rm -rf lib && npx tsc && npx api-extractor run --local --verbose && node scripts/removePrivate.js && rm -rf lib",
     "bp": "npm version patch && npm run build && cd dist && npm publish & cd.."
   },
   "repository": {
@@ -60,7 +60,7 @@
   "devDependencies": {
     "@microsoft/api-extractor": "^7.13.2",
     "@types/mocha": "^5.2.6",
-    "@types/node": "^12.20.4",
+    "@types/node": "^12.20.6",
     "mocha": "^8.3.2",
     "nyc": "^14.1.0",
     "rollup": "^1.32.1",
