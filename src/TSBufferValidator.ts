@@ -50,7 +50,7 @@ const typedArrays = {
 /**
  * @public
  */
-export class TSBufferValidator<Proto extends TSBufferProto> {
+export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
     /** 默认配置 */
     options: TSBufferValidatorOptions = {
         excessPropertyChecks: true,
