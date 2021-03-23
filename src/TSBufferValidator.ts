@@ -72,7 +72,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
      * @param value 
      * @param schemaId 例如 a/b.ts 里的 Test类型 则ID为 a/b/Test
      */
-    validate(value: any, schemaOrId: keyof Proto | TSBufferSchema): { isSucc: true, errMsg?: undefined } | { isSucc: false, errMsg: string } {
+    validate(value: any, schemaOrId: keyof Proto | TSBufferSchema): ValidatorOutput {
         let schema: TSBufferSchema;
         let schemaId: string | undefined;
 
@@ -89,11 +89,9 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         }
 
         // Merge default options
-        let vRes = this._validate(value, schema);
-        return vRes.isSucc ? { isSucc: true } : { isSucc: false, errMsg: vRes.errMsg }
+        return this._validate(value, schema);
     }
 
-    /** @internal */
     private _validate(value: any, schema: TSBufferSchema, options?: ValidateOptions) {
         let vRes: ValidateResult;
 
@@ -175,7 +173,7 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
      * @param unionProperties validate 的 options 输出
      * @returns Return a shallow copy when prune occur, otherwise return the original value
      */
-    validateAndPrune<T>(value: T, schemaOrId: string | TSBufferSchema): ValidateResult & { pruneOutput: T | undefined } {
+    validateAndPrune<T>(value: T, schemaOrId: string | TSBufferSchema): ValidatorOutput & { pruneOutput: T | undefined } {
         let schema: TSBufferSchema = typeof schemaOrId === 'string' ? this.proto[schemaOrId] : schemaOrId;
         if (!schema) {
             throw new Error('Cannot find schema: ' + schemaOrId);
@@ -192,7 +190,6 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         return vRes;
     }
 
-    /** @internal */
     private _validateBooleanType(value: any, schema: BooleanTypeSchema): ValidateResult {
         let type = this._getTypeof(value);
         if (type === 'boolean') {
@@ -203,7 +200,6 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         }
     }
 
-    /** @internal */
     private _validateNumberType(value: any, schema: NumberTypeSchema): ValidateResult {
         // 默认为double
         let scalarType = schema.scalarType || 'double';
@@ -228,13 +224,11 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         return ValidateResultUtil.succ;
     }
 
-    /** @internal */
     private _validateStringType(value: any, schema: StringTypeSchema): ValidateResult {
         let type = this._getTypeof(value);
         return type === 'string' ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.TypeError, 'string', type);
     }
 
-    /** @internal */
     private _validateArrayType(value: any, schema: ArrayTypeSchema, prune: ValidatePruneOptions | undefined): ValidateResult {
         // is Array type
         let type = this._getTypeof(value);
@@ -266,7 +260,6 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         return ValidateResultUtil.succ;
     }
 
-    /** @internal */
     private _validateTupleType(value: any, schema: TupleTypeSchema, prune: ValidatePruneOptions | undefined): ValidateResult {
         // is Array type
         let type = this._getTypeof(value);
@@ -315,7 +308,6 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         return ValidateResultUtil.succ;
     }
 
-    /** @internal */
     private _canBeUndefined(schema: TSBufferSchema): boolean {
         if (schema.type === SchemaType.Union) {
             return schema.members.some(v => this._canBeUndefined(v.type))
@@ -328,7 +320,6 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         return false;
     }
 
-    /** @internal */
     private _validateEnumType(value: any, schema: EnumTypeSchema): ValidateResult {
         // must be string or number
         let type = this._getTypeof(value);
@@ -345,12 +336,10 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         }
     }
 
-    /** @internal */
     private _validateAnyType(value: any): ValidateResult {
         return ValidateResultUtil.succ;
     }
 
-    /** @internal */
     private _validateLiteralType(value: any, schema: LiteralTypeSchema): ValidateResult {
         // 非 null undefined 严格模式，null undefined同等对待
         if (!this.options.strictNullChecks && (schema.literal === null || schema.literal === undefined)) {
@@ -369,7 +358,6 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         return type === 'Object' ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.TypeError, 'Object', type);
     }
 
-    /** @internal */
     private _validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference, unionProperties: string[] | undefined, prune: ValidatePruneOptions | undefined): ValidateResult {
         let type = this._getTypeof(value);
         if (type !== 'Object') {
@@ -387,7 +375,6 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         return this._validateFlatInterface(value, flatSchema, prune);
     }
 
-    /** @internal */
     private _validateMappedType(value: any, schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema, unionProperties: string[] | undefined, prune: ValidatePruneOptions | undefined): ValidateResult {
         let parsed = this.protoHelper.parseMappedType(schema);
         if (parsed.type === SchemaType.Interface) {
@@ -476,7 +463,6 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         return ValidateResultUtil.succ;
     }
 
-    /** @internal */
     private _validateBufferType(value: any, schema: BufferTypeSchema): ValidateResult {
         let type = this._getTypeof(value);
         if (type !== 'Object') {
@@ -494,12 +480,10 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         }
     }
 
-    /** @internal */
     private _validateReferenceType(value: any, schema: ReferenceTypeSchema | IndexedAccessTypeSchema, options?: ValidateOptions): ValidateResult {
         return this._validate(value, this.protoHelper.parseReference(schema), options);
     }
 
-    /** @internal */
     private _validateUnionType(value: any, schema: UnionTypeSchema, unionProperties: string[] | undefined, prune: ValidatePruneOptions | undefined): ValidateResult {
         unionProperties = unionProperties || this.protoHelper.getUnionProperties(schema);
 
@@ -613,13 +597,11 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         return ValidateResultUtil.succ;
     }
 
-    /** @internal */
     private _isNumberKey(key: string): boolean {
         let int = parseInt(key);
         return !(isNaN(int) || ('' + int) !== key);
     }
 
-    /** @internal */
     private _getTypeof(value: any): "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "Object" | "function" | "Array" | "null" {
         let type = typeof value;
         if (type === 'object') {
@@ -637,3 +619,6 @@ export class TSBufferValidator<Proto extends TSBufferProto> {
         return type;
     }
 }
+
+/** @public */
+export type ValidatorOutput = { isSucc: true, errMsg?: undefined } | { isSucc: false, errMsg: string };

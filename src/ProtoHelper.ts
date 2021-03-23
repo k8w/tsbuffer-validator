@@ -93,9 +93,7 @@ export class ProtoHelper {
         return schema.type === SchemaType.Reference || schema.type === SchemaType.IndexedAccess;
     }
 
-    /** @internal */
     private _schemaWithUuids: (TSBufferSchema & { uuid: number })[] = [];
-    /** @internal */
     private _getSchemaUuid(schema: TSBufferSchema) {
         let schemaWithUuid: TSBufferSchema & { uuid?: number } = schema;
         if (!schemaWithUuid.uuid) {
@@ -104,7 +102,6 @@ export class ProtoHelper {
         return schemaWithUuid.uuid;
     }
 
-    /** @internal */
     private _unionPropertiesCache: { [uuid: number]: string[] } = {};
     getUnionProperties(schema: UnionTypeSchema | IntersectionTypeSchema) {
         let uuid = this._getSchemaUuid(schema);
@@ -116,7 +113,6 @@ export class ProtoHelper {
 
     /**
      * unionProperties: 在Union或Intersection类型中，出现在任意member中的字段
-     * @internal
      */
     private _addUnionProperties(unionProperties: string[], schemas: TSBufferSchema[]): string[] {
         for (let i = 0, len = schemas.length; i < len; ++i) {
@@ -213,7 +209,6 @@ export class ProtoHelper {
 
     /** 
      * 展平interface
-     * @internal 
      */
     private _flattenInterface(schema: InterfaceTypeSchema): FlatInterfaceTypeSchema {
         let properties: {
@@ -280,7 +275,6 @@ export class ProtoHelper {
     }
 
     /** 将MappedTypeSchema转换为展平的Interface
-     * @internal
      */
     private _flattenMappedType(schema: PickTypeSchema | PartialTypeSchema | OverwriteTypeSchema | OmitTypeSchema): FlatInterfaceTypeSchema {
         // target 解引用

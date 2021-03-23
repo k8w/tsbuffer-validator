@@ -11,9 +11,9 @@
   "scripts": {
     "test": "npx mocha",
     "coverage": "nyc mocha test/**/*.test.ts && start coverage\\index.html",
-    "build": "npm run build:js && cp package.json LICENSE README.md dist/",
+    "build": "npm run build:js && npm run build:dts && cp package.json LICENSE README.md dist/",
     "build:js": "rm -rf dist && npx rollup -c",
-    "build:dts": "rm -rf lib && npx tsc && npx api-extractor run --local --verbose",
+    "build:dts": "rm -rf lib && npx tsc && npx api-extractor run --local --verbose && node scripts/removePrivate.js",
     "bp": "npm version patch && npm run build && cd dist && npm publish & cd.."
   },
   "repository": {
