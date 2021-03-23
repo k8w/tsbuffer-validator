@@ -97,10 +97,10 @@ describe('LogicType', function () {
         ]));
 
         // A | null
-        assert.strictEqual(validator.validate({ a: 'sss' }, 'logic/AOrNull'), ValidateResultUtil.succ);
-        assert.strictEqual(validator.validate(null, 'logic/AOrNull'), ValidateResultUtil.succ);
-        assert.strictEqual(validator.validate([{ a: 'sss' }], 'logic/AOrNullArr'), ValidateResultUtil.succ);
-        assert.strictEqual(validator.validate([null], 'logic/AOrNullArr'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate({ a: 'sss' }, 'logic/AOrNull'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate(null, 'logic/AOrNull'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate([{ a: 'sss' }], 'logic/AOrNullArr'), ValidateResultUtil.succ);
+        assert.deepStrictEqual(validator.validate([null], 'logic/AOrNullArr'), ValidateResultUtil.succ);
     });
 
     it('Intersection: Basic', function () {
