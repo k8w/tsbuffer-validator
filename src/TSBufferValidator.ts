@@ -27,10 +27,33 @@ export interface ValidatePruneOptions {
 
 /** @public */
 export interface TSBufferValidatorOptions {
-    /** 检查interface中是否包含Schema之外的字段，默认为true */
+    /**
+     * 检查interface中是否包含Schema之外的字段
+     * 
+     * 例1：
+     * ```
+     * type AB = { a: string, b: string };
+     * let ab: AB = { a: 'x', b: 'x', c: 'x' }
+     * ```
+     * 字段 `c` 为 excess property，当 `excessPropertyChecks` 启用时将会报错。
+     * 
+     * 例2：
+     * ```
+     * type AB = { a: string} | { b: string };
+     * let ab: AB = { a: 'x', b: 'x', c: 'x' }
+     * ```
+     * 字段 `c` 为 excess property，当 `excessPropertyChecks` 启用时将会报错。
+     * 
+     * 默认：`true`
+     */
     excessPropertyChecks?: boolean,
 
-    /** undefined和null区别对待，默认为true */
+    /**
+     * 同 `tsconfig.json` 中的 `strictNullChecks`
+     * 是否使用严格等于去判定 `undefined` 和 `null`
+     * 
+     * 默认为 `true`
+     */
     strictNullChecks?: boolean
 }
 
@@ -48,15 +71,18 @@ const typedArrays = {
 };
 
 /**
+ * TSBuffer Schema Validator
  * @public
  */
 export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
-    /** 默认配置 */
+    /** 
+     * Default options
+     */
     options: TSBufferValidatorOptions = {
         excessPropertyChecks: true,
         strictNullChecks: true
     }
-    /** 会自动赋予每个schema一个uuid，便于提升性能 */
+
     proto: TSBufferProto;
 
     readonly protoHelper: ProtoHelper;
@@ -71,9 +97,10 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
     }
 
     /**
-     * 验证
-     * @param value - 待验证的值
-     * @param schemaId - 例如 a/b.ts 里的 Test类型 则ID为 a/b/Test
+     * Validate whether the value is valid to the schema
+     * @param value - Value to be validated.
+     * @param schemaId - Schema or schema ID.
+     * For example, the schema ID for type `Test` in `a/b.ts` may be `a/b/Test`.
      */
     validate(value: any, schemaOrId: keyof Proto | TSBufferSchema): ValidatorOutput {
         let schema: TSBufferSchema;
@@ -173,8 +200,8 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
      * 修剪 Object，移除 Schema 中未定义的 Key
      * 需要确保 value 类型合法
      * @param value - value to be validated
-     * @param unionProperties - validate 的 options 输出
-     * @returns Return a shallow copy when prune occur, otherwise return the original value
+     * @param schemaOrId -Schema or schema ID.
+     * @returns Validate result and pruned value. if validate failed, `pruneOutput` would be undefined.
      */
     validateAndPrune<T>(value: T, schemaOrId: string | TSBufferSchema): ValidatorOutput & { pruneOutput: T | undefined } {
         let schema: TSBufferSchema = typeof schemaOrId === 'string' ? this.proto[schemaOrId] : schemaOrId;
