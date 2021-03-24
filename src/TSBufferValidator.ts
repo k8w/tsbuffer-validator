@@ -102,7 +102,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
      * @param schemaId - Schema or schema ID.
      * For example, the schema ID for type `Test` in `a/b.ts` may be `a/b/Test`.
      */
-    validate(value: any, schemaOrId: keyof Proto | TSBufferSchema): ValidateOutput {
+    validate(value: any, schemaOrId: keyof Proto | TSBufferSchema, options?: ValidateOptions): ValidateOutput {
         let schema: TSBufferSchema;
         let schemaId: string | undefined;
 
@@ -119,7 +119,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         }
 
         // Merge default options
-        return this._validate(value, schema);
+        return this._validate(value, schema, options);
     }
 
     private _validate(value: any, schema: TSBufferSchema, options?: ValidateOptions) {
