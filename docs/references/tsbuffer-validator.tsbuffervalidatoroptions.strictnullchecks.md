@@ -11,5 +11,5 @@
 <b>Signature:</b>
 
 ```typescript
-strictNullChecks?: boolean;
+strictNullChecks: boolean;
 ```

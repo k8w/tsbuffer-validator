@@ -22,5 +22,6 @@
 
 |  Type Alias | Description |
 |  --- | --- |
-|  [ValidatorOutput](./tsbuffer-validator.validatoroutput.md) |  |
+|  [PruneOutput](./tsbuffer-validator.pruneoutput.md) |  |
+|  [ValidateOutput](./tsbuffer-validator.validateoutput.md) |  |
 

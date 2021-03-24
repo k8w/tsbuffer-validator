@@ -46,7 +46,7 @@ export interface TSBufferValidatorOptions {
      * 
      * 默认：`true`
      */
-    excessPropertyChecks?: boolean,
+    excessPropertyChecks: boolean,
 
     /**
      * 同 `tsconfig.json` 中的 `strictNullChecks`
@@ -54,7 +54,7 @@ export interface TSBufferValidatorOptions {
      * 
      * 默认为 `true`
      */
-    strictNullChecks?: boolean
+    strictNullChecks: boolean
 }
 
 const typedArrays = {
@@ -102,7 +102,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
      * @param schemaId - Schema or schema ID.
      * For example, the schema ID for type `Test` in `a/b.ts` may be `a/b/Test`.
      */
-    validate(value: any, schemaOrId: keyof Proto | TSBufferSchema): ValidatorOutput {
+    validate(value: any, schemaOrId: keyof Proto | TSBufferSchema): ValidateOutput {
         let schema: TSBufferSchema;
         let schemaId: string | undefined;
 
@@ -203,7 +203,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
      * @param schemaOrId -Schema or schema ID.
      * @returns Validate result and pruned value. if validate failed, `pruneOutput` would be undefined.
      */
-    validateAndPrune<T>(value: T, schemaOrId: string | TSBufferSchema): ValidatorOutput & { pruneOutput: T | undefined } {
+    prune<T>(value: T, schemaOrId: string | TSBufferSchema): PruneOutput<T> {
         let schema: TSBufferSchema = typeof schemaOrId === 'string' ? this.proto[schemaOrId] : schemaOrId;
         if (!schema) {
             throw new Error('Cannot find schema: ' + schemaOrId);
@@ -212,7 +212,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         let options: ValidateOptions = {
             prune: {}
         };
-        let vRes = this._validate(value, schema, options) as ValidateResult & { pruneOutput: T };
+        let vRes = this._validate(value, schema, options) as PruneOutput<T>;
         if (vRes.isSucc) {
             vRes.pruneOutput = options.prune!.output;
         }
@@ -298,7 +298,8 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         }
 
         // validate length
-        if (this.options.excessPropertyChecks && value.length > schema.elementTypes.length) {
+        // excessPropertyChecks 与 prune互斥
+        if (!prune && this.options.excessPropertyChecks && value.length > schema.elementTypes.length) {
             return ValidateResultUtil.error(ErrorType.TupleOverLength, value.length, schema.elementTypes.length);
         }
 
@@ -430,8 +431,8 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
             prune.output = {};
         }
 
-        // Excess property check
-        if (this.options.excessPropertyChecks && !schema.indexSignature) {
+        // Excess property check (与prune互斥)
+        if (!prune && this.options.excessPropertyChecks && !schema.indexSignature) {
             let validProperties = schema.properties.map(v => v.name);
             let firstExcessProperty = Object.keys(value).find(v => validProperties.indexOf(v) === -1);
             if (firstExcessProperty) {
@@ -651,4 +652,6 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 }
 
 /** @public */
-export type ValidatorOutput = { isSucc: true, errMsg?: undefined } | { isSucc: false, errMsg: string };
+export type ValidateOutput = { isSucc: true, errMsg?: undefined } | { isSucc: false, errMsg: string };/** @public */
+/** @public */
+export type PruneOutput<T> = { isSucc: true, pruneOutput: T, errMsg?: undefined } | { isSucc: false, errMsg: string, pruneOutput?: undefined };

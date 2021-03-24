@@ -29,5 +29,5 @@ let ab: AB = { a: 'x', b: 'x', c: 'x' }
 <b>Signature:</b>
 
 ```typescript
-excessPropertyChecks?: boolean;
+excessPropertyChecks: boolean;
 ```
