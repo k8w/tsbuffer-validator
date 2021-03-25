@@ -23,7 +23,7 @@ export declare class TSBufferValidator<Proto extends TSBufferProto = TSBufferPro
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [options](./tsbuffer-validator.tsbuffervalidator.options.md) |  | [TSBufferValidatorOptions](./tsbuffer-validator.tsbuffervalidatoroptions.md) | Default options |
-|  [proto](./tsbuffer-validator.tsbuffervalidator.proto.md) |  | TSBufferProto |  |
+|  [proto](./tsbuffer-validator.tsbuffervalidator.proto.md) |  | Proto |  |
 |  [protoHelper](./tsbuffer-validator.tsbuffervalidator.protohelper.md) |  | [ProtoHelper](./tsbuffer-validator.protohelper.md) |  |
 
 ## Methods

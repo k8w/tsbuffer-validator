@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-proto: TSBufferProto;
+proto: Proto;
 ```

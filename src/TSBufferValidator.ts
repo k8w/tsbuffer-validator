@@ -403,7 +403,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
     private _validateNonPrimitiveType(value: any, schema: NonPrimitiveTypeSchema): ValidateResult {
         let type = this._getTypeof(value);
-        return type === 'Object' ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.TypeError, 'Object', type);
+        return type === 'Object' || type === 'Array' ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.TypeError, 'Object', type);
     }
 
     private _validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference, unionProperties: string[] | undefined, prune: ValidatePruneOptions | undefined, excessPropertyChecks: boolean, strictNullChecks: boolean): ValidateResult {
