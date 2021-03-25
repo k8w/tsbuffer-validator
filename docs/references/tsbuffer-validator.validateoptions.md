@@ -9,9 +9,9 @@
 <b>Signature:</b>
 
 ```typescript
-export interface ValidateOptions extends Partial<TSBufferValidatorOptions> 
+export interface ValidateOptions extends TSBufferValidatorOptions 
 ```
-<b>Extends:</b> Partial&lt;[TSBufferValidatorOptions](./tsbuffer-validator.tsbuffervalidatoroptions.md)<!-- -->&gt;
+<b>Extends:</b> [TSBufferValidatorOptions](./tsbuffer-validator.tsbuffervalidatoroptions.md)
 
 ## Properties
 
