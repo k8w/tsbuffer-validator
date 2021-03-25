@@ -86,7 +86,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         strictNullChecks: true
     }
 
-    proto: TSBufferProto;
+    proto: Proto;
 
     readonly protoHelper: ProtoHelper;
 
