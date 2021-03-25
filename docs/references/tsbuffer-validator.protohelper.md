@@ -28,7 +28,6 @@ export declare class ProtoHelper
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [applyUnionProperties(schema, unionProperties)](./tsbuffer-validator.protohelper.applyunionproperties.md) |  | 将unionProperties 扩展到 InterfaceTypeSchema中（optional的any类型） 以此来跳过对它们的检查（用于Intersection/Union） |
-|  [canBeLiteral(schema, literal)](./tsbuffer-validator.protohelper.canbeliteral.md) |  | type类型是否能编码为该literal |
 |  [getFlatInterfaceSchema(schema)](./tsbuffer-validator.protohelper.getflatinterfaceschema.md) |  | 将interface及其引用转换为展平的schema |
 |  [getUnionProperties(schema)](./tsbuffer-validator.protohelper.getunionproperties.md) |  |  |
 |  [isInterface(schema, excludeReference)](./tsbuffer-validator.protohelper.isinterface.md) |  |  |

@@ -9,7 +9,7 @@
 <b>Signature:</b>
 
 ```typescript
-prune<T>(value: T, schemaOrId: string | TSBufferSchema): PruneOutput<T>;
+prune<T>(value: T, schemaOrId: string | TSBufferSchema, options?: ValidateOptions): PruneOutput<T>;
 ```
 
 ## Parameters
@@ -18,6 +18,7 @@ prune<T>(value: T, schemaOrId: string | TSBufferSchema): PruneOutput<T>;
 |  --- | --- | --- |
 |  value | T | value to be validated |
 |  schemaOrId | string \| TSBufferSchema | Schema or schema ID. |
+|  options | [ValidateOptions](./tsbuffer-validator.validateoptions.md) |  |
 
 <b>Returns:</b>
 

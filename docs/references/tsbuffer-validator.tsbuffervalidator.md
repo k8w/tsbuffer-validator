@@ -30,6 +30,6 @@ export declare class TSBufferValidator<Proto extends TSBufferProto = TSBufferPro
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [prune(value, schemaOrId)](./tsbuffer-validator.tsbuffervalidator.prune.md) |  | 修剪 Object，移除 Schema 中未定义的 Key 需要确保 value 类型合法 |
+|  [prune(value, schemaOrId, options)](./tsbuffer-validator.tsbuffervalidator.prune.md) |  | 修剪 Object，移除 Schema 中未定义的 Key 需要确保 value 类型合法 |
 |  [validate(value, schemaOrId)](./tsbuffer-validator.tsbuffervalidator.validate.md) |  | Validate whether the value is valid to the schema |
 
