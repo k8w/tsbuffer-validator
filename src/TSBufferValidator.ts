@@ -224,15 +224,14 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
             throw new Error('Cannot find schema: ' + schemaOrId);
         }
 
-        options = {
+        let prune: ValidateOptions['prune'] = {};
+        let vRes = this._validate(value, schema, {
             ...options,
-            prune: {},
+            prune: prune,
             excessPropertyChecks: false
-        };
-
-        let vRes = this._validate(value, schema, options) as PruneOutput<T>;
+        }) as PruneOutput<T>;
         if (vRes.isSucc) {
-            vRes.pruneOutput = options.prune!.output;
+            vRes.pruneOutput = prune.output;
         }
 
         return vRes;
