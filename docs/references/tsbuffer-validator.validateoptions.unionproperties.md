@@ -4,7 +4,7 @@
 
 ## ValidateOptions.unionProperties property
 
-Common properties from Union/Intersection type
+Common properties from Union/Intersection type ( In case of they are treated as excess property and lead to validation error )
 
 <b>Signature:</b>
 

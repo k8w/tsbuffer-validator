@@ -17,5 +17,5 @@ export interface ValidateOptions extends Partial<TSBufferValidatorOptions>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [unionProperties?](./tsbuffer-validator.validateoptions.unionproperties.md) | string\[\] | <i>(Optional)</i> Common properties from Union/Intersection type |
+|  [unionProperties?](./tsbuffer-validator.validateoptions.unionproperties.md) | string\[\] | <i>(Optional)</i> Common properties from Union/Intersection type ( In case of they are treated as excess property and lead to validation error ) |
 
