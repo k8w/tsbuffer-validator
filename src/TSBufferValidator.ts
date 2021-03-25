@@ -7,7 +7,7 @@ import { ValidateResult, ValidateResultError, ValidateResultUtil } from './Valid
  * 单次validate的选项，会向下透传
  * @public
  */
-export interface ValidateOptions extends Partial<TSBufferValidatorOptions> {
+export interface ValidateOptions extends TSBufferValidatorOptions {
     /** 
      * Common properties from Union/Intersection type
      * ( In case of they are treated as excess property and lead to validation error )
@@ -108,7 +108,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
      * @param schemaId - Schema or schema ID.
      * For example, the schema ID for type `Test` in `a/b.ts` may be `a/b/Test`.
      */
-    validate(value: any, schemaOrId: keyof Proto | TSBufferSchema, options?: ValidateOptions): ValidateOutput {
+    validate(value: any, schemaOrId: keyof Proto | TSBufferSchema, options?: Partial<ValidateOptions>): ValidateOutput {
         let schema: TSBufferSchema;
         let schemaId: string | undefined;
 
@@ -125,10 +125,14 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         }
 
         // Merge default options
-        return this._validate(value, schema, options);
+        return this._validate(value, schema, {
+            ...options,
+            excessPropertyChecks: options?.excessPropertyChecks ?? this.options.excessPropertyChecks,
+            strictNullChecks: options?.strictNullChecks ?? this.options.strictNullChecks
+        });
     }
 
-    private _validate(value: any, schema: TSBufferSchema, options?: ValidateOptions) {
+    private _validate(value: any, schema: TSBufferSchema, options: ValidateOptions) {
         let vRes: ValidateResult;
 
         // Validate
@@ -143,13 +147,10 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
                 vRes = this._validateStringType(value, schema);
                 break;
             case SchemaType.Array:
-                vRes = this._validateArrayType(value, schema, options?.prune);
+                vRes = this._validateArrayType(value, schema, options);
                 break;
             case SchemaType.Tuple:
-                vRes = this._validateTupleType(value, schema, options?.prune,
-                    options?.excessPropertyChecks ?? this.options.excessPropertyChecks,
-                    options?.strictNullChecks ?? this.options.strictNullChecks
-                );
+                vRes = this._validateTupleType(value, schema, options);
                 break;
             case SchemaType.Enum:
                 vRes = this._validateEnumType(value, schema);
@@ -164,10 +165,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
                 vRes = this._validateNonPrimitiveType(value, schema);
                 break;
             case SchemaType.Interface:
-                vRes = this._validateInterfaceType(value, schema, options?.unionProperties, options?.prune,
-                    options?.excessPropertyChecks ?? this.options.excessPropertyChecks,
-                    options?.strictNullChecks ?? this.options.strictNullChecks
-                );
+                vRes = this._validateInterfaceType(value, schema, options);
                 break;
             case SchemaType.Buffer:
                 vRes = this._validateBufferType(value, schema);
@@ -177,19 +175,16 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
                 vRes = this._validateReferenceType(value, schema, options);
                 break;
             case SchemaType.Union:
-                vRes = this._validateUnionType(value, schema, options?.unionProperties, options?.prune);
+                vRes = this._validateUnionType(value, schema, options);
                 break;
             case SchemaType.Intersection:
-                vRes = this._validateIntersectionType(value, schema, options?.unionProperties, options?.prune);
+                vRes = this._validateIntersectionType(value, schema, options);
                 break;
             case SchemaType.Pick:
             case SchemaType.Omit:
             case SchemaType.Partial:
             case SchemaType.Overwrite:
-                vRes = this._validateMappedType(value, schema, options?.unionProperties, options?.prune,
-                    options?.excessPropertyChecks ?? this.options.excessPropertyChecks,
-                    options?.strictNullChecks ?? this.options.strictNullChecks
-                );
+                vRes = this._validateMappedType(value, schema, options);
                 break;
             // 错误的type
             default:
@@ -218,7 +213,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
      * @param schemaOrId -Schema or schema ID.
      * @returns Validate result and pruned value. if validate failed, `pruneOutput` would be undefined.
      */
-    prune<T>(value: T, schemaOrId: string | TSBufferSchema, options?: ValidateOptions): PruneOutput<T> {
+    prune<T>(value: T, schemaOrId: string | TSBufferSchema, options?: Partial<ValidateOptions>): PruneOutput<T> {
         let schema: TSBufferSchema = typeof schemaOrId === 'string' ? this.proto[schemaOrId] : schemaOrId;
         if (!schema) {
             throw new Error('Cannot find schema: ' + schemaOrId);
@@ -228,7 +223,8 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         let vRes = this._validate(value, schema, {
             ...options,
             prune: prune,
-            excessPropertyChecks: false
+            excessPropertyChecks: false,
+            strictNullChecks: options?.strictNullChecks ?? this.options.strictNullChecks
         }) as PruneOutput<T>;
         if (vRes.isSucc) {
             vRes.pruneOutput = prune.output;
@@ -276,7 +272,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         return type === 'string' ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.TypeError, 'string', type);
     }
 
-    private _validateArrayType(value: any, schema: ArrayTypeSchema, prune: ValidatePruneOptions | undefined): ValidateResult {
+    private _validateArrayType(value: any, schema: ArrayTypeSchema, options: ValidateOptions): ValidateResult {
         // is Array type
         let type = this._getTypeof(value);
         if (type !== SchemaType.Array) {
@@ -284,6 +280,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         }
 
         // prune output
+        let prune = options.prune;
         if (prune) {
             prune.output = Array.from({ length: value.length });
         }
@@ -291,6 +288,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         // validate elementType
         for (let i = 0; i < value.length; ++i) {
             let elemValidateResult = this._validate(value[i], schema.elementType, {
+                ...options,
                 prune: prune?.output ? {
                     parent: {
                         value: prune.output,
@@ -307,16 +305,18 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         return ValidateResultUtil.succ;
     }
 
-    private _validateTupleType(value: any, schema: TupleTypeSchema, prune: ValidatePruneOptions | undefined, excessPropertyChecks: boolean, strictNullChecks: boolean): ValidateResult {
+    private _validateTupleType(value: any, schema: TupleTypeSchema, options: ValidateOptions): ValidateResult {
         // is Array type
         let type = this._getTypeof(value);
         if (type !== SchemaType.Array) {
             return ValidateResultUtil.error(ErrorType.TypeError, SchemaType.Array, type);
         }
 
+        let prune = options.prune;
+
         // validate length
         // excessPropertyChecks 与 prune互斥
-        if (!prune && excessPropertyChecks && value.length > schema.elementTypes.length) {
+        if (!prune && options.excessPropertyChecks && value.length > schema.elementTypes.length) {
             return ValidateResultUtil.error(ErrorType.TupleOverLength, value.length, schema.elementTypes.length);
         }
 
@@ -328,7 +328,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         // validate elementType
         for (let i = 0; i < schema.elementTypes.length; ++i) {
             // MissingRequiredProperty: NotOptional && is undefined
-            if (value[i] === undefined || value[i] === null && !strictNullChecks) {
+            if (value[i] === undefined || value[i] === null && !options.strictNullChecks) {
                 let isOptional = schema.optionalStartIndex !== undefined && i >= schema.optionalStartIndex || this._canBeUndefined(schema.elementTypes[i]);
                 // skip undefined property
                 if (isOptional) {
@@ -341,6 +341,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
             // element type check
             let elemValidateResult = this._validate(value[i], schema.elementTypes[i], {
+                ...options,
                 prune: prune?.output ? {
                     parent: {
                         value: prune.output,
@@ -406,7 +407,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         return type === 'Object' || type === 'Array' ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.TypeError, 'Object', type);
     }
 
-    private _validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference, unionProperties: string[] | undefined, prune: ValidatePruneOptions | undefined, excessPropertyChecks: boolean, strictNullChecks: boolean): ValidateResult {
+    private _validateInterfaceType(value: any, schema: InterfaceTypeSchema | InterfaceReference, options: ValidateOptions): ValidateResult {
         let type = this._getTypeof(value);
         if (type !== 'Object') {
             return ValidateResultUtil.error(ErrorType.TypeError, 'Object', type);
@@ -416,25 +417,25 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         let flatSchema = this.protoHelper.getFlatInterfaceSchema(schema);
 
         // From union or intersecton type
-        if (unionProperties) {
-            flatSchema = this.protoHelper.applyUnionProperties(flatSchema, unionProperties);
+        if (options.unionProperties) {
+            flatSchema = this.protoHelper.applyUnionProperties(flatSchema, options.unionProperties);
         }
 
-        return this._validateFlatInterface(value, flatSchema, prune, excessPropertyChecks, strictNullChecks);
+        return this._validateFlatInterface(value, flatSchema, options);
     }
 
-    private _validateMappedType(value: any, schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema, unionProperties: string[] | undefined, prune: ValidatePruneOptions | undefined, excessPropertyChecks: boolean, strictNullChecks: boolean): ValidateResult {
+    private _validateMappedType(value: any, schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema, options: ValidateOptions): ValidateResult {
         let parsed = this.protoHelper.parseMappedType(schema);
         if (parsed.type === SchemaType.Interface) {
-            return this._validateInterfaceType(value, schema, unionProperties, prune, excessPropertyChecks, strictNullChecks);
+            return this._validateInterfaceType(value, schema, options);
         }
         else if (parsed.type === SchemaType.Union) {
-            return this._validateUnionType(value, parsed, unionProperties, prune);
+            return this._validateUnionType(value, parsed, options);
         }
         throw new Error();
     }
 
-    private _validateFlatInterface(value: any, schema: FlatInterfaceTypeSchema, prune: ValidatePruneOptions | undefined, excessPropertyChecks: boolean, strictNullChecks: boolean) {
+    private _validateFlatInterface(value: any, schema: FlatInterfaceTypeSchema, options: ValidateOptions) {
         // interfaceSignature强制了key必须是数字的情况
         if (schema.indexSignature && schema.indexSignature.keyType === SchemaType.Number) {
             for (let key in value) {
@@ -444,12 +445,13 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
             }
         }
 
+        let prune = options.prune;
         if (prune) {
             prune.output = {};
         }
 
         // Excess property check (与prune互斥)
-        if (!prune && excessPropertyChecks && !schema.indexSignature) {
+        if (!prune && options.excessPropertyChecks && !schema.indexSignature) {
             let validProperties = schema.properties.map(v => v.name);
             let firstExcessProperty = Object.keys(value).find(v => validProperties.indexOf(v) === -1);
             if (firstExcessProperty) {
@@ -461,7 +463,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         if (schema.properties) {
             for (let property of schema.properties) {
                 // MissingRequiredProperty: is undefined && !isOptional
-                if (value[property.name] === undefined || value[property.name] === null && !strictNullChecks) {
+                if (value[property.name] === undefined || value[property.name] === null && !options.strictNullChecks) {
                     let isOptional = property.optional || this._canBeUndefined(property.type);
                     // skip undefined optional property
                     if (isOptional) {
@@ -474,6 +476,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
                 // property本身验证
                 let vRes = this._validate(value[property.name], property.type, {
+                    ...options,
                     prune: prune?.output && property.id > -1 ? {
                         parent: {
                             value: prune.output,
@@ -495,6 +498,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
                 // validate each field
                 let vRes = this._validate(value[key], schema.indexSignature.type, {
+                    ...options,
                     prune: prune?.output ? {
                         parent: {
                             value: prune.output,
@@ -528,14 +532,15 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         }
     }
 
-    private _validateReferenceType(value: any, schema: ReferenceTypeSchema | IndexedAccessTypeSchema, options?: ValidateOptions): ValidateResult {
+    private _validateReferenceType(value: any, schema: ReferenceTypeSchema | IndexedAccessTypeSchema, options: ValidateOptions): ValidateResult {
         return this._validate(value, this.protoHelper.parseReference(schema), options);
     }
 
-    private _validateUnionType(value: any, schema: UnionTypeSchema, unionProperties: string[] | undefined, prune: ValidatePruneOptions | undefined): ValidateResult {
-        unionProperties = unionProperties || this.protoHelper.getUnionProperties(schema);
+    private _validateUnionType(value: any, schema: UnionTypeSchema, options: ValidateOptions): ValidateResult {
+        options.unionProperties = options.unionProperties || this.protoHelper.getUnionProperties(schema);
 
         let isObjectPrune: boolean = false;
+        let prune = options.prune;
         if (prune && value && Object.getPrototypeOf(value) === Object.prototype) {
             isObjectPrune = true;
             prune.output = {};
@@ -549,7 +554,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
             let memberType = this.protoHelper.isTypeReference(member.type) ? this.protoHelper.parseReference(member.type) : member.type;
             let memberPrune: ValidatePruneOptions | undefined = prune ? {} : undefined;
             let vRes: ValidateResult = this._validate(value, memberType, {
-                unionProperties: unionProperties,
+                ...options,
                 prune: memberPrune
             });
 
@@ -613,10 +618,11 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         }
     }
 
-    private _validateIntersectionType(value: any, schema: IntersectionTypeSchema, unionProperties: string[] | undefined, prune: ValidatePruneOptions | undefined): ValidateResult {
-        unionProperties = unionProperties || this.protoHelper.getUnionProperties(schema);
+    private _validateIntersectionType(value: any, schema: IntersectionTypeSchema, options: ValidateOptions): ValidateResult {
+        options.unionProperties = options.unionProperties || this.protoHelper.getUnionProperties(schema);
 
         let isObjectPrune: boolean = false;
+        let prune = options.prune;
         if (prune && value && Object.getPrototypeOf(value) === Object.prototype) {
             prune.output = {};
             isObjectPrune = true;
@@ -630,7 +636,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
             let memberPrune: ValidatePruneOptions | undefined = prune ? {} : undefined;
 
             let vRes: ValidateResult = this._validate(value, memberType, {
-                unionProperties: unionProperties,
+                ...options,
                 prune: memberPrune
             });
 

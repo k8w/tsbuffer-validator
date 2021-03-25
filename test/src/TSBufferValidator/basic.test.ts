@@ -310,7 +310,7 @@ describe('BasicType Validate', function () {
         });
 
         assert.strictEqual(validator.validate({ a: 1 }, 'a/b').isSucc, true);
-        assert.deepStrictEqual(validator.validate([1, 2, 3], 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Object', 'Array').errMsg);
+        assert.deepStrictEqual(validator.validate([1, 2, 3], 'a/b').errMsg, undefined);
         assert.deepStrictEqual(validator.validate(null, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Object', 'null').errMsg);
         assert.deepStrictEqual(validator.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Object', 'undefined').errMsg);
         assert.deepStrictEqual(validator.validate(123, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Object', 'number').errMsg);
