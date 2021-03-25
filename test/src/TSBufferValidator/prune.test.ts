@@ -4,9 +4,7 @@ import { TSBufferValidator } from '../../../src/TSBufferValidator';
 
 describe('prune', function () {
     const proto: TSBufferProto = require('../../genTestSchemas/output');
-    let validator = new TSBufferValidator(proto, {
-        excessPropertyChecks: false
-    });
+    let validator = new TSBufferValidator(proto);
 
     it('basic interface', function () {
         assert.deepStrictEqual(
