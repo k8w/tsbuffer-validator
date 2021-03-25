@@ -8,7 +8,10 @@ import { ValidateResult, ValidateResultError, ValidateResultUtil } from './Valid
  * @public
  */
 export interface ValidateOptions extends Partial<TSBufferValidatorOptions> {
-    /** Common properties from Union/Intersection type */
+    /** 
+     * Common properties from Union/Intersection type
+     * ( In case of they are treated as excess property and lead to validation error )
+     */
     unionProperties?: string[],
 
     /** @internal prune and output to this object */
@@ -105,7 +108,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
      * @param schemaId - Schema or schema ID.
      * For example, the schema ID for type `Test` in `a/b.ts` may be `a/b/Test`.
      */
-    validate(value: any, schemaOrId: keyof Proto | TSBufferSchema): ValidateOutput {
+    validate(value: any, schemaOrId: keyof Proto | TSBufferSchema, options?: ValidateOptions): ValidateOutput {
         let schema: TSBufferSchema;
         let schemaId: string | undefined;
 
@@ -122,7 +125,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         }
 
         // Merge default options
-        return this._validate(value, schema);
+        return this._validate(value, schema, options);
     }
 
     private _validate(value: any, schema: TSBufferSchema, options?: ValidateOptions) {
@@ -226,7 +229,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
             prune: {},
             excessPropertyChecks: false
         };
-        
+
         let vRes = this._validate(value, schema, options) as PruneOutput<T>;
         if (vRes.isSucc) {
             vRes.pruneOutput = options.prune!.output;
