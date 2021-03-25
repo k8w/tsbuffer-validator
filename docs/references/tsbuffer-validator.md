@@ -17,6 +17,7 @@
 |  --- | --- |
 |  [FlatInterfaceTypeSchema](./tsbuffer-validator.flatinterfacetypeschema.md) |  |
 |  [TSBufferValidatorOptions](./tsbuffer-validator.tsbuffervalidatoroptions.md) |  |
+|  [ValidateOptions](./tsbuffer-validator.validateoptions.md) | 单次validate的选项，会向下透传 |
 
 ## Type Aliases
 

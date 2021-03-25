@@ -394,6 +394,21 @@ export class ProtoHelper {
             throw new Error(`Unsupported pattern ${schema.type}<${child.type}>`);
         }
     }
+
+    /** type类型是否能编码为该literal */
+    canBeLiteral(schema: TSBufferSchema, literal: any): boolean {
+        let parsedSchema = this.parseReference(schema);
+
+        if (parsedSchema.type === SchemaType.Union) {
+            return parsedSchema.members.some(v => this.canBeLiteral(v.type, literal))
+        }
+
+        if (parsedSchema.type === SchemaType.Literal && parsedSchema.literal === literal) {
+            return true;
+        }
+
+        return false;
+    }
 }
 
 /** @public */

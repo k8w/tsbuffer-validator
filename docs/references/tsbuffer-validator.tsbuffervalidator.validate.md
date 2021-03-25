@@ -9,7 +9,7 @@ Validate whether the value is valid to the schema
 <b>Signature:</b>
 
 ```typescript
-validate(value: any, schemaOrId: keyof Proto | TSBufferSchema): ValidateOutput;
+validate(value: any, schemaOrId: keyof Proto | TSBufferSchema, options?: ValidateOptions): ValidateOutput;
 ```
 
 ## Parameters
@@ -18,6 +18,7 @@ validate(value: any, schemaOrId: keyof Proto | TSBufferSchema): ValidateOutput;
 |  --- | --- | --- |
 |  value | any | Value to be validated. |
 |  schemaOrId | keyof Proto \| TSBufferSchema |  |
+|  options | [ValidateOptions](./tsbuffer-validator.validateoptions.md) |  |
 
 <b>Returns:</b>
 

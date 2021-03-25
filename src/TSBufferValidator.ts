@@ -5,13 +5,13 @@ import { ValidateResult, ValidateResultError, ValidateResultUtil } from './Valid
 
 /** 
  * 单次validate的选项，会向下透传
- * @internal
+ * @public
  */
 export interface ValidateOptions {
-    // Common properties from Union/Intersection type
+    /** Common properties from Union/Intersection type */
     unionProperties?: string[],
 
-    // prune and output to this object
+    /** @internal prune and output to this object */
     prune?: ValidatePruneOptions
 }
 
@@ -91,7 +91,10 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         this.proto = Object.merge({}, proto);
 
         if (options) {
-            Object.assign(this.options, options);
+            this.options = {
+                ...this.options,
+                ...options
+            };
         }
         this.protoHelper = new ProtoHelper(this.proto);
     }
@@ -102,7 +105,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
      * @param schemaId - Schema or schema ID.
      * For example, the schema ID for type `Test` in `a/b.ts` may be `a/b/Test`.
      */
-    validate(value: any, schemaOrId: keyof Proto | TSBufferSchema, options?: ValidateOptions): ValidateOutput {
+    validate(value: any, schemaOrId: keyof Proto | TSBufferSchema): ValidateOutput {
         let schema: TSBufferSchema;
         let schemaId: string | undefined;
 
@@ -119,7 +122,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         }
 
         // Merge default options
-        return this._validate(value, schema, options);
+        return this._validate(value, schema);
     }
 
     private _validate(value: any, schema: TSBufferSchema, options?: ValidateOptions) {
@@ -372,7 +375,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
     }
 
     private _validateLiteralType(value: any, schema: LiteralTypeSchema): ValidateResult {
-        // 非 null undefined 严格模式，null undefined同等对待
+        // 非strictNullChecks严格模式，null undefined同等对待
         if (!this.options.strictNullChecks && (schema.literal === null || schema.literal === undefined)) {
             return value === null || value === undefined ?
                 ValidateResultUtil.succ
@@ -541,7 +544,10 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
                 // if prune object: must prune all members
                 if (isObjectPrune) {
-                    Object.assign(prune!.output, memberPrune!.output);
+                    prune!.output = {
+                        ...prune!.output,
+                        ...memberPrune!.output
+                    }
                 }
                 // not prune object: stop checking after 1st member matched
                 else {
@@ -620,7 +626,10 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
             }
 
             if (isObjectPrune) {
-                Object.assign(prune!.output, memberPrune!.output);
+                prune!.output = {
+                    ...prune!.output,
+                    ...memberPrune!.output
+                }
             }
         }
 
