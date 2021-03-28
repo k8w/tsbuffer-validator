@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer-validator",
-  "version": "1.1.11",
+  "version": "1.1.12",
   "description": "Validator for TSBuffer values",
   "main": "index.cjs",
   "exports": {
@@ -34,7 +34,7 @@
     "validate"
   ],
   "author": "k8w",
-  "license": "Apache-2.0",
+  "license": "LGPL-3.0",
   "bugs": {
     "url": "https://github.com/k8w/tsbuffer-validator/issues"
   },
