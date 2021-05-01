@@ -1,6 +1,5 @@
 import * as assert from 'assert';
-import { TSBufferSchema } from 'tsbuffer-schema';
-import { LiteralTypeSchema } from 'tsbuffer-schema';
+import { LiteralTypeSchema, TSBufferSchema } from 'tsbuffer-schema';
 import { ErrorType } from '../../../src/ErrorMsg';
 import { TSBufferValidator } from '../../../src/TSBufferValidator';
 import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
@@ -301,9 +300,9 @@ describe('BasicType Validate', function () {
         assert.deepStrictEqual(validator2.validate({}, 'a/b'), ValidateResultUtil.succ);
     })
 
-    it('NonPrimitive', function () {
+    it('Object', function () {
         let schema = {
-            type: 'NonPrimitive'
+            type: 'Object'
         } as const;
         let validator = new TSBufferValidator({
             'a/b': schema

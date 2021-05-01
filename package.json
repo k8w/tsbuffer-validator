@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer-validator",
-  "version": "2.0.0",
+  "version": "2.0.1-dev.0",
   "description": "Validator for TSBuffer values",
   "main": "index.cjs",
   "exports": {
@@ -14,7 +14,7 @@
     "build": "npm run build:js && npm run build:dts && npm run build:doc && cp package.json LICENSE README.md dist/",
     "build:js": "rm -rf dist && npx rollup -c",
     "build:dts": "rm -rf lib && npx tsc && npx api-extractor run --local --verbose && node scripts/removePrivate.js && rm -rf lib",
-    "build:doc": "rm -rf docs/references && npx api-documenter markdown --input temp --output docs/references",
+    "build:doc": "rm -rf docs/api && npx api-documenter markdown --input temp --output docs/api",
     "bp": "npm version patch && npm run build && cd dist && npm publish & cd.."
   },
   "repository": {
@@ -41,7 +41,7 @@
   "homepage": "https://github.com/k8w/tsbuffer-validator#readme",
   "dependencies": {
     "k8w-extend-native": "^1.4.5",
-    "tsbuffer-schema": "^2.0.0"
+    "tsbuffer-schema": "^2.0.1-dev.0"
   },
   "nyc": {
     "extension": [

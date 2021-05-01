@@ -1,4 +1,4 @@
-import { ArrayTypeSchema, BooleanTypeSchema, BufferTypeSchema, EnumTypeSchema, IndexedAccessTypeSchema, InterfaceReference, InterfaceTypeSchema, IntersectionTypeSchema, LiteralTypeSchema, NonPrimitiveTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, ReferenceTypeSchema, SchemaType, StringTypeSchema, TSBufferProto, TSBufferSchema, TupleTypeSchema, UnionTypeSchema } from 'tsbuffer-schema';
+import { ArrayTypeSchema, BooleanTypeSchema, BufferTypeSchema, EnumTypeSchema, IndexedAccessTypeSchema, InterfaceReference, InterfaceTypeSchema, IntersectionTypeSchema, LiteralTypeSchema, ObjectTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, ReferenceTypeSchema, SchemaType, StringTypeSchema, TSBufferProto, TSBufferSchema, TupleTypeSchema, UnionTypeSchema } from 'tsbuffer-schema';
 import { ErrorType, stringify } from './ErrorMsg';
 import { FlatInterfaceTypeSchema, ProtoHelper } from './ProtoHelper';
 import { ValidateResult, ValidateResultError, ValidateResultUtil } from './ValidateResultUtil';
@@ -161,8 +161,8 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
             case SchemaType.Literal:
                 vRes = this._validateLiteralType(value, schema, options?.strictNullChecks ?? this.options.strictNullChecks);
                 break;
-            case SchemaType.NonPrimitive:
-                vRes = this._validateNonPrimitiveType(value, schema);
+            case SchemaType.Object:
+                vRes = this._validateObjectType(value, schema);
                 break;
             case SchemaType.Interface:
                 vRes = this._validateInterfaceType(value, schema, options);
@@ -402,7 +402,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
             : ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema.literal, value);
     }
 
-    private _validateNonPrimitiveType(value: any, schema: NonPrimitiveTypeSchema): ValidateResult {
+    private _validateObjectType(value: any, schema: ObjectTypeSchema): ValidateResult {
         let type = this._getTypeof(value);
         return type === 'Object' || type === 'Array' ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.TypeError, 'Object', type);
     }
