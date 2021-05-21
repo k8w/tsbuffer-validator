@@ -1544,6 +1544,191 @@
     ],
     "type": "Pick"
   },
+  "mapped/Wrapper": {
+    "type": "Interface",
+    "properties": [
+      {
+        "id": 0,
+        "name": "time",
+        "type": {
+          "type": "Date"
+        }
+      },
+      {
+        "id": 1,
+        "name": "value1",
+        "type": {
+          "type": "String"
+        },
+        "optional": true
+      },
+      {
+        "id": 2,
+        "name": "value2",
+        "type": {
+          "type": "Union",
+          "members": [
+            {
+              "id": 0,
+              "type": {
+                "type": "Literal",
+                "literal": null
+              }
+            },
+            {
+              "id": 1,
+              "type": {
+                "type": "String"
+              }
+            },
+            {
+              "id": 2,
+              "type": {
+                "type": "Literal"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 3,
+        "name": "value4",
+        "type": {
+          "type": "Union",
+          "members": [
+            {
+              "id": 0,
+              "type": {
+                "type": "Interface",
+                "properties": [
+                  {
+                    "id": 0,
+                    "name": "a",
+                    "type": {
+                      "type": "Union",
+                      "members": [
+                        {
+                          "id": 0,
+                          "type": {
+                            "type": "Interface",
+                            "properties": [
+                              {
+                                "id": 0,
+                                "name": "b",
+                                "type": {
+                                  "type": "Union",
+                                  "members": [
+                                    {
+                                      "id": 0,
+                                      "type": {
+                                        "type": "String"
+                                      }
+                                    },
+                                    {
+                                      "id": 1,
+                                      "type": {
+                                        "type": "Literal",
+                                        "literal": null
+                                      }
+                                    }
+                                  ]
+                                },
+                                "optional": true
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "id": 1,
+                          "type": {
+                            "type": "Literal",
+                            "literal": null
+                          }
+                        }
+                      ]
+                    },
+                    "optional": true
+                  }
+                ]
+              }
+            },
+            {
+              "id": 1,
+              "type": {
+                "type": "Literal",
+                "literal": null
+              }
+            }
+          ]
+        },
+        "optional": true
+      }
+    ]
+  },
+  "mapped/Value3": {
+    "type": "Union",
+    "members": [
+      {
+        "id": 0,
+        "type": {
+          "type": "String"
+        }
+      },
+      {
+        "id": 1,
+        "type": {
+          "type": "Literal",
+          "literal": null
+        }
+      },
+      {
+        "id": 2,
+        "type": {
+          "type": "Literal"
+        }
+      }
+    ]
+  },
+  "mapped/NonNullable1": {
+    "type": "NonNullable",
+    "target": {
+      "type": "IndexedAccess",
+      "index": "value1",
+      "objectType": {
+        "type": "Reference",
+        "target": "mapped/Wrapper"
+      }
+    }
+  },
+  "mapped/NonNullable2": {
+    "type": "NonNullable",
+    "target": {
+      "type": "IndexedAccess",
+      "index": "value2",
+      "objectType": {
+        "type": "Reference",
+        "target": "mapped/Wrapper"
+      }
+    }
+  },
+  "mapped/NonNullable3": {
+    "type": "NonNullable",
+    "target": {
+      "type": "Reference",
+      "target": "mapped/Value3"
+    }
+  },
+  "mapped/NonNullable4": {
+    "type": "NonNullable",
+    "target": {
+      "type": "IndexedAccess",
+      "index": "value4",
+      "objectType": {
+        "type": "Reference",
+        "target": "mapped/Wrapper"
+      }
+    }
+  },
   "nested/ArrStr": {
     "type": "Array",
     "elementType": {

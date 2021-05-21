@@ -369,4 +369,22 @@ describe('BasicType Validate', function () {
             }
         }
     })
+
+    it('Date', function () {
+        let schema: TSBufferSchema = {
+            type: 'Date'
+        };
+        let validator = new TSBufferValidator({
+            'a/b': schema
+        });
+
+        assert.strictEqual(validator.validate(new Date(), 'a/b').isSucc, true);
+        assert.strictEqual(validator.validate(true, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Date', 'boolean').errMsg);
+        assert.strictEqual(validator.validate(false, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Date', 'boolean').errMsg);
+        assert.deepStrictEqual(validator.validate(null, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Date', 'null').errMsg);
+        assert.deepStrictEqual(validator.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Date', 'undefined').errMsg);
+        assert.deepStrictEqual(validator.validate(123, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Date', 'number').errMsg);
+        assert.deepStrictEqual(validator.validate({}, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Date', 'Object').errMsg);
+        assert.deepStrictEqual(validator.validate('123', 'a/b').errMsg, ValidateResultUtil.error(ErrorType.TypeError, 'Date', 'string').errMsg);
+    })
 })

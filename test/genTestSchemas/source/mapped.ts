@@ -69,3 +69,19 @@ export type NestedAB = Pick<Omit<Pick<AB, 'type' | 'common' | 'common1'>, 'commo
 export type PartialAB = Partial<AB>;
 export type PartialPick = Partial<PickAB>;
 export type PickPartial = Pick<PartialAB, 'type'>;
+
+export interface Wrapper {
+    time: Date,
+    value1?: string,
+    value2: null | string | undefined,
+    value4?: {
+        a?: {
+            b?: string | null
+        } | null
+    } | null
+}
+export type Value3 = string | null | undefined;
+export type NonNullable1 = NonNullable<Wrapper['value1']>;
+export type NonNullable2 = NonNullable<Wrapper['value2']>;
+export type NonNullable3 = NonNullable<Value3>;
+export type NonNullable4 = NonNullable<Wrapper['value4']>;

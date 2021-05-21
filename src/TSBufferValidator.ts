@@ -1,4 +1,4 @@
-import { ArrayTypeSchema, BooleanTypeSchema, BufferTypeSchema, EnumTypeSchema, IndexedAccessTypeSchema, InterfaceReference, InterfaceTypeSchema, IntersectionTypeSchema, LiteralTypeSchema, ObjectTypeSchema, NumberTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, ReferenceTypeSchema, SchemaType, StringTypeSchema, TSBufferProto, TSBufferSchema, TupleTypeSchema, UnionTypeSchema } from 'tsbuffer-schema';
+import { ArrayTypeSchema, BooleanTypeSchema, BufferTypeSchema, EnumTypeSchema, IndexedAccessTypeSchema, InterfaceReference, InterfaceTypeSchema, IntersectionTypeSchema, LiteralTypeSchema, NonNullableTypeSchema, NumberTypeSchema, ObjectTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, ReferenceTypeSchema, SchemaType, StringTypeSchema, TSBufferProto, TSBufferSchema, TupleTypeSchema, UnionTypeSchema } from 'tsbuffer-schema';
 import { ErrorType, stringify } from './ErrorMsg';
 import { FlatInterfaceTypeSchema, ProtoHelper } from './ProtoHelper';
 import { ValidateResult, ValidateResultError, ValidateResultUtil } from './ValidateResultUtil';
@@ -186,6 +186,12 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
             case SchemaType.Overwrite:
                 vRes = this._validateMappedType(value, schema, options);
                 break;
+            case SchemaType.Date:
+                vRes = this._validateDateType(value);
+                break;
+            case SchemaType.NonNullable:
+                vRes = this._validateNonNullableType(value, schema, options);
+                break;
             // 错误的type
             default:
                 throw new Error(`Unsupported schema type: ${(schema as any).type}`);
@@ -341,13 +347,14 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
             // element type check
             let elemValidateResult = this._validate(value[i], schema.elementTypes[i], {
-                ...options,
                 prune: prune?.output ? {
                     parent: {
                         value: prune.output,
                         key: i
                     }
-                } : undefined
+                } : undefined,
+                strictNullChecks: options.strictNullChecks,
+                excessPropertyChecks: options.excessPropertyChecks
             });
             if (!elemValidateResult.isSucc) {
                 return ValidateResultUtil.innerError('' + i, value[i], schema.elementTypes[i], elemValidateResult);
@@ -476,13 +483,14 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
                 // property本身验证
                 let vRes = this._validate(value[property.name], property.type, {
-                    ...options,
                     prune: prune?.output && property.id > -1 ? {
                         parent: {
                             value: prune.output,
                             key: property.name
                         }
-                    } : undefined
+                    } : undefined,
+                    strictNullChecks: options.strictNullChecks,
+                    excessPropertyChecks: options.excessPropertyChecks
                 });
                 if (!vRes.isSucc) {
                     return ValidateResultUtil.innerError(property.name, value[property.name], property.type, vRes);
@@ -498,13 +506,14 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
                 // validate each field
                 let vRes = this._validate(value[key], schema.indexSignature.type, {
-                    ...options,
                     prune: prune?.output ? {
                         parent: {
                             value: prune.output,
                             key: key
                         }
-                    } : undefined
+                    } : undefined,
+                    strictNullChecks: options.strictNullChecks,
+                    excessPropertyChecks: options.excessPropertyChecks
                 });
                 if (!vRes.isSucc) {
                     return ValidateResultUtil.innerError(key, value[key], schema.indexSignature.type, vRes);
@@ -655,6 +664,23 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
 
         // 全成功则成功
         return ValidateResultUtil.succ;
+    }
+
+    private _validateDateType(value: any): ValidateResult {
+        if (value instanceof Date) {
+            return ValidateResultUtil.succ;
+        }
+        else {
+            return ValidateResultUtil.error(ErrorType.TypeError, 'Date', this._getTypeof(value));
+        }
+    }
+
+    private _validateNonNullableType(value: any, schema: NonNullableTypeSchema, options: ValidateOptions): ValidateResult {
+        let type = this._getTypeof(value);
+        if ((type === 'null' || type === 'undefined') && schema.target.type !== 'Any') {
+            return ValidateResultUtil.error(ErrorType.TypeError, 'NonNullable', type);
+        }
+        return this._validate(value, schema.target, options);
     }
 
     private _isNumberKey(key: string): boolean {

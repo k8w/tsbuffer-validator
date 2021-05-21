@@ -2,6 +2,7 @@ import * as assert from 'assert';
 import { TSBufferProto } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../../src';
 import { ErrorMsg, ErrorType } from '../../../src/ErrorMsg';
+import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
 
 describe('MappedType Validate', function () {
     const proto: TSBufferProto = require('../../genTestSchemas/output');
@@ -203,5 +204,29 @@ describe('MappedType Validate', function () {
         validateAndAssert({ a: '1', b: 2 }, 'mapped/IOverwrite1', ErrorMsg[ErrorType.TypeError]('number', 'string'), ['a']);
         validateAndAssert({ a: 'x', b: 'x', c: 'x' }, 'mapped/IOverwrite2', undefined);
         validateAndAssert({ a: 'x', b: 'x', c: 1 }, 'mapped/IOverwrite2', ErrorMsg[ErrorType.TypeError]('string', 'number'), ['c']);
+    });
+
+    it('NonNullable', function () {
+        validateAndAssert(undefined, 'mapped/NonNullable1', ValidateResultUtil.error(ErrorType.TypeError, 'NonNullable', 'undefined').errMsg);
+        validateAndAssert(undefined, 'mapped/NonNullable2', ValidateResultUtil.error(ErrorType.TypeError, 'NonNullable', 'undefined').errMsg);
+        validateAndAssert(undefined, 'mapped/NonNullable3', ValidateResultUtil.error(ErrorType.TypeError, 'NonNullable', 'undefined').errMsg);
+
+        validateAndAssert(null, 'mapped/NonNullable1', ValidateResultUtil.error(ErrorType.TypeError, 'NonNullable', 'null').errMsg);
+        validateAndAssert(null, 'mapped/NonNullable2', ValidateResultUtil.error(ErrorType.TypeError, 'NonNullable', 'null').errMsg);
+        validateAndAssert(null, 'mapped/NonNullable3', ValidateResultUtil.error(ErrorType.TypeError, 'NonNullable', 'null').errMsg);
+
+        validateAndAssert('ABC', 'mapped/NonNullable1', undefined);
+        validateAndAssert('ABC', 'mapped/NonNullable2', undefined);
+        validateAndAssert('ABC', 'mapped/NonNullable3', undefined);
+
+        validateAndAssert(12345, 'mapped/NonNullable1', ValidateResultUtil.error(ErrorType.TypeError, 'string', 'number').errMsg);
+        validateAndAssert(12345, 'mapped/NonNullable2', ValidateResultUtil.error(ErrorType.TypeError, 'string', 'number').errMsg);
+        validateAndAssert(12345, 'mapped/NonNullable3', ValidateResultUtil.error(ErrorType.TypeError, 'string', 'number').errMsg);
+
+        validateAndAssert({}, 'mapped/NonNullable4', undefined);
+        validateAndAssert({ a: null }, 'mapped/NonNullable4', undefined);
+        validateAndAssert({ a: {} }, 'mapped/NonNullable4', undefined);
+        validateAndAssert({ a: { b: null } }, 'mapped/NonNullable4', undefined);
+        validateAndAssert({ a: { b: 'ABC' } }, 'mapped/NonNullable4', undefined);
     });
 });
