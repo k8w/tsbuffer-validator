@@ -20,7 +20,7 @@ export const ErrorMsg = {
     [ErrorType.InvalidEnumValue]: (value: string | number) => `\`${value}\` is not a valid enum member.`,
     [ErrorType.InvalidLiteralValue]: (expected: any, actual: any) => `Expected to equals \`${stringify(expected)}\`, actually \`${stringify(actual)}\``,
     [ErrorType.MissingRequiredProperty]: (propName: string | number) => `Missing required property \`${propName}\`.`,
-    [ErrorType.ExcessProperty]: (propName: string | number) => `Unexpected property \`${propName}\`.`,
+    [ErrorType.ExcessProperty]: (propName: string | number) => `Excess property \`${propName}\` should not exists.`,
     [ErrorType.InvalidNumberKey]: (key: string) => `\`${key}\` is not a valid key, the key here should be a \`number\`.`,
 
     // Union

@@ -57,7 +57,14 @@ export interface TSBufferValidatorOptions {
      * 
      * 默认为 `true`
      */
-    strictNullChecks: boolean
+    strictNullChecks: boolean,
+
+    /**
+     * Clone the proto
+     * @internal
+     * @defaultValue true
+     */
+    cloneProto?: boolean
 }
 
 const typedArrays = {
@@ -83,7 +90,8 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
      */
     options: TSBufferValidatorOptions = {
         excessPropertyChecks: true,
-        strictNullChecks: true
+        strictNullChecks: true,
+        cloneProto: true
     }
 
     proto: Proto;
@@ -91,14 +99,15 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
     readonly protoHelper: ProtoHelper;
 
     constructor(proto: Proto, options?: Partial<TSBufferValidatorOptions>) {
-        this.proto = Object.merge({}, proto);
-
         if (options) {
             this.options = {
                 ...this.options,
                 ...options
             };
         }
+
+        this.proto = this.options.cloneProto ? Object.merge({}, proto) : proto;
+
         this.protoHelper = new ProtoHelper(this.proto);
     }
 
