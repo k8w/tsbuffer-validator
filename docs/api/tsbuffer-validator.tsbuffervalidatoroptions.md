@@ -15,6 +15,7 @@ export interface TSBufferValidatorOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [cloneProto?](./tsbuffer-validator.tsbuffervalidatoroptions.cloneproto.md) | boolean | <i>(Optional)</i> Clone the proto, don't change this if you don't know what it is. |
 |  [excessPropertyChecks](./tsbuffer-validator.tsbuffervalidatoroptions.excesspropertychecks.md) | boolean | 检查interface中是否包含Schema之外的字段<!-- -->例1：
 ```
 type AB = { a: string, b: string };

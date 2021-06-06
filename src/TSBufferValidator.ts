@@ -60,8 +60,7 @@ export interface TSBufferValidatorOptions {
     strictNullChecks: boolean,
 
     /**
-     * Clone the proto
-     * @internal
+     * Clone the proto, don't change this if you don't know what it is.
      * @defaultValue true
      */
     cloneProto?: boolean
