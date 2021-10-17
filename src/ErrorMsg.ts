@@ -10,6 +10,7 @@ export enum ErrorType {
     InvalidNumberKey = 'InvalidNumberKey',
     UnionTypesNotMatch = 'UnionTypesNotMatch',
     UnionMembersNotMatch = 'UnionMembersNotMatch',
+    CustomError = 'CustomError'
 }
 
 /** @internal */
@@ -26,6 +27,8 @@ export const ErrorMsg = {
     // Union
     [ErrorType.UnionTypesNotMatch]: (value: any, types: string[]) => `\`${stringify(value)}\` is not matched to \`${types.join(' | ')}\``,
     [ErrorType.UnionMembersNotMatch]: (memberErrors: { errMsg: string }[]) => `No union member matched, detail:\n${memberErrors.map((v, i) => `  <${i}> ${v.errMsg}`).join('\n')}`,
+
+    [ErrorType.CustomError]: (errMsg: string) => errMsg
 };
 
 /** @internal */

@@ -15,6 +15,7 @@ module.exports = {
         './test/src/TSBufferValidator/nested.test.ts',
         './test/src/TSBufferValidator/reference.test.ts',
         './test/src/TSBufferValidator/prune.test.ts',
+        './test/src/TSBufferValidator/custom.test.ts',
     ],
     parallel: false
 }

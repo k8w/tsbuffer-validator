@@ -200,9 +200,13 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
             case SchemaType.NonNullable:
                 vRes = this._validateNonNullableType(value, schema, options);
                 break;
+            case SchemaType.Custom:
+                let res = schema.validate(value);
+                vRes = res.isSucc ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.CustomError, res.errMsg);
+                break;
             // 错误的type
             default:
-                throw new Error(`Unsupported schema type: ${(schema as any).type}`);
+                throw new Error(`Unsupported schema type: ${schema.type}`);
         }
 
         // prune

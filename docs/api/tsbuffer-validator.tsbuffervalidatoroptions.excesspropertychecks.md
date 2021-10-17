@@ -11,7 +11,6 @@
 ```
 type AB = { a: string, b: string };
 let ab: AB = { a: 'x', b: 'x', c: 'x' }
-
 ```
 字段 `c` 为 excess property，当 `excessPropertyChecks` 启用时将会报错。
 
@@ -20,7 +19,6 @@ let ab: AB = { a: 'x', b: 'x', c: 'x' }
 ```
 type AB = { a: string} | { b: string };
 let ab: AB = { a: 'x', b: 'x', c: 'x' }
-
 ```
 字段 `c` 为 excess property，当 `excessPropertyChecks` 启用时将会报错。
 

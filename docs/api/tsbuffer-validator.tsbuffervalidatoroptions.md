@@ -20,13 +20,11 @@ export interface TSBufferValidatorOptions
 ```
 type AB = { a: string, b: string };
 let ab: AB = { a: 'x', b: 'x', c: 'x' }
-
 ```
 字段 <code>c</code> 为 excess property，当 <code>excessPropertyChecks</code> 启用时将会报错。<!-- -->例2：
 ```
 type AB = { a: string} | { b: string };
 let ab: AB = { a: 'x', b: 'x', c: 'x' }
-
 ```
 字段 <code>c</code> 为 excess property，当 <code>excessPropertyChecks</code> 启用时将会报错。<!-- -->默认：<code>true</code> |
 |  [strictNullChecks](./tsbuffer-validator.tsbuffervalidatoroptions.strictnullchecks.md) | boolean | 同 <code>tsconfig.json</code> 中的 <code>strictNullChecks</code> 是否使用严格等于去判定 <code>undefined</code> 和 <code>null</code>默认为 <code>true</code> |
