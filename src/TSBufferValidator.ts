@@ -15,7 +15,10 @@ export interface ValidateOptions extends TSBufferValidatorOptions {
     unionProperties?: string[],
 
     /** @internal prune and output to this object */
-    prune?: ValidatePruneOptions
+    prune?: ValidatePruneOptions,
+
+    /** Ignore JSON-incompatible types, such as ArrayBuffer, Date, CustomTypes... */
+    ignoreJsonIncompatibleTypes?: boolean
 }
 
 export interface ValidatePruneOptions {
@@ -176,6 +179,9 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
                 vRes = this._validateInterfaceType(value, schema, options);
                 break;
             case SchemaType.Buffer:
+                if (options.ignoreJsonIncompatibleTypes && typeof value === 'string') {
+                    return ValidateResultUtil.succ;
+                }
                 vRes = this._validateBufferType(value, schema);
                 break;
             case SchemaType.IndexedAccess:
@@ -195,12 +201,18 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
                 vRes = this._validateMappedType(value, schema, options);
                 break;
             case SchemaType.Date:
+                if (options.ignoreJsonIncompatibleTypes && (typeof value === 'string' || typeof value === 'number')) {
+                    return ValidateResultUtil.succ;
+                }
                 vRes = this._validateDateType(value);
                 break;
             case SchemaType.NonNullable:
                 vRes = this._validateNonNullableType(value, schema, options);
                 break;
             case SchemaType.Custom:
+                if (options.ignoreJsonIncompatibleTypes) {
+                    return ValidateResultUtil.succ;
+                }
                 let res = schema.validate(value);
                 vRes = res.isSucc ? ValidateResultUtil.succ : ValidateResultUtil.error(ErrorType.CustomError, res.errMsg);
                 break;
