@@ -265,4 +265,82 @@ describe('prune', function () {
             }
         );
     })
+
+    it('strictNullChecks: undefined', function () {
+        let strict = new TSBufferValidator({
+            'a/b': {
+                type: 'Interface',
+                properties: [{
+                    id: 0,
+                    name: 'a',
+                    type: {
+                        type: 'String'
+                    },
+                    optional: true
+                }]
+            }
+        }, { strictNullChecks: true });
+        let nonStrict = new TSBufferValidator({
+            'a/b': {
+                type: 'Interface',
+                properties: [{
+                    id: 0,
+                    name: 'a',
+                    type: {
+                        type: 'String'
+                    },
+                    optional: true
+                }]
+            }
+        }, { strictNullChecks: false });
+
+        assert.deepStrictEqual(strict.prune({}, 'a/b').pruneOutput, {});
+        assert.deepStrictEqual(strict.prune({ a: undefined }, 'a/b').pruneOutput, {});
+        assert.deepStrictEqual(strict.prune({ a: null }, 'a/b').pruneOutput, undefined);
+        assert.deepStrictEqual(nonStrict.prune({}, 'a/b').pruneOutput, {});
+        assert.deepStrictEqual(nonStrict.prune({ a: undefined }, 'a/b').pruneOutput, {});
+        assert.deepStrictEqual(nonStrict.prune({ a: null }, 'a/b').pruneOutput, {});
+    })
+
+    it('strictNullChecks: null', function () {
+        let strict = new TSBufferValidator({
+            'a/b': {
+                type: 'Interface',
+                properties: [{
+                    id: 0,
+                    name: 'a',
+                    type: {
+                        type: 'Union',
+                        members: [
+                            { id: 0, type: { type: 'Literal', literal: null } },
+                            { id: 1, type: { type: 'String' } }
+                        ]
+                    }
+                }]
+            }
+        }, { strictNullChecks: true });
+        let nonStrict = new TSBufferValidator({
+            'a/b': {
+                type: 'Interface',
+                properties: [{
+                    id: 0,
+                    name: 'a',
+                    type: {
+                        type: 'Union',
+                        members: [
+                            { id: 0, type: { type: 'Literal', literal: null } },
+                            { id: 1, type: { type: 'String' } }
+                        ]
+                    }
+                }]
+            }
+        }, { strictNullChecks: false });
+
+        assert.deepStrictEqual(strict.prune({}, 'a/b').pruneOutput, undefined);
+        assert.deepStrictEqual(strict.prune({ a: undefined }, 'a/b').pruneOutput, undefined);
+        assert.deepStrictEqual(strict.prune({ a: null }, 'a/b').pruneOutput, { a: null });
+        assert.deepStrictEqual(nonStrict.prune({}, 'a/b').pruneOutput, { a: null });
+        assert.deepStrictEqual(nonStrict.prune({ a: undefined }, 'a/b').pruneOutput, { a: null });
+        assert.deepStrictEqual(nonStrict.prune({ a: null }, 'a/b').pruneOutput, { a: null });
+    })
 })

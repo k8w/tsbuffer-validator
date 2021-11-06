@@ -57,8 +57,7 @@ export interface TSBufferValidatorOptions {
     /**
      * 同 `tsconfig.json` 中的 `strictNullChecks`
      * 是否使用严格等于去判定 `undefined` 和 `null`
-     * 
-     * 默认为 `true`
+     * @defaultValue false
      */
     strictNullChecks: boolean,
 
@@ -92,7 +91,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
      */
     options: TSBufferValidatorOptions = {
         excessPropertyChecks: true,
-        strictNullChecks: true,
+        strictNullChecks: false,
         cloneProto: true
     }
 
@@ -359,9 +358,20 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         for (let i = 0; i < schema.elementTypes.length; ++i) {
             // MissingRequiredProperty: NotOptional && is undefined
             if (value[i] === undefined || value[i] === null && !options.strictNullChecks) {
-                let isOptional = schema.optionalStartIndex !== undefined && i >= schema.optionalStartIndex || this._canBeUndefined(schema.elementTypes[i]);
+                let canBeNull = this._canBeNull(schema.elementTypes[i]);
+                let canBeUndefined = schema.optionalStartIndex !== undefined && i >= schema.optionalStartIndex || this._canBeUndefined(schema.elementTypes[i]);
+                let isOptional = canBeUndefined || !options.strictNullChecks && canBeNull;
                 // skip undefined property
                 if (isOptional) {
+                    // Prune null & undefined->null
+                    if (prune?.output) {
+                        if (value[i] === null && canBeNull
+                            || value[i] === undefined && !canBeUndefined && canBeNull
+                        ) {
+                            prune.output[i] = null;
+                        }
+                    }
+
                     continue;
                 }
                 else {
@@ -394,6 +404,18 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         }
 
         if (schema.type === SchemaType.Literal && schema.literal === undefined) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private _canBeNull(schema: TSBufferSchema): boolean {
+        if (schema.type === SchemaType.Union) {
+            return schema.members.some(v => this._canBeNull(v.type))
+        }
+
+        if (schema.type === SchemaType.Literal && schema.literal === null) {
             return true;
         }
 
@@ -495,9 +517,20 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
             for (let property of schema.properties) {
                 // MissingRequiredProperty: is undefined && !isOptional
                 if (value[property.name] === undefined || value[property.name] === null && !options.strictNullChecks) {
-                    let isOptional = property.optional || this._canBeUndefined(property.type);
+                    let canBeNull = this._canBeNull(property.type);
+                    let canBeUndefined = property.optional || this._canBeUndefined(property.type);
+                    let isOptional = canBeUndefined || !options.strictNullChecks && canBeNull;
                     // skip undefined optional property
                     if (isOptional) {
+                        // Prune null & undefined->null
+                        if (prune?.output) {
+                            if (value[property.name] === null && canBeNull
+                                || value[property.name] === undefined && !canBeUndefined && canBeNull
+                            ) {
+                                prune.output[property.name] = null;
+                            }
+                        }
+
                         continue;
                     }
                     else {

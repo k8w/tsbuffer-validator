@@ -1,6 +1,6 @@
 {
   "name": "tsbuffer-validator",
-  "version": "2.0.7-dev.1",
+  "version": "2.0.7-dev.2",
   "description": "Validator for TSBuffer values",
   "main": "index.cjs",
   "exports": {

@@ -240,6 +240,8 @@ describe('BasicType Validate', function () {
         };
         let validator3 = new TSBufferValidator({
             'a/b': schema3
+        }, {
+            strictNullChecks: true
         });
         assert.strictEqual(validator3.validate(null, 'a/b').isSucc, true);
         assert.deepStrictEqual(validator3.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema3.literal, undefined).errMsg);
@@ -250,9 +252,24 @@ describe('BasicType Validate', function () {
         };
         let validator4 = new TSBufferValidator({
             'a/b': schema4
+        }, {
+            strictNullChecks: true
         });
         assert.strictEqual(validator4.validate(undefined, 'a/b').isSucc, true);
         assert.deepStrictEqual(validator4.validate(null, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema4.literal, null).errMsg);
+
+        let schema5: LiteralTypeSchema = {
+            type: 'Literal',
+            literal: null
+        };
+        let validator5 = new TSBufferValidator({
+            'a/b': schema5
+        }, {
+            strictNullChecks: false
+        });
+        assert.strictEqual(validator5.validate(null, 'a/b').isSucc, true);
+        assert.deepStrictEqual(validator5.validate(undefined, 'a/b').isSucc, true);
+
     })
 
     it('strictNullChecks false', function () {

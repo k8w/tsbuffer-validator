@@ -6,7 +6,7 @@ import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
 
 describe('MappedType Validate', function () {
     const proto: TSBufferProto = require('../../genTestSchemas/output');
-    let validator = new TSBufferValidator(proto);
+    let validator = new TSBufferValidator(proto, { strictNullChecks: true });
 
     function validateAndAssert(value: any, schemaId: string, errMsg: string | undefined, property?: string[]) {
         let vRes = validator.validate(value, schemaId);
@@ -59,6 +59,60 @@ describe('MappedType Validate', function () {
             common: 'xxx',
         }, 'mapped/PickAB', ErrorMsg[ErrorType.MissingRequiredProperty]('type'));
     });
+
+    it('Pick, strictNullChecks: false', function () {
+        let validator = new TSBufferValidator(proto, { strictNullChecks: false });
+
+        function validateAndAssert(value: any, schemaId: string, errMsg: string | undefined, property?: string[]) {
+            let vRes = validator.validate(value, schemaId);
+            if (property) {
+                assert.strictEqual(vRes.errMsg, `Property \`${property.join('.')}\`: ${errMsg}`);
+            }
+            else {
+                assert.strictEqual(vRes.errMsg, errMsg)
+            }
+        }
+
+        // simple Pick
+        validateAndAssert({ name: 'x' }, 'mapped/Pick1', undefined);
+        validateAndAssert({ name: 'x', orders: [] }, 'mapped/Pick1', ErrorMsg[ErrorType.ExcessProperty]('orders'));
+        validateAndAssert({}, 'mapped/Pick1', ErrorMsg[ErrorType.MissingRequiredProperty]('name'));
+
+        // Pick fields
+        validateAndAssert({ name: 'x' }, 'mapped/Pick2', undefined);
+        validateAndAssert({ name: 'x', orders: [1, 2, 3] }, 'mapped/Pick2', undefined);
+        validateAndAssert({ name: 'x', orders: [1, 2, 3], sex: { value: 'm' } }, 'mapped/Pick2',
+            ErrorMsg[ErrorType.ExcessProperty]('sex'));
+
+        // Pick<Pick>
+        validateAndAssert({ orders: [1, 2, 3] }, 'mapped/Pick3', undefined);
+        validateAndAssert({}, 'mapped/Pick3', undefined);
+        validateAndAssert({ name: 'x', orders: [1] }, 'mapped/Pick3', ErrorMsg[ErrorType.ExcessProperty]('name'));
+
+        // indexSignature
+        validateAndAssert({ a: 'x', c: 'x' }, 'mapped/IPick', undefined);
+        validateAndAssert({ a: 'x', c: 1 }, 'mapped/IPick', undefined);
+        validateAndAssert({ a: 'x', c: undefined }, 'mapped/IPick', ErrorMsg[ErrorType.MissingRequiredProperty]('c'));
+        validateAndAssert({ a: 'x', c: null }, 'mapped/IPick', ErrorMsg[ErrorType.MissingRequiredProperty]('c'));
+
+        // Pick<A|B>
+        validateAndAssert({
+            type: 'A',
+            common: 'xxx'
+        }, 'mapped/PickAB', undefined);
+        validateAndAssert({
+            type: 'B',
+            common: 'xxx'
+        }, 'mapped/PickAB', undefined);
+        validateAndAssert({
+            type: 'A',
+            common: 'xxx',
+            valueA: 'asdg'
+        }, 'mapped/PickAB', ErrorMsg[ErrorType.ExcessProperty]('valueA'));
+        validateAndAssert({
+            common: 'xxx',
+        }, 'mapped/PickAB', ErrorMsg[ErrorType.MissingRequiredProperty]('type'));
+    })
 
     it('Partial', function () {
         // Partial1
