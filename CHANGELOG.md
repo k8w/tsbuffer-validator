@@ -1,8 +1,6 @@
 # CHANGELOG
 
-## [2.0.7-dev.2] - 2021-11-04
-### Added
-- Add `options.ignoreJsonIncompatibleTypes`
+## [2.0.7] - 2021-11-08
 ### Changed
 - Default option of `strictNullChecks` changed to `false`
 ### Fixed
