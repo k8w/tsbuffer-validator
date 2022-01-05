@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.0.8] - 2022-01-06
+### Fixed
+- `cjs` to `js` to fix `react-scripts@5`
+
 ## [2.0.7] - 2021-11-08
 ### Changed
 - Default option of `strictNullChecks` changed to `false`

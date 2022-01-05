@@ -1,10 +1,10 @@
 {
   "name": "tsbuffer-validator",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "Validator for TSBuffer values",
-  "main": "index.cjs",
+  "main": "index.js",
   "exports": {
-    "require": "./index.cjs",
+    "require": "./index.js",
     "import": "./index.mjs"
   },
   "typings": "./index.d.ts",
@@ -41,7 +41,7 @@
   "homepage": "https://github.com/k8w/tsbuffer-validator#readme",
   "dependencies": {
     "k8w-extend-native": "^1.4.6",
-    "tsbuffer-schema": "^2.0.8",
+    "tsbuffer-schema": "^2.1.1",
     "tslib": "^2.3.1"
   },
   "nyc": {
@@ -60,15 +60,15 @@
     "all": true
   },
   "devDependencies": {
-    "@microsoft/api-documenter": "^7.13.65",
-    "@microsoft/api-extractor": "^7.18.17",
+    "@microsoft/api-documenter": "^7.14.1",
+    "@microsoft/api-extractor": "^7.19.4",
     "@types/mocha": "^8.2.3",
     "@types/node": "^15.14.9",
     "mocha": "^9.1.3",
     "nyc": "^15.1.0",
-    "rollup": "^2.59.0",
-    "rollup-plugin-typescript2": "^0.30.0",
+    "rollup": "^2.63.0",
+    "rollup-plugin-typescript2": "^0.31.1",
     "ts-node": "^10.4.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.5.4"
   }
 }
