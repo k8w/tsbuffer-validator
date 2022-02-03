@@ -70,6 +70,19 @@ export class ProtoHelper {
 
             return this.isTypeReference(propType) ? this.parseReference(propType) : propType;
         }
+        else if (schema.type === SchemaType.Keyof) {
+            let flatInterface = this.getFlatInterfaceSchema(schema.target);
+            return {
+                type: 'Union',
+                members: flatInterface.properties.map((v, i) => ({
+                    id: i,
+                    type: {
+                        type: SchemaType.Literal,
+                        literal: v.name
+                    }
+                }))
+            }
+        }
         else {
             return schema;
         }

@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [2.1.0-dev.0] - 2022-02-03
+### Added
+- Support new `KeyofTypeSchema`. 
 ## [2.0.8] - 2022-01-06
 ### Fixed
 - `cjs` to `js` to fix `react-scripts@5`
