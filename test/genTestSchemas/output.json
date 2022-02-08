@@ -1762,6 +1762,315 @@
     ],
     "type": "Pick"
   },
+  "mapped/PickIntersection1": {
+    "target": {
+      "type": "Intersection",
+      "members": [
+        {
+          "id": 0,
+          "type": {
+            "type": "Interface",
+            "properties": [
+              {
+                "id": 0,
+                "name": "a",
+                "type": {
+                  "type": "String"
+                }
+              },
+              {
+                "id": 1,
+                "name": "b",
+                "type": {
+                  "type": "String"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": 1,
+          "type": {
+            "type": "Interface",
+            "properties": [
+              {
+                "id": 0,
+                "name": "c",
+                "type": {
+                  "type": "String"
+                }
+              },
+              {
+                "id": 1,
+                "name": "d",
+                "type": {
+                  "type": "String"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "keys": [
+      "a",
+      "c"
+    ],
+    "type": "Pick"
+  },
+  "mapped/OmitIntersection1": {
+    "target": {
+      "type": "Intersection",
+      "members": [
+        {
+          "id": 0,
+          "type": {
+            "type": "Interface",
+            "properties": [
+              {
+                "id": 0,
+                "name": "a",
+                "type": {
+                  "type": "String"
+                }
+              },
+              {
+                "id": 1,
+                "name": "b",
+                "type": {
+                  "type": "String"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": 1,
+          "type": {
+            "type": "Interface",
+            "properties": [
+              {
+                "id": 0,
+                "name": "c",
+                "type": {
+                  "type": "String"
+                }
+              },
+              {
+                "id": 1,
+                "name": "d",
+                "type": {
+                  "type": "String"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "keys": [
+      "b",
+      "d"
+    ],
+    "type": "Omit"
+  },
+  "mapped/PickIntersection2": {
+    "target": {
+      "type": "Intersection",
+      "members": [
+        {
+          "id": 0,
+          "type": {
+            "type": "Union",
+            "members": [
+              {
+                "id": 0,
+                "type": {
+                  "type": "Interface",
+                  "properties": [
+                    {
+                      "id": 0,
+                      "name": "type",
+                      "type": {
+                        "type": "Literal",
+                        "literal": "a"
+                      }
+                    },
+                    {
+                      "id": 1,
+                      "name": "value",
+                      "type": {
+                        "type": "Interface",
+                        "properties": [
+                          {
+                            "id": 0,
+                            "name": "a",
+                            "type": {
+                              "type": "String"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "id": 1,
+                "type": {
+                  "type": "Interface",
+                  "properties": [
+                    {
+                      "id": 0,
+                      "name": "type",
+                      "type": {
+                        "type": "Literal",
+                        "literal": "b"
+                      }
+                    },
+                    {
+                      "id": 1,
+                      "name": "value",
+                      "type": {
+                        "type": "Interface",
+                        "properties": [
+                          {
+                            "id": 0,
+                            "name": "b",
+                            "type": {
+                              "type": "String"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": 1,
+          "type": {
+            "type": "Interface",
+            "properties": [
+              {
+                "id": 0,
+                "name": "meta",
+                "type": {
+                  "type": "String"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "keys": [
+      "type",
+      "value"
+    ],
+    "type": "Pick"
+  },
+  "mapped/OmitIntersection2": {
+    "target": {
+      "type": "Intersection",
+      "members": [
+        {
+          "id": 0,
+          "type": {
+            "type": "Union",
+            "members": [
+              {
+                "id": 0,
+                "type": {
+                  "type": "Interface",
+                  "properties": [
+                    {
+                      "id": 0,
+                      "name": "type",
+                      "type": {
+                        "type": "Literal",
+                        "literal": "a"
+                      }
+                    },
+                    {
+                      "id": 1,
+                      "name": "value",
+                      "type": {
+                        "type": "Interface",
+                        "properties": [
+                          {
+                            "id": 0,
+                            "name": "a",
+                            "type": {
+                              "type": "String"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "id": 1,
+                "type": {
+                  "type": "Interface",
+                  "properties": [
+                    {
+                      "id": 0,
+                      "name": "type",
+                      "type": {
+                        "type": "Literal",
+                        "literal": "b"
+                      }
+                    },
+                    {
+                      "id": 1,
+                      "name": "value",
+                      "type": {
+                        "type": "Interface",
+                        "properties": [
+                          {
+                            "id": 0,
+                            "name": "b",
+                            "type": {
+                              "type": "String"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": 1,
+          "type": {
+            "type": "Interface",
+            "properties": [
+              {
+                "id": 0,
+                "name": "meta",
+                "type": {
+                  "type": "String"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "keys": [
+      "meta"
+    ],
+    "type": "Omit"
+  },
   "mapped/Wrapper": {
     "type": "Interface",
     "properties": [

@@ -93,12 +93,15 @@ export class ProtoHelper {
             return this.isInterface(parsed, excludeReference);
         }
         else {
-            return schema.type === SchemaType.Interface ||
-                schema.type === SchemaType.Pick ||
-                schema.type === SchemaType.Partial ||
-                schema.type === SchemaType.Omit ||
-                schema.type === SchemaType.Overwrite;
+            return schema.type === SchemaType.Interface || this.isMappedType(schema) && this.parseMappedType(schema).type === SchemaType.Interface
         }
+    }
+
+    isMappedType(schema: TSBufferSchema): schema is Exclude<InterfaceReference, TypeReference> {
+        return schema.type === SchemaType.Pick ||
+            schema.type === SchemaType.Partial ||
+            schema.type === SchemaType.Omit ||
+            schema.type === SchemaType.Overwrite;
     }
 
     isTypeReference(schema: TSBufferSchema): schema is TypeReference {
@@ -145,6 +148,9 @@ export class ProtoHelper {
             // Intersection/Union 递归合并unionProperties
             else if (schema.type === SchemaType.Intersection || schema.type === SchemaType.Union) {
                 this._addUnionProperties(unionProperties, schema.members.map(v => v.type));
+            }
+            else if (this.isMappedType(schema)) {
+                this._addUnionProperties(unionProperties, [this.parseMappedType(schema)]);
             }
         }
         return unionProperties;
@@ -210,8 +216,12 @@ export class ProtoHelper {
         else if (schema.type === SchemaType.Interface) {
             this._flatInterfaceSchemaCache[uuid] = this._flattenInterface(schema);
         }
-        else {
+        else if (this.isMappedType(schema)) {
             this._flatInterfaceSchemaCache[uuid] = this._flattenMappedType(schema);
+        }
+        else {
+            // @ts-expect-error
+            throw new Error('Invalid interface type: ' + schema.type);
         }
 
         return this._flatInterfaceSchemaCache[uuid];
@@ -329,9 +339,6 @@ export class ProtoHelper {
                         type: flatTarget.indexSignature.type
                     })
                 }
-                else {
-                    throw new Error(`Cannot find pick key [${key}]`);
-                }
             }
             return {
                 type: SchemaType.Interface,
@@ -366,23 +373,24 @@ export class ProtoHelper {
         }
     }
 
-    parseMappedType(schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema): InterfaceTypeSchema | UnionTypeSchema {
+    parseMappedType(schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema): InterfaceTypeSchema | UnionTypeSchema | IntersectionTypeSchema {
+        // 解嵌套，例如：Pick<Pick<Omit, XXX, 'a'|'b'>>>
         let parents: (PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema)[] = [];
         let child: TSBufferSchema = schema;
         do {
             parents.push(child);
             child = this.parseReference(child.target);
         }
-        while (child.type === SchemaType.Pick || child.type === SchemaType.Omit || child.type === SchemaType.Partial || child.type === SchemaType.Overwrite);
+        while (this.isMappedType(child));
 
-        // Final
+        // 最内层是 interface，直接返回（validator 会验证 key 匹配）
         if (child.type === SchemaType.Interface) {
             return child;
         }
         // PickOmit<A|B> === PickOmit<A> | PickOmit<B>
-        else if (child.type === SchemaType.Union) {
-            let newSchema: UnionTypeSchema = {
-                type: SchemaType.Union,
+        else if (child.type === SchemaType.Union || child.type === SchemaType.Intersection) {
+            let newSchema: UnionTypeSchema | IntersectionTypeSchema = {
+                type: child.type,
                 members: child.members.map(v => {
                     // 从里面往外装
                     let type: TSBufferSchema = v.type;

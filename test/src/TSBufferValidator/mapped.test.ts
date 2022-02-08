@@ -60,6 +60,22 @@ describe('MappedType Validate', function () {
         validateAndAssert({
             common: 'xxx',
         }, 'mapped/PickAB', ErrorMsg[ErrorType.MissingRequiredProperty]('type'));
+
+        // Pick Intersection
+        ['PickIntersection1', 'OmitIntersection1'].forEach(v => {
+            validateAndAssert({ a: 'x', c: 'x' }, 'mapped/' + v, undefined);
+            validateAndAssert({ a: 'x' }, 'mapped/' + v, ErrorMsg[ErrorType.MissingRequiredProperty]('c'));
+            validateAndAssert({ c: 'x' }, 'mapped/' + v, ErrorMsg[ErrorType.MissingRequiredProperty]('a'));
+            validateAndAssert({ a: 'x', b: 'x', c: 'x' }, 'mapped/' + v, ErrorMsg[ErrorType.ExcessProperty]('b'));
+        });
+
+        ['PickIntersection2', 'OmitIntersection2'].forEach(v => {
+            validateAndAssert({ type: 'a', value: { a: 'x' } }, 'mapped/' + v, undefined);
+            validateAndAssert({ type: 'b', value: { b: 'x' } }, 'mapped/' + v, undefined);
+            validateAndAssert({ type: 'b' }, 'mapped/' + v, ErrorMsg[ErrorType.MissingRequiredProperty]('value'));
+            validateAndAssert({ type: 'b', value: { b: 'x' }, meta: 'xxx' }, 'mapped/' + v, ErrorMsg[ErrorType.ExcessProperty]('meta'));
+
+        })
     });
 
     it('Pick, strictNullChecks: false', function () {

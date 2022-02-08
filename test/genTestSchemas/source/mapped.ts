@@ -89,6 +89,11 @@ export type PartialAB = Partial<AB>;
 export type PartialPick = Partial<PickAB>;
 export type PickPartial = Pick<PartialAB, 'type'>;
 
+export type PickIntersection1 = Pick<{ a: string, b: string } & { c: string, d: string }, 'a' | 'c'>;
+export type OmitIntersection1 = Omit<{ a: string, b: string } & { c: string, d: string }, 'b' | 'd'>;
+export type PickIntersection2 = Pick<({ type: 'a', value: { a: string } } | { type: 'b', value: { b: string } }) & { meta: string }, 'type' | 'value'>;
+export type OmitIntersection2 = Omit<({ type: 'a', value: { a: string } } | { type: 'b', value: { b: string } }) & { meta: string }, 'meta'>;
+
 export interface Wrapper {
     time: Date,
     value1?: string,

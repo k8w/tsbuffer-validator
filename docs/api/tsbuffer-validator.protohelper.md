@@ -30,6 +30,7 @@ export declare class ProtoHelper
 |  [getFlatInterfaceSchema(schema)](./tsbuffer-validator.protohelper.getflatinterfaceschema.md) |  | 将interface及其引用转换为展平的schema |
 |  [getUnionProperties(schema)](./tsbuffer-validator.protohelper.getunionproperties.md) |  |  |
 |  [isInterface(schema, excludeReference)](./tsbuffer-validator.protohelper.isinterface.md) |  |  |
+|  [isMappedType(schema)](./tsbuffer-validator.protohelper.ismappedtype.md) |  |  |
 |  [isTypeReference(schema)](./tsbuffer-validator.protohelper.istypereference.md) |  |  |
 |  [parseMappedType(schema)](./tsbuffer-validator.protohelper.parsemappedtype.md) |  |  |
 |  [parseReference(schema)](./tsbuffer-validator.protohelper.parsereference.md) |  | 将ReferenceTypeSchema层层转换为它最终实际引用的类型 |

@@ -473,7 +473,12 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         else if (parsed.type === SchemaType.Union) {
             return this._validateUnionType(value, parsed, options);
         }
-        throw new Error();
+        else if (parsed.type === SchemaType.Intersection) {
+            return this._validateIntersectionType(value, parsed, options);
+        }
+
+        // @ts-expect-error
+        throw new Error(`Invalid ${schema.type} target type: ${parsed.type}`);
     }
 
     private _validateFlatInterface(value: any, schema: FlatInterfaceTypeSchema, options: ValidateOptions) {

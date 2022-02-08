@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-parseMappedType(schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema): InterfaceTypeSchema | UnionTypeSchema;
+parseMappedType(schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema): InterfaceTypeSchema | UnionTypeSchema | IntersectionTypeSchema;
 ```
 
 ## Parameters
@@ -18,5 +18,5 @@ parseMappedType(schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | Ov
 
 <b>Returns:</b>
 
-InterfaceTypeSchema \| UnionTypeSchema
+InterfaceTypeSchema \| UnionTypeSchema \| IntersectionTypeSchema
 
