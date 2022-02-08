@@ -1083,6 +1083,136 @@
       }
     ]
   },
+  "mapped/key1": {
+    "type": "Union",
+    "members": [
+      {
+        "id": 0,
+        "type": {
+          "type": "Literal",
+          "literal": "name"
+        }
+      },
+      {
+        "id": 1,
+        "type": {
+          "type": "Literal",
+          "literal": "orders"
+        }
+      }
+    ]
+  },
+  "mapped/key2_A": {
+    "type": "Union",
+    "members": [
+      {
+        "id": 0,
+        "type": {
+          "type": "Literal",
+          "literal": "a"
+        }
+      },
+      {
+        "id": 1,
+        "type": {
+          "type": "Literal",
+          "literal": "b"
+        }
+      },
+      {
+        "id": 2,
+        "type": {
+          "type": "Literal",
+          "literal": "name"
+        }
+      },
+      {
+        "id": 3,
+        "type": {
+          "type": "Literal",
+          "literal": "orders"
+        }
+      }
+    ]
+  },
+  "mapped/key2_B": {
+    "type": "Union",
+    "members": [
+      {
+        "id": 0,
+        "type": {
+          "type": "Literal",
+          "literal": "c"
+        }
+      },
+      {
+        "id": 1,
+        "type": {
+          "type": "Literal",
+          "literal": "d"
+        }
+      },
+      {
+        "id": 2,
+        "type": {
+          "type": "Literal",
+          "literal": "name"
+        }
+      },
+      {
+        "id": 3,
+        "type": {
+          "type": "Literal",
+          "literal": "orders"
+        }
+      }
+    ]
+  },
+  "mapped/key2": {
+    "type": "Intersection",
+    "members": [
+      {
+        "id": 0,
+        "type": {
+          "type": "Reference",
+          "target": "mapped/key2_A"
+        }
+      },
+      {
+        "id": 1,
+        "type": {
+          "type": "Reference",
+          "target": "mapped/key2_B"
+        }
+      }
+    ]
+  },
+  "mapped/ObjKey3": {
+    "type": "Interface",
+    "properties": [
+      {
+        "id": 0,
+        "name": "name",
+        "type": {
+          "type": "String"
+        }
+      },
+      {
+        "id": 1,
+        "name": "orders",
+        "type": {
+          "type": "String"
+        }
+      }
+    ]
+  },
+  "mapped/key3": {
+    "type": "Keyof",
+    "target": {
+      "type": "Reference",
+      "target": "mapped/ObjKey3"
+    }
+  },
   "mapped/Pick1": {
     "target": {
       "type": "Reference",
@@ -1094,6 +1224,50 @@
     "type": "Pick"
   },
   "mapped/Pick2": {
+    "target": {
+      "type": "Reference",
+      "target": "mapped/Base"
+    },
+    "keys": [
+      "name",
+      "orders"
+    ],
+    "type": "Pick"
+  },
+  "mapped/Pick2_1": {
+    "target": {
+      "type": "Reference",
+      "target": "mapped/Base"
+    },
+    "keys": [
+      "name",
+      "orders"
+    ],
+    "type": "Pick"
+  },
+  "mapped/Pick2_2": {
+    "target": {
+      "type": "Reference",
+      "target": "mapped/Base"
+    },
+    "keys": [
+      "name",
+      "orders"
+    ],
+    "type": "Pick"
+  },
+  "mapped/Pick2_3": {
+    "target": {
+      "type": "Reference",
+      "target": "mapped/Base"
+    },
+    "keys": [
+      "name",
+      "orders"
+    ],
+    "type": "Pick"
+  },
+  "mapped/Pick2_4": {
     "target": {
       "type": "Reference",
       "target": "mapped/Base"
@@ -1155,6 +1329,50 @@
     },
     "keys": [
       "name"
+    ],
+    "type": "Omit"
+  },
+  "mapped/Omit4_1": {
+    "target": {
+      "type": "Reference",
+      "target": "mapped/Base"
+    },
+    "keys": [
+      "name",
+      "orders"
+    ],
+    "type": "Omit"
+  },
+  "mapped/Omit4_2": {
+    "target": {
+      "type": "Reference",
+      "target": "mapped/Base"
+    },
+    "keys": [
+      "name",
+      "orders"
+    ],
+    "type": "Omit"
+  },
+  "mapped/Omit4_3": {
+    "target": {
+      "type": "Reference",
+      "target": "mapped/Base"
+    },
+    "keys": [
+      "name",
+      "orders"
+    ],
+    "type": "Omit"
+  },
+  "mapped/Omit4_4": {
+    "target": {
+      "type": "Reference",
+      "target": "mapped/Base"
+    },
+    "keys": [
+      "name",
+      "orders"
     ],
     "type": "Omit"
   },

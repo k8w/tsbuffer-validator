@@ -1,8 +1,8 @@
 # CHANGELOG
 
-## [2.1.0-dev.0] - 2022-02-03
+## [2.1.0-dev.1] - 2022-02-03
 ### Added
-- Support new `KeyofTypeSchema`. 
+- Support new `KeyofTypeSchema`, support type alias and using `keyof` in `Pick` and `Omit`
 ## [2.0.8] - 2022-01-06
 ### Fixed
 - `cjs` to `js` to fix `react-scripts@5`

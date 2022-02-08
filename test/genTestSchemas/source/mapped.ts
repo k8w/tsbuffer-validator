@@ -8,8 +8,22 @@ export interface Base {
     }
 }
 
+export type key1 = 'name' | 'orders';
+export type key2_A = 'a' | 'b' | 'name' | 'orders';
+export type key2_B = 'c' | 'd' | 'name' | 'orders';
+export type key2 = key2_A & key2_B;
+export interface ObjKey3 {
+    name: string,
+    orders: string
+}
+export type key3 = keyof ObjKey3;
+
 export type Pick1 = Pick<Base, 'name'>;
 export type Pick2 = Pick<Base, 'name' | 'orders'>;
+export type Pick2_1 = Pick<Base, key1>;
+export type Pick2_2 = Pick<Base, key2>;
+export type Pick2_3 = Pick<Base, keyof ObjKey3>;
+export type Pick2_4 = Pick<Base, key3>;
 export type Pick3 = Pick<Pick2, 'orders'>;
 
 export type Partial1 = Partial<Base>;
@@ -18,6 +32,11 @@ export type Partial2 = Partial<Pick2>;
 export type Omit1 = Omit<Base, 'sex'>;
 export type Omit2 = Omit<Pick2, 'orders'>;
 export type Omit3 = Omit<Omit1, 'name'>;
+export type Omit4_1 = Omit<Base, key1>;
+export type Omit4_2 = Omit<Base, key2>;
+export type Omit4_3 = Omit<Base, keyof ObjKey3>;
+export type Omit4_4 = Omit<Base, key3>;
+
 
 export type Overwrite1 = Overwrite<Base, {
     sex: 'm' | 'f';

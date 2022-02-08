@@ -24,11 +24,13 @@ describe('MappedType Validate', function () {
         validateAndAssert({ name: 'x', orders: [] }, 'mapped/Pick1', ErrorMsg[ErrorType.ExcessProperty]('orders'));
         validateAndAssert({}, 'mapped/Pick1', ErrorMsg[ErrorType.MissingRequiredProperty]('name'));
 
-        // Pick fields
-        validateAndAssert({ name: 'x' }, 'mapped/Pick2', undefined);
-        validateAndAssert({ name: 'x', orders: [1, 2, 3] }, 'mapped/Pick2', undefined);
-        validateAndAssert({ name: 'x', orders: [1, 2, 3], sex: { value: 'm' } }, 'mapped/Pick2',
-            ErrorMsg[ErrorType.ExcessProperty]('sex'));
+        // Pick fields (Pick2)
+        ['Pick2', 'Pick2_1', 'Pick2_2', 'Pick2_3', 'Pick2_4'].forEach(v => {
+            validateAndAssert({ name: 'x' }, `mapped/${v}`, undefined);
+            validateAndAssert({ name: 'x', orders: [1, 2, 3] }, `mapped/${v}`, undefined);
+            validateAndAssert({ name: 'x', orders: [1, 2, 3], sex: { value: 'm' } }, `mapped/${v}`,
+                ErrorMsg[ErrorType.ExcessProperty]('sex'));
+        });
 
         // Pick<Pick>
         validateAndAssert({ orders: [1, 2, 3] }, 'mapped/Pick3', undefined);
@@ -78,11 +80,14 @@ describe('MappedType Validate', function () {
         validateAndAssert({ name: 'x', orders: [] }, 'mapped/Pick1', ErrorMsg[ErrorType.ExcessProperty]('orders'));
         validateAndAssert({}, 'mapped/Pick1', ErrorMsg[ErrorType.MissingRequiredProperty]('name'));
 
-        // Pick fields
-        validateAndAssert({ name: 'x' }, 'mapped/Pick2', undefined);
-        validateAndAssert({ name: 'x', orders: [1, 2, 3] }, 'mapped/Pick2', undefined);
-        validateAndAssert({ name: 'x', orders: [1, 2, 3], sex: { value: 'm' } }, 'mapped/Pick2',
-            ErrorMsg[ErrorType.ExcessProperty]('sex'));
+        // Pick fields (Pick2)
+        // Pick fields (Pick2)
+        ['Pick2', 'Pick2_1', 'Pick2_2', 'Pick2_3', 'Pick2_4'].forEach(v => {
+            validateAndAssert({ name: 'x' }, `mapped/${v}`, undefined);
+            validateAndAssert({ name: 'x', orders: [1, 2, 3] }, `mapped/${v}`, undefined);
+            validateAndAssert({ name: 'x', orders: [1, 2, 3], sex: { value: 'm' } }, `mapped/${v}`,
+                ErrorMsg[ErrorType.ExcessProperty]('sex'));
+        });
 
         // Pick<Pick>
         validateAndAssert({ orders: [1, 2, 3] }, 'mapped/Pick3', undefined);
@@ -158,6 +163,14 @@ describe('MappedType Validate', function () {
         validateAndAssert({ orders: [1] }, 'mapped/Omit3', undefined);
         validateAndAssert({ name: 'x' }, 'mapped/Omit3', ErrorMsg[ErrorType.ExcessProperty]('name'));
         validateAndAssert({ sex: 'x' }, 'mapped/Omit3', ErrorMsg[ErrorType.ExcessProperty]('sex'));
+
+        // Omit4
+        ['Omit4_1', 'Omit4_2', 'Omit4_3', 'Omit4_4'].forEach(v => {
+            validateAndAssert({}, `mapped/${v}`, undefined);
+            validateAndAssert({ sex: { value: 'm' } }, `mapped/${v}`, undefined);
+            validateAndAssert({ name: 'x' }, `mapped/${v}`, ErrorMsg[ErrorType.ExcessProperty]('name'));
+            validateAndAssert({ orders: [1] }, `mapped/${v}`, ErrorMsg[ErrorType.ExcessProperty]('orders'));
+        })
 
         // indexSignature
         validateAndAssert({ a: 'x', d: 'x' }, 'mapped/IOmit', undefined);
