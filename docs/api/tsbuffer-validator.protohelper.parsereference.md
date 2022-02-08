@@ -4,7 +4,7 @@
 
 ## ProtoHelper.parseReference() method
 
-将ReferenceTYpeSchema层层转换为它最终实际引用的类型
+将ReferenceTypeSchema层层转换为它最终实际引用的类型
 
 <b>Signature:</b>
 

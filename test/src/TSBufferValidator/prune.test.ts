@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { TSBufferProto } from 'tsbuffer-schema';
+import { SchemaType, TSBufferProto } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../../src/TSBufferValidator';
 
 describe('prune', function () {
@@ -269,12 +269,12 @@ describe('prune', function () {
     it('strictNullChecks: undefined', function () {
         let strict = new TSBufferValidator({
             'a/b': {
-                type: 'Interface',
+                type: SchemaType.Interface,
                 properties: [{
                     id: 0,
                     name: 'a',
                     type: {
-                        type: 'String'
+                        type: SchemaType.String
                     },
                     optional: true
                 }]
@@ -282,12 +282,12 @@ describe('prune', function () {
         }, { strictNullChecks: true });
         let nonStrict = new TSBufferValidator({
             'a/b': {
-                type: 'Interface',
+                type: SchemaType.Interface,
                 properties: [{
                     id: 0,
                     name: 'a',
                     type: {
-                        type: 'String'
+                        type: SchemaType.String
                     },
                     optional: true
                 }]
@@ -305,15 +305,15 @@ describe('prune', function () {
     it('strictNullChecks: null', function () {
         let strict = new TSBufferValidator({
             'a/b': {
-                type: 'Interface',
+                type: SchemaType.Interface,
                 properties: [{
                     id: 0,
                     name: 'a',
                     type: {
-                        type: 'Union',
+                        type: SchemaType.Union,
                         members: [
-                            { id: 0, type: { type: 'Literal', literal: null } },
-                            { id: 1, type: { type: 'String' } }
+                            { id: 0, type: { type: SchemaType.Literal, literal: null } },
+                            { id: 1, type: { type: SchemaType.String } }
                         ]
                     }
                 }]
@@ -321,15 +321,15 @@ describe('prune', function () {
         }, { strictNullChecks: true });
         let nonStrict = new TSBufferValidator({
             'a/b': {
-                type: 'Interface',
+                type: SchemaType.Interface,
                 properties: [{
                     id: 0,
                     name: 'a',
                     type: {
-                        type: 'Union',
+                        type: SchemaType.Union,
                         members: [
-                            { id: 0, type: { type: 'Literal', literal: null } },
-                            { id: 1, type: { type: 'String' } }
+                            { id: 0, type: { type: SchemaType.Literal, literal: null } },
+                            { id: 1, type: { type: SchemaType.String } }
                         ]
                     }
                 }]

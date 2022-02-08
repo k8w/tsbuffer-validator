@@ -72,7 +72,7 @@ export class ProtoHelper {
         else if (schema.type === SchemaType.Keyof) {
             let flatInterface = this.getFlatInterfaceSchema(schema.target);
             return {
-                type: 'Union',
+                type: SchemaType.Union,
                 members: flatInterface.properties.map((v, i) => ({
                     id: i,
                     type: {

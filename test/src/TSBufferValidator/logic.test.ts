@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { TSBufferProto } from 'tsbuffer-schema';
+import { SchemaType, TSBufferProto } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../../src';
 import { ErrorMsg, ErrorType } from '../../../src/ErrorMsg';
 import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
@@ -160,17 +160,17 @@ describe('LogicType', function () {
     it('Basic Intersection', function () {
         let validator = new TSBufferValidator({
             'a/a1': {
-                type: 'Intersection',
+                type: SchemaType.Intersection,
                 members: [
-                    { id: 0, type: { type: 'String' } },
-                    { id: 1, type: { type: 'String' } },
+                    { id: 0, type: { type: SchemaType.String } },
+                    { id: 1, type: { type: SchemaType.String } },
                 ]
             },
             'a/a2': {
-                type: 'Intersection',
+                type: SchemaType.Intersection,
                 members: [
-                    { id: 0, type: { type: 'String' } },
-                    { id: 1, type: { type: 'Any' } },
+                    { id: 0, type: { type: SchemaType.String } },
+                    { id: 1, type: { type: SchemaType.Any } },
                 ]
             }
         });

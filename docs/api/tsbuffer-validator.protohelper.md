@@ -4,7 +4,6 @@
 
 ## ProtoHelper class
 
-
 <b>Signature:</b>
 
 ```typescript
@@ -33,5 +32,5 @@ export declare class ProtoHelper
 |  [isInterface(schema, excludeReference)](./tsbuffer-validator.protohelper.isinterface.md) |  |  |
 |  [isTypeReference(schema)](./tsbuffer-validator.protohelper.istypereference.md) |  |  |
 |  [parseMappedType(schema)](./tsbuffer-validator.protohelper.parsemappedtype.md) |  |  |
-|  [parseReference(schema)](./tsbuffer-validator.protohelper.parsereference.md) |  | 将ReferenceTYpeSchema层层转换为它最终实际引用的类型 |
+|  [parseReference(schema)](./tsbuffer-validator.protohelper.parsereference.md) |  | 将ReferenceTypeSchema层层转换为它最终实际引用的类型 |
 

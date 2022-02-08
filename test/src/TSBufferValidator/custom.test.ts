@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import { SchemaType } from 'tsbuffer-schema';
 import { ErrorMsg, ErrorType } from '../../../src/ErrorMsg';
 import { TSBufferValidator } from '../../../src/TSBufferValidator';
 import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
@@ -7,11 +8,11 @@ describe('CustomType Validate', function () {
     it('Custom', function () {
         let validator = new TSBufferValidator({
             'a/b': {
-                type: 'Reference',
+                type: SchemaType.Reference,
                 target: 'custom/Email'
             },
             'custom/Email': {
-                type: 'Custom',
+                type: SchemaType.Custom,
                 validate: value => {
                     if (typeof value !== 'string') {
                         return { isSucc: false, errMsg: ErrorMsg.TypeError('string', typeof value) };

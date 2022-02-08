@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import { SchemaType } from 'tsbuffer-schema';
 import { TSBufferValidator } from '../../../src';
 import { ErrorMsg, ErrorType } from '../../../src/ErrorMsg';
 import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
@@ -6,34 +7,34 @@ import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
 describe('TypeReference Validate', function () {
     it('Reference', function () {
         let schema = {
-            type: 'Boolean'
+            type: SchemaType.Boolean
         } as const;
         let validator = new TSBufferValidator({
             // 原始
             'a/a1': schema,
             // 文件内直接引用
             'a/a2': {
-                type: 'Reference',
+                type: SchemaType.Reference,
                 target: 'a/a1'
             },
             // 文件内间接引用
             'a/a3': {
-                type: 'Reference',
+                type: SchemaType.Reference,
                 target: 'a/a2'
             },
             // 跨文件直接引用
             'b/b1': {
-                type: 'Reference',
+                type: SchemaType.Reference,
                 target: 'a/a1'
             },
             // 跨文件间接引用
             'b/b2': {
-                type: 'Reference',
+                type: SchemaType.Reference,
                 target: 'a/a2'
             },
             // 跨多文件间接引用
             'c/c1': {
-                type: 'Reference',
+                type: SchemaType.Reference,
                 target: 'b/b2'
             }
         });
@@ -56,50 +57,50 @@ describe('TypeReference Validate', function () {
         let validator = new TSBufferValidator({
             // 原始
             'a/a1': {
-                type: 'Interface',
+                type: SchemaType.Interface,
                 properties: [
                     {
                         id: 0,
                         name: 'aaa',
                         type: {
-                            type: 'Boolean'
+                            type: SchemaType.Boolean
                         }
                     }
                 ],
                 indexSignature: {
                     keyType: 'String',
                     type: {
-                        type: 'Boolean'
+                        type: SchemaType.Boolean
                     }
                 }
             },
             'b/b1': {
-                type: 'IndexedAccess',
+                type: SchemaType.IndexedAccess,
                 objectType: {
-                    type: 'Reference',
+                    type: SchemaType.Reference,
                     target: 'a/a1'
                 },
                 index: 'aaa'
             },
             'b/b2': {
-                type: 'IndexedAccess',
+                type: SchemaType.IndexedAccess,
                 objectType: {
-                    type: 'Reference',
+                    type: SchemaType.Reference,
                     target: 'a/a1'
                 },
                 index: 'bbb'
             },
             'e/e1': {
-                type: 'IndexedAccess',
+                type: SchemaType.IndexedAccess,
                 objectType: {
-                    type: 'Any' as any
+                    type: SchemaType.Any as any
                 },
                 index: 'xxx'
             },
             'e/e2': {
-                type: 'IndexedAccess',
+                type: SchemaType.IndexedAccess,
                 objectType: {
-                    type: 'Interface',
+                    type: SchemaType.Interface,
                     properties: []
                 },
                 index: 'xxx'
@@ -127,20 +128,20 @@ describe('TypeReference Validate', function () {
     it('Optional to | undefined', function () {
         let validator = new TSBufferValidator({
             'a/a1': {
-                type: 'Interface',
+                type: SchemaType.Interface,
                 properties: [
                     {
                         id: 0,
                         optional: true,
                         name: 'aaa',
-                        type: { type: 'String' }
+                        type: { type: SchemaType.String }
                     }
                 ]
             },
             'a/b1': {
-                type: 'IndexedAccess',
+                type: SchemaType.IndexedAccess,
                 objectType: {
-                    type: 'Reference',
+                    type: SchemaType.Reference,
                     target: 'a/a1'
                 },
                 index: 'aaa'
@@ -155,26 +156,26 @@ describe('TypeReference Validate', function () {
     it('IndexedAccess a optional fields with | undefined', function () {
         let validator = new TSBufferValidator({
             'a/a1': {
-                type: 'Interface',
+                type: SchemaType.Interface,
                 properties: [
                     {
                         id: 0,
                         optional: true,
                         name: 'aaa',
                         type: {
-                            type: 'Union',
+                            type: SchemaType.Union,
                             members: [
-                                { id: 0, type: { type: 'String' } },
-                                { id: 0, type: { type: 'Literal', literal: undefined } }
+                                { id: 0, type: { type: SchemaType.String } },
+                                { id: 0, type: { type: SchemaType.Literal, literal: undefined } }
                             ]
                         }
                     }
                 ]
             },
             'a/b1': {
-                type: 'IndexedAccess',
+                type: SchemaType.IndexedAccess,
                 objectType: {
-                    type: 'Reference',
+                    type: SchemaType.Reference,
                     target: 'a/a1'
                 },
                 index: 'aaa'

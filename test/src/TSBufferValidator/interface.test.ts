@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { TSBufferProto } from 'tsbuffer-schema';
+import { SchemaType, TSBufferProto } from 'tsbuffer-schema';
 import { ErrorMsg, ErrorType } from '../../../src/ErrorMsg';
 import { TSBufferValidator } from '../../../src/TSBufferValidator';
 import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
@@ -203,14 +203,14 @@ describe('Interface Validate', function () {
     it('Cannot extend from non-interface', function () {
         let validator = new TSBufferValidator({
             'a/a1': {
-                type: 'String'
+                type: SchemaType.String
             },
             'a/b1': {
-                type: 'Interface',
+                type: SchemaType.Interface,
                 extends: [{
                     id: 0,
                     type: {
-                        type: 'Reference',
+                        type: SchemaType.Reference,
                         target: 'a/a1'
                     }
                 }]
@@ -224,22 +224,22 @@ describe('Interface Validate', function () {
     it('Required | undefined', function () {
         let validator = new TSBufferValidator({
             'a/b': {
-                type: 'Interface',
+                type: SchemaType.Interface,
                 properties: [
                     {
                         id: 0,
                         name: 'value',
                         type: {
-                            type: 'Union',
+                            type: SchemaType.Union,
                             members: [
                                 {
                                     id: 0,
-                                    type: { type: 'String' }
+                                    type: { type: SchemaType.String }
                                 },
                                 {
                                     id: 1,
                                     type: {
-                                        type: 'Literal',
+                                        type: SchemaType.Literal,
                                         literal: undefined
                                     }
                                 }

@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { LiteralTypeSchema, TSBufferSchema } from 'tsbuffer-schema';
+import { LiteralTypeSchema, SchemaType, TSBufferSchema } from 'tsbuffer-schema';
 import { ErrorType } from '../../../src/ErrorMsg';
 import { TSBufferValidator } from '../../../src/TSBufferValidator';
 import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
@@ -11,11 +11,11 @@ describe('BasicType Validate', function () {
                 type: 'xxx' as any
             },
             'a/c': {
-                type: 'Reference',
+                type: SchemaType.Reference,
                 target: 'x/x'
             },
             'a/d': {
-                type: 'Reference',
+                type: SchemaType.Reference,
                 target: 'a/x'
             }
         }, {});
@@ -43,7 +43,7 @@ describe('BasicType Validate', function () {
 
     it('Boolean', function () {
         let schema: TSBufferSchema = {
-            type: 'Boolean'
+            type: SchemaType.Boolean
         };
         let validator = new TSBufferValidator({
             'a/b': schema
@@ -62,7 +62,7 @@ describe('BasicType Validate', function () {
         let scalarTypes = [undefined, 'double'] as const;
         for (let scalarType of scalarTypes) {
             let schema: TSBufferSchema = {
-                type: 'Number',
+                type: SchemaType.Number,
                 scalarType: scalarType
             };
             let validator = new TSBufferValidator({
@@ -86,7 +86,7 @@ describe('BasicType Validate', function () {
         let scalarTypes = ['int', 'uint'] as const;
         for (let scalarType of scalarTypes) {
             let schema: TSBufferSchema = {
-                type: 'Number',
+                type: SchemaType.Number,
                 scalarType: scalarType
             };
             let validator = new TSBufferValidator({
@@ -117,7 +117,7 @@ describe('BasicType Validate', function () {
     it('Number: bigint', function () {
         (['bigint', 'bigint64', 'biguint64'] as const).forEach(v => {
             let schema: TSBufferSchema = {
-                type: 'Number',
+                type: SchemaType.Number,
                 scalarType: v
             };
             let validator = new TSBufferValidator({
@@ -135,7 +135,7 @@ describe('BasicType Validate', function () {
 
     it('String', function () {
         let schema = {
-            type: 'String'
+            type: SchemaType.String
         } as const;
         let validator = new TSBufferValidator({
             'a/b': schema
@@ -155,7 +155,7 @@ describe('BasicType Validate', function () {
 
     it('Enum', function () {
         let schema: TSBufferSchema = {
-            type: 'Enum',
+            type: SchemaType.Enum,
             members: [
                 { id: 0, value: 0 },
                 { id: 1, value: 1 },
@@ -189,7 +189,7 @@ describe('BasicType Validate', function () {
     it('Any', function () {
         let validator = new TSBufferValidator({
             'a/b': {
-                type: 'Any'
+                type: SchemaType.Any
             }
         });
 
@@ -203,7 +203,7 @@ describe('BasicType Validate', function () {
 
     it('Literal', function () {
         let schema: LiteralTypeSchema = {
-            type: 'Literal',
+            type: SchemaType.Literal,
             literal: '123'
         }
         let validator = new TSBufferValidator({
@@ -215,7 +215,7 @@ describe('BasicType Validate', function () {
         assert.deepStrictEqual(validator.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema.literal, undefined,).errMsg);
 
         let schema1: LiteralTypeSchema = {
-            type: 'Literal',
+            type: SchemaType.Literal,
             literal: 123
         };
         let validator1 = new TSBufferValidator({
@@ -225,7 +225,7 @@ describe('BasicType Validate', function () {
         assert.deepStrictEqual(validator1.validate('123', 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema1.literal, '123').errMsg);
 
         let schema2: LiteralTypeSchema = {
-            type: 'Literal',
+            type: SchemaType.Literal,
             literal: true
         }
         let validator2 = new TSBufferValidator({
@@ -235,7 +235,7 @@ describe('BasicType Validate', function () {
         assert.deepStrictEqual(validator2.validate(1, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema2.literal, 1).errMsg);
 
         let schema3: LiteralTypeSchema = {
-            type: 'Literal',
+            type: SchemaType.Literal,
             literal: null
         };
         let validator3 = new TSBufferValidator({
@@ -247,7 +247,7 @@ describe('BasicType Validate', function () {
         assert.deepStrictEqual(validator3.validate(undefined, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema3.literal, undefined).errMsg);
 
         let schema4: LiteralTypeSchema = {
-            type: 'Literal',
+            type: SchemaType.Literal,
             literal: undefined
         };
         let validator4 = new TSBufferValidator({
@@ -259,7 +259,7 @@ describe('BasicType Validate', function () {
         assert.deepStrictEqual(validator4.validate(null, 'a/b').errMsg, ValidateResultUtil.error(ErrorType.InvalidLiteralValue, schema4.literal, null).errMsg);
 
         let schema5: LiteralTypeSchema = {
-            type: 'Literal',
+            type: SchemaType.Literal,
             literal: null
         };
         let validator5 = new TSBufferValidator({
@@ -275,7 +275,7 @@ describe('BasicType Validate', function () {
     it('strictNullChecks false', function () {
         let validator = new TSBufferValidator({
             'a/b': {
-                type: 'Literal',
+                type: SchemaType.Literal,
                 literal: null
             }
         }, {
@@ -286,7 +286,7 @@ describe('BasicType Validate', function () {
 
         let validator1 = new TSBufferValidator({
             'a/b': {
-                type: 'Literal',
+                type: SchemaType.Literal,
                 literal: undefined
             }
         }, {
@@ -297,13 +297,13 @@ describe('BasicType Validate', function () {
 
         let validator2 = new TSBufferValidator({
             'a/b': {
-                type: 'Interface',
+                type: SchemaType.Interface,
                 properties: [
                     {
                         id: 0,
                         name: 'value',
                         type: {
-                            type: 'String'
+                            type: SchemaType.String
                         },
                         optional: true
                     }
@@ -319,7 +319,7 @@ describe('BasicType Validate', function () {
 
     it('Object', function () {
         let schema = {
-            type: 'Object'
+            type: SchemaType.Object
         } as const;
         let validator = new TSBufferValidator({
             'a/b': schema
@@ -336,12 +336,12 @@ describe('BasicType Validate', function () {
 
     it('Buffer', function () {
         let schema = {
-            type: 'Buffer'
+            type: SchemaType.Buffer
         } as const;
         let validator = new TSBufferValidator({
             'a/b': schema,
             'a/c': {
-                type: 'Buffer',
+                type: SchemaType.Buffer,
                 arrayType: 'xxx' as any
             }
         });
@@ -368,7 +368,7 @@ describe('BasicType Validate', function () {
         let typedArrays = ['Int8Array', 'Int16Array', 'Int32Array', 'BigInt64Array', 'Uint8Array', 'Uint16Array', 'Uint32Array', 'BigUint64Array', 'Float32Array', 'Float64Array'] as const;
         for (let arrayType of typedArrays) {
             let schema2 = {
-                type: 'Buffer',
+                type: SchemaType.Buffer,
                 arrayType: arrayType
             } as const;
             let validator = new TSBufferValidator({
@@ -389,7 +389,7 @@ describe('BasicType Validate', function () {
 
     it('Date', function () {
         let schema: TSBufferSchema = {
-            type: 'Date'
+            type: SchemaType.Date
         };
         let validator = new TSBufferValidator({
             'a/b': schema
