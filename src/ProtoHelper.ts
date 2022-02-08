@@ -1,6 +1,5 @@
 import { InterfaceReference, InterfaceTypeSchema, IntersectionTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, ReferenceTypeSchema, SchemaType, TSBufferProto, TSBufferSchema, TypeReference, UnionTypeSchema } from "tsbuffer-schema";
 
-/** @public */
 export class ProtoHelper {
 
     readonly proto: TSBufferProto;
@@ -9,7 +8,7 @@ export class ProtoHelper {
         this.proto = proto;
     }
 
-    /** 将ReferenceTYpeSchema层层转换为它最终实际引用的类型 */
+    /** 将ReferenceTypeSchema层层转换为它最终实际引用的类型 */
     parseReference(schema: TSBufferSchema): Exclude<TSBufferSchema, TypeReference> {
         // Reference
         if (schema.type === SchemaType.Reference) {
