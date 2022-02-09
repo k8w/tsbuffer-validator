@@ -74,7 +74,7 @@ describe('MappedType Validate', function () {
             validateAndAssert({ type: 'b', value: { b: 'x' } }, 'mapped/' + v, undefined);
             validateAndAssert({ type: 'b' }, 'mapped/' + v, ErrorMsg[ErrorType.MissingRequiredProperty]('value'));
             validateAndAssert({ type: 'b', value: { b: 'x' }, meta: 'xxx' }, 'mapped/' + v, ErrorMsg[ErrorType.ExcessProperty]('meta'));
-
+            validateAndAssert({ type: 'b', value: { a: 'x' } }, 'mapped/' + v, ErrorMsg[ErrorType.ExcessProperty]('a'), ['value']);
         })
     });
 
