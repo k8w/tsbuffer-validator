@@ -312,4 +312,20 @@ describe('MappedType Validate', function () {
         validateAndAssert({ a: { b: null } }, 'mapped/NonNullable4', undefined);
         validateAndAssert({ a: { b: 'ABC' } }, 'mapped/NonNullable4', undefined);
     });
+
+    it('Interface extends Pick/Omit', async function () {
+        validateAndAssert({ name: 'x' }, 'mapped/ExtendPick2', ErrorMsg[ErrorType.MissingRequiredProperty]('xxx'));
+        validateAndAssert({ name: 'x', xxx: 'x' }, `mapped/ExtendPick2`, undefined);
+        validateAndAssert({ name: 'x', xxx: 'x' }, `mapped/ExtendPick2`, undefined);
+        validateAndAssert({ name: 'x', xxx: 'x', orders: [1, 2, 3] }, `mapped/ExtendPick2`, undefined);
+        validateAndAssert({ name: 'x', xxx: 'x', orders: [1, 2, 3], sex: { value: 'm' } }, `mapped/ExtendPick2`,
+            ErrorMsg[ErrorType.ExcessProperty]('sex'));
+
+        validateAndAssert({ name: 'x' }, 'mapped/ExtendOmit2', ErrorMsg[ErrorType.MissingRequiredProperty]('xxx'));
+        validateAndAssert({ name: 'x', xxx: 'x' }, 'mapped/ExtendOmit2', undefined);
+        validateAndAssert({ name: 'x', xxx: 'x', orders: [1] }, 'mapped/ExtendOmit2', ErrorMsg[ErrorType.ExcessProperty]('orders'));
+        validateAndAssert({ name: 'x', xxx: 'x', sex: { value: 'f' } }, 'mapped/ExtendOmit2', ErrorMsg[ErrorType.ExcessProperty]('sex'));
+        validateAndAssert({ xxx: 'x' }, 'mapped/ExtendOmit2', ErrorMsg[ErrorType.MissingRequiredProperty]('name'));
+
+    })
 });

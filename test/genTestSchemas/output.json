@@ -2256,6 +2256,48 @@
       }
     }
   },
+  "mapped/ExtendPick2": {
+    "type": "Interface",
+    "extends": [
+      {
+        "id": 0,
+        "type": {
+          "type": "Reference",
+          "target": "mapped/Pick2"
+        }
+      }
+    ],
+    "properties": [
+      {
+        "id": 0,
+        "name": "xxx",
+        "type": {
+          "type": "String"
+        }
+      }
+    ]
+  },
+  "mapped/ExtendOmit2": {
+    "type": "Interface",
+    "extends": [
+      {
+        "id": 0,
+        "type": {
+          "type": "Reference",
+          "target": "mapped/Omit2"
+        }
+      }
+    ],
+    "properties": [
+      {
+        "id": 0,
+        "name": "xxx",
+        "type": {
+          "type": "String"
+        }
+      }
+    ]
+  },
   "nested/ArrStr": {
     "type": "Array",
     "elementType": {

@@ -257,9 +257,14 @@ export class ProtoHelper {
             for (let extend of schema.extends) {
                 // 解引用
                 let parsedExtRef = this.parseReference(extend.type);
-                if (parsedExtRef.type !== SchemaType.Interface) {
+                if (this.isMappedType(parsedExtRef)) {
+                    parsedExtRef = this._flattenMappedType(parsedExtRef);
+                }
+
+                if (!this.isInterface(parsedExtRef)) {
                     throw new Error('SchemaError: extends must from interface but from ' + parsedExtRef.type)
                 }
+
                 // 递归展平extends
                 let flatenExtendsSchema = this.getFlatInterfaceSchema(parsedExtRef);
 

@@ -109,3 +109,10 @@ export type NonNullable1 = NonNullable<Wrapper['value1']>;
 export type NonNullable2 = NonNullable<Wrapper['value2']>;
 export type NonNullable3 = NonNullable<Value3>;
 export type NonNullable4 = NonNullable<Wrapper['value4']>;
+
+export interface ExtendPick2 extends Pick2 {
+    xxx: string
+}
+export interface ExtendOmit2 extends Omit2 {
+    xxx: string
+}
