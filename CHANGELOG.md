@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [2.1.0-dev.5] - 2022-02-26
+## [2.1.0] - 2022-02-26
 ### Added
 - Support new `KeyofTypeSchema`, support type alias and using `keyof` in `Pick` and `Omit`
 - Support `Pick<Intersection>` and `Omit<Intersection>`
