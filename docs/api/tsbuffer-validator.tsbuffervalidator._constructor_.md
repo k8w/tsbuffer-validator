@@ -17,5 +17,5 @@ constructor(proto: Proto, options?: Partial<TSBufferValidatorOptions>);
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  proto | Proto |  |
-|  options | Partial&lt;[TSBufferValidatorOptions](./tsbuffer-validator.tsbuffervalidatoroptions.md)<!-- -->&gt; |  |
+|  options | Partial&lt;[TSBufferValidatorOptions](./tsbuffer-validator.tsbuffervalidatoroptions.md)<!-- -->&gt; | <i>(Optional)</i> |
 

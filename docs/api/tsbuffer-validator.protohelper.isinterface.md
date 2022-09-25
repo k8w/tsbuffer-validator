@@ -15,7 +15,7 @@ isInterface(schema: TSBufferSchema, excludeReference?: boolean): schema is Inter
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  schema | TSBufferSchema |  |
-|  excludeReference | boolean |  |
+|  excludeReference | boolean | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

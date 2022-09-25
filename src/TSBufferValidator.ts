@@ -1,4 +1,4 @@
-import { ArrayTypeSchema, BooleanTypeSchema, BufferTypeSchema, EnumTypeSchema, IndexedAccessTypeSchema, InterfaceReference, InterfaceTypeSchema, IntersectionTypeSchema, LiteralTypeSchema, NonNullableTypeSchema, NumberTypeSchema, ObjectTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, ReferenceTypeSchema, SchemaType, StringTypeSchema, TSBufferProto, TSBufferSchema, TupleTypeSchema, UnionTypeSchema } from 'tsbuffer-schema';
+import { ArrayTypeSchema, BooleanTypeSchema, BufferTypeSchema, EnumTypeSchema, InterfaceReference, InterfaceTypeSchema, IntersectionTypeSchema, LiteralTypeSchema, NonNullableTypeSchema, NumberTypeSchema, ObjectTypeSchema, OmitTypeSchema, OverwriteTypeSchema, PartialTypeSchema, PickTypeSchema, SchemaType, StringTypeSchema, TSBufferProto, TSBufferSchema, TupleTypeSchema, TypeReference, UnionTypeSchema } from 'tsbuffer-schema';
 import { ErrorType, stringify } from './ErrorMsg';
 import { FlatInterfaceTypeSchema, ProtoHelper } from './ProtoHelper';
 import { ValidateResult, ValidateResultError, ValidateResultUtil } from './ValidateResultUtil';
@@ -206,6 +206,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
                 break;
             // 错误的type
             default:
+                // @ts-expect-error
                 throw new Error(`Unsupported schema type: ${schema.type}`);
         }
 
@@ -592,7 +593,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
         }
     }
 
-    private _validateReferenceType(value: any, schema: ReferenceTypeSchema | IndexedAccessTypeSchema, options: ValidateOptions): ValidateResult {
+    private _validateReferenceType(value: any, schema: TypeReference, options: ValidateOptions): ValidateResult {
         return this._validate(value, this.protoHelper.parseReference(schema), options);
     }
 

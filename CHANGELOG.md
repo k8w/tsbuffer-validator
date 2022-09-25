@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.1.1] - 2022-09-25
+### Fixed
+- Support validate `keyof` types (by [@774653363](https://github.com/774653363)) 
+
 ## [2.1.0] - 2022-02-26
 ### Added
 - Support new `KeyofTypeSchema`, support type alias and using `keyof` in `Pick` and `Omit`

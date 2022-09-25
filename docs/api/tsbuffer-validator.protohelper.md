@@ -20,7 +20,7 @@ export declare class ProtoHelper
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [proto](./tsbuffer-validator.protohelper.proto.md) |  | TSBufferProto |  |
+|  [proto](./tsbuffer-validator.protohelper.proto.md) | <code>readonly</code> | TSBufferProto |  |
 
 ## Methods
 
