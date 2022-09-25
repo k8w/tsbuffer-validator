@@ -179,6 +179,7 @@ export class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> {
                 break;
             case SchemaType.IndexedAccess:
             case SchemaType.Reference:
+            case SchemaType.Keyof:
                 vRes = this._validateReferenceType(value, schema, options);
                 break;
             case SchemaType.Union:

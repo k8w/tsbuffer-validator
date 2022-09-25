@@ -105,7 +105,7 @@ export class ProtoHelper {
     }
 
     isTypeReference(schema: TSBufferSchema): schema is TypeReference {
-        return schema.type === SchemaType.Reference || schema.type === SchemaType.IndexedAccess;
+        return schema.type === SchemaType.Reference || schema.type === SchemaType.IndexedAccess || schema.type === SchemaType.Keyof;
     }
 
     private _schemaWithUuids: (TSBufferSchema & { uuid: number })[] = [];
