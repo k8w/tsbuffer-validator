@@ -5,10 +5,10 @@
 ## ValidateOutput type
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
-export declare type ValidateOutput = {
+export type ValidateOutput = {
     isSucc: true;
     errMsg?: undefined;
 } | {

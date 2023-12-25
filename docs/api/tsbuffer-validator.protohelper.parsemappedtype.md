@@ -4,7 +4,7 @@
 
 ## ProtoHelper.parseMappedType() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 parseMappedType(schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema): InterfaceTypeSchema | UnionTypeSchema | IntersectionTypeSchema;
@@ -16,7 +16,7 @@ parseMappedType(schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | Ov
 |  --- | --- | --- |
 |  schema | PickTypeSchema \| OmitTypeSchema \| PartialTypeSchema \| OverwriteTypeSchema |  |
 
-<b>Returns:</b>
+**Returns:**
 
 InterfaceTypeSchema \| UnionTypeSchema \| IntersectionTypeSchema
 

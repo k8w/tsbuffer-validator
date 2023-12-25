@@ -4,7 +4,7 @@
 
 ## ProtoHelper.isTypeReference() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isTypeReference(schema: TSBufferSchema): schema is TypeReference;
@@ -16,7 +16,7 @@ isTypeReference(schema: TSBufferSchema): schema is TypeReference;
 |  --- | --- | --- |
 |  schema | TSBufferSchema |  |
 
-<b>Returns:</b>
+**Returns:**
 
 schema is TypeReference
 

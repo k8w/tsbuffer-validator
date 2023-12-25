@@ -4,7 +4,7 @@
 
 ## TSBufferValidator.protoHelper property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly protoHelper: ProtoHelper;

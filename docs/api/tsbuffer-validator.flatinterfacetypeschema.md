@@ -5,7 +5,7 @@
 ## FlatInterfaceTypeSchema interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface FlatInterfaceTypeSchema 
@@ -15,7 +15,7 @@ export interface FlatInterfaceTypeSchema
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [indexSignature?](./tsbuffer-validator.flatinterfacetypeschema.indexsignature.md) |  | InterfaceTypeSchema\['indexSignature'\] | <i>(Optional)</i> |
+|  [indexSignature?](./tsbuffer-validator.flatinterfacetypeschema.indexsignature.md) |  | InterfaceTypeSchema\['indexSignature'\] | _(Optional)_ |
 |  [properties](./tsbuffer-validator.flatinterfacetypeschema.properties.md) |  | NonNullable&lt;InterfaceTypeSchema\['properties'\]&gt; |  |
 |  [type](./tsbuffer-validator.flatinterfacetypeschema.type.md) |  | InterfaceTypeSchema\['type'\] |  |
 

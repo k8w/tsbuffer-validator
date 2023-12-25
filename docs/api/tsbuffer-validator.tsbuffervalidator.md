@@ -6,7 +6,7 @@
 
 TSBuffer Schema Validator
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class TSBufferValidator<Proto extends TSBufferProto = TSBufferProto> 

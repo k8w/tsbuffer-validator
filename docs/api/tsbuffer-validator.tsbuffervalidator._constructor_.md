@@ -6,7 +6,7 @@
 
 Constructs a new instance of the `TSBufferValidator` class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constructor(proto: Proto, options?: Partial<TSBufferValidatorOptions>);
@@ -17,5 +17,5 @@ constructor(proto: Proto, options?: Partial<TSBufferValidatorOptions>);
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  proto | Proto |  |
-|  options | Partial&lt;[TSBufferValidatorOptions](./tsbuffer-validator.tsbuffervalidatoroptions.md)<!-- -->&gt; | <i>(Optional)</i> |
+|  options | Partial&lt;[TSBufferValidatorOptions](./tsbuffer-validator.tsbuffervalidatoroptions.md)<!-- -->&gt; | _(Optional)_ |
 

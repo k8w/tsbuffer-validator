@@ -6,7 +6,7 @@
 
 Constructs a new instance of the `ProtoHelper` class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constructor(proto: TSBufferProto);

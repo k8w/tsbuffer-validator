@@ -6,7 +6,7 @@
 
 Common properties from Union/Intersection type ( In case of they are treated as excess property and lead to validation error )
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 unionProperties?: string[];

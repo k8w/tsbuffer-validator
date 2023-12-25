@@ -6,7 +6,7 @@
 
 将ReferenceTypeSchema层层转换为它最终实际引用的类型
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 parseReference(schema: TSBufferSchema): Exclude<TSBufferSchema, TypeReference>;
@@ -18,7 +18,7 @@ parseReference(schema: TSBufferSchema): Exclude<TSBufferSchema, TypeReference>;
 |  --- | --- | --- |
 |  schema | TSBufferSchema |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Exclude&lt;TSBufferSchema, TypeReference&gt;
 

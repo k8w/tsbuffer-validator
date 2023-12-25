@@ -6,7 +6,7 @@
 
 将interface及其引用转换为展平的schema
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getFlatInterfaceSchema(schema: InterfaceTypeSchema | InterfaceReference): FlatInterfaceTypeSchema;
@@ -18,7 +18,7 @@ getFlatInterfaceSchema(schema: InterfaceTypeSchema | InterfaceReference): FlatIn
 |  --- | --- | --- |
 |  schema | InterfaceTypeSchema \| InterfaceReference |  |
 
-<b>Returns:</b>
+**Returns:**
 
 [FlatInterfaceTypeSchema](./tsbuffer-validator.flatinterfacetypeschema.md)
 

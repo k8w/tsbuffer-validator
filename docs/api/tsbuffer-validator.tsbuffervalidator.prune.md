@@ -6,7 +6,7 @@
 
 修剪 Object，移除 Schema 中未定义的 Key 需要确保 value 类型合法
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 prune<T>(value: T, schemaOrId: string | TSBufferSchema, options?: Partial<ValidateOptions>): PruneOutput<T>;
@@ -18,9 +18,9 @@ prune<T>(value: T, schemaOrId: string | TSBufferSchema, options?: Partial<Valida
 |  --- | --- | --- |
 |  value | T | value to be validated |
 |  schemaOrId | string \| TSBufferSchema | Schema or schema ID. |
-|  options | Partial&lt;[ValidateOptions](./tsbuffer-validator.validateoptions.md)<!-- -->&gt; | <i>(Optional)</i> |
+|  options | Partial&lt;[ValidateOptions](./tsbuffer-validator.validateoptions.md)<!-- -->&gt; | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 [PruneOutput](./tsbuffer-validator.pruneoutput.md)<!-- -->&lt;T&gt;
 

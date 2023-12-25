@@ -4,7 +4,7 @@
 
 ## FlatInterfaceTypeSchema.indexSignature property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 indexSignature?: InterfaceTypeSchema['indexSignature'];

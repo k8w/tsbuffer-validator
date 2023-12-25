@@ -6,7 +6,7 @@
 
 将unionProperties 扩展到 InterfaceTypeSchema中（optional的any类型） 以此来跳过对它们的检查（用于Intersection/Union）
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 applyUnionProperties(schema: FlatInterfaceTypeSchema, unionProperties: string[]): FlatInterfaceTypeSchema;
@@ -19,7 +19,7 @@ applyUnionProperties(schema: FlatInterfaceTypeSchema, unionProperties: string[])
 |  schema | [FlatInterfaceTypeSchema](./tsbuffer-validator.flatinterfacetypeschema.md) |  |
 |  unionProperties | string\[\] |  |
 
-<b>Returns:</b>
+**Returns:**
 
 [FlatInterfaceTypeSchema](./tsbuffer-validator.flatinterfacetypeschema.md)
 

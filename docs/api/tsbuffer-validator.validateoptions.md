@@ -6,16 +6,16 @@
 
 单次validate的选项，会向下透传
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ValidateOptions extends TSBufferValidatorOptions 
 ```
-<b>Extends:</b> [TSBufferValidatorOptions](./tsbuffer-validator.tsbuffervalidatoroptions.md)
+**Extends:** [TSBufferValidatorOptions](./tsbuffer-validator.tsbuffervalidatoroptions.md)
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [unionProperties?](./tsbuffer-validator.validateoptions.unionproperties.md) |  | string\[\] | <i>(Optional)</i> Common properties from Union/Intersection type ( In case of they are treated as excess property and lead to validation error ) |
+|  [unionProperties?](./tsbuffer-validator.validateoptions.unionproperties.md) |  | string\[\] | _(Optional)_ Common properties from Union/Intersection type ( In case of they are treated as excess property and lead to validation error ) |
 

@@ -4,7 +4,7 @@
 
 ## ProtoHelper.isMappedType() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isMappedType(schema: TSBufferSchema): schema is Exclude<InterfaceReference, TypeReference>;
@@ -16,7 +16,7 @@ isMappedType(schema: TSBufferSchema): schema is Exclude<InterfaceReference, Type
 |  --- | --- | --- |
 |  schema | TSBufferSchema |  |
 
-<b>Returns:</b>
+**Returns:**
 
 schema is Exclude&lt;InterfaceReference, TypeReference&gt;
 

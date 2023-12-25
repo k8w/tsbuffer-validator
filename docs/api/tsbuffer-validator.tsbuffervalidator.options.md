@@ -6,7 +6,7 @@
 
 Default options
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 options: TSBufferValidatorOptions;

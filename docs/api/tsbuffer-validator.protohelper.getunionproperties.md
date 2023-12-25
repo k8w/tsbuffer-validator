@@ -4,7 +4,7 @@
 
 ## ProtoHelper.getUnionProperties() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getUnionProperties(schema: UnionTypeSchema | IntersectionTypeSchema): string[];
@@ -16,7 +16,7 @@ getUnionProperties(schema: UnionTypeSchema | IntersectionTypeSchema): string[];
 |  --- | --- | --- |
 |  schema | UnionTypeSchema \| IntersectionTypeSchema |  |
 
-<b>Returns:</b>
+**Returns:**
 
 string\[\]
 

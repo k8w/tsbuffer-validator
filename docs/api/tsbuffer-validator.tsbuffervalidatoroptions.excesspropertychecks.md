@@ -24,7 +24,7 @@ let ab: AB = { a: 'x', b: 'x', c: 'x' }
 
 默认：`true`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 excessPropertyChecks: boolean;

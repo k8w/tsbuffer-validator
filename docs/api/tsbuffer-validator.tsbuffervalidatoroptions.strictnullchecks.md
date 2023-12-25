@@ -6,7 +6,7 @@
 
 同 `tsconfig.json` 中的 `strictNullChecks` 是否使用严格等于去判定 `undefined` 和 `null`
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 strictNullChecks: boolean;

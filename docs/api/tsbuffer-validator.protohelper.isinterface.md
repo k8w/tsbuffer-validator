@@ -4,7 +4,7 @@
 
 ## ProtoHelper.isInterface() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isInterface(schema: TSBufferSchema, excludeReference?: boolean): schema is InterfaceTypeSchema | InterfaceReference;
@@ -15,9 +15,9 @@ isInterface(schema: TSBufferSchema, excludeReference?: boolean): schema is Inter
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  schema | TSBufferSchema |  |
-|  excludeReference | boolean | <i>(Optional)</i> |
+|  excludeReference | boolean | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 schema is InterfaceTypeSchema \| InterfaceReference
 

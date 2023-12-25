@@ -5,7 +5,7 @@
 ## TSBufferValidatorOptions interface
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface TSBufferValidatorOptions 
@@ -15,7 +15,7 @@ export interface TSBufferValidatorOptions
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [cloneProto?](./tsbuffer-validator.tsbuffervalidatoroptions.cloneproto.md) |  | boolean | <i>(Optional)</i> Clone the proto, don't change this if you don't know what it is. |
+|  [cloneProto?](./tsbuffer-validator.tsbuffervalidatoroptions.cloneproto.md) |  | boolean | _(Optional)_ Clone the proto, don't change this if you don't know what it is. |
 |  [excessPropertyChecks](./tsbuffer-validator.tsbuffervalidatoroptions.excesspropertychecks.md) |  | boolean | <p>检查interface中是否包含Schema之外的字段</p><p>例1：</p>
 ```
 type AB = { a: string, b: string };

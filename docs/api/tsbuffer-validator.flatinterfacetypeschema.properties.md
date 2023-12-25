@@ -4,7 +4,7 @@
 
 ## FlatInterfaceTypeSchema.properties property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 properties: NonNullable<InterfaceTypeSchema['properties']>;

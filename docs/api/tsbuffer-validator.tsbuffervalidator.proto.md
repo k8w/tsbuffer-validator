@@ -4,7 +4,7 @@
 
 ## TSBufferValidator.proto property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 proto: Proto;
