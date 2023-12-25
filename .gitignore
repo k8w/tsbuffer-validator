@@ -8,6 +8,7 @@ yarn-error.log*
 dist
 lib
 .rpt2_cache
+.ds_store
 
 # Runtime data
 pids
