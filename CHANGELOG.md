@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.1.2-dev.0] - 2023-12-25
+### Fixed
+- Fixed memory leaking due to `parseMappedType` not cached properly. (Thanks @刺鸟)
+
 ## [2.1.1] - 2022-09-25
 ### Fixed
 - Support validate `keyof` types (by [@774653363](https://github.com/774653363)) 

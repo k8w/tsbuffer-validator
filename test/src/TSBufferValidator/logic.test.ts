@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { SchemaType, TSBufferProto } from 'tsbuffer-schema';
-import { TSBufferValidator } from '../../../src';
+import { ProtoHelper, TSBufferValidator } from '../../../src';
 import { ErrorMsg, ErrorType } from '../../../src/ErrorMsg';
 import { ValidateResultUtil } from '../../../src/ValidateResultUtil';
 
@@ -196,5 +196,84 @@ describe('LogicType', function () {
             value1: 123,
             value3: 1234
         }, 'logic/ME_Final', ErrorMsg[ErrorType.MissingRequiredProperty]('value2'));
+    })
+
+    it('Intersection: schemaid cache', function () {
+        let validator = new TSBufferValidator({
+            'a/Intersection': {
+                type: SchemaType.Intersection,
+                members: [
+                    { id: 0, type: { type: SchemaType.Reference, target: 'a/Inter' } },
+                    {
+                        id: 1, type: {
+                            type: SchemaType.Partial,
+                            target: { type: SchemaType.Reference, target: 'a/Inter' }
+                        }
+                    },
+                    {
+                        id: 2, type: {
+                            type: SchemaType.Interface,
+                            properties: [
+                                {
+                                    id: 0,
+                                    name: 'a',
+                                    type: {
+                                        type: SchemaType.String
+                                    }
+                                },
+                                {
+                                    id: 0,
+                                    name: 'b',
+                                    type: {
+                                        type: SchemaType.String
+                                    }
+                                },
+                            ]
+                        }
+                    },
+                ]
+            },
+            'a/Inter': {
+                type: SchemaType.Interface,
+                properties: [
+                    {
+                        id: 0,
+                        name: 'a',
+                        type: {
+                            type: SchemaType.String
+                        }
+                    },
+                    {
+                        id: 0,
+                        name: 'b',
+                        type: {
+                            type: SchemaType.String
+                        }
+                    },
+                ]
+            }
+        });
+
+        const helper = new ProtoHelper(validator.proto);
+
+        assert.strictEqual(
+            helper['_getSchemaUuid'](validator.proto['a/Intersection']),
+            helper['_getSchemaUuid'](validator.proto['a/Intersection'])
+        );
+
+        assert.strictEqual(
+            helper['_getSchemaUuid'](validator.proto['a/Inter']),
+            helper['_getSchemaUuid'](validator.proto['a/Inter'])
+        );
+
+        assert.strictEqual(
+            helper.getUnionProperties(validator.proto['a/Intersection']),
+            helper.getUnionProperties(validator.proto['a/Intersection']),
+        );
+
+        assert.strictEqual(
+            helper.getUnionProperties(validator.proto['a/Intersection']),
+            helper.getUnionProperties(validator.proto['a/Intersection']),
+        );
     })
 })

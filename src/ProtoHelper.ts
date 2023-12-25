@@ -378,7 +378,13 @@ export class ProtoHelper {
         }
     }
 
+    private _parseMappedTypeCache: WeakMap<Parameters<ProtoHelper['parseMappedType']>[0], ReturnType<ProtoHelper['parseMappedType']>> = new WeakMap();
     parseMappedType(schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema): InterfaceTypeSchema | UnionTypeSchema | IntersectionTypeSchema {
+        let cache = this._parseMappedTypeCache.get(schema);
+        if (cache) {
+            return cache;
+        }
+
         // 解嵌套，例如：Pick<Pick<Omit, XXX, 'a'|'b'>>>
         let parents: (PickTypeSchema | OmitTypeSchema | PartialTypeSchema | OverwriteTypeSchema)[] = [];
         let child: TSBufferSchema = schema;
@@ -390,6 +396,7 @@ export class ProtoHelper {
 
         // 最内层是 interface，直接返回（validator 会验证 key 匹配）
         if (child.type === SchemaType.Interface) {
+            this._parseMappedTypeCache.set(schema, child);
             return child;
         }
         // PickOmit<A|B> === PickOmit<A> | PickOmit<B>
@@ -413,6 +420,8 @@ export class ProtoHelper {
                     }
                 })
             };
+
+            this._parseMappedTypeCache.set(schema, newSchema);
             return newSchema;
         }
         else {
