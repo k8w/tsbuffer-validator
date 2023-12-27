@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [2.1.2-dev.0] - 2023-12-25
+## [2.1.2] - 2023-12-28
 ### Fixed
 - Fixed memory leaking due to `parseMappedType` not cached properly. (Thanks @刺鸟)
 
