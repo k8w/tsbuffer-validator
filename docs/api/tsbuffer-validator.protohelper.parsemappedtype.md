@@ -12,9 +12,37 @@ parseMappedType(schema: PickTypeSchema | OmitTypeSchema | PartialTypeSchema | Ov
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  schema | PickTypeSchema \| OmitTypeSchema \| PartialTypeSchema \| OverwriteTypeSchema |  |
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+schema
+
+
+</td><td>
+
+PickTypeSchema \| OmitTypeSchema \| PartialTypeSchema \| OverwriteTypeSchema
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 
 **Returns:**
 

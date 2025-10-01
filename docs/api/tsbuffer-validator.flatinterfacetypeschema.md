@@ -13,9 +13,79 @@ export interface FlatInterfaceTypeSchema
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [indexSignature?](./tsbuffer-validator.flatinterfacetypeschema.indexsignature.md) |  | InterfaceTypeSchema\['indexSignature'\] | _(Optional)_ |
-|  [properties](./tsbuffer-validator.flatinterfacetypeschema.properties.md) |  | NonNullable&lt;InterfaceTypeSchema\['properties'\]&gt; |  |
-|  [type](./tsbuffer-validator.flatinterfacetypeschema.type.md) |  | InterfaceTypeSchema\['type'\] |  |
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[indexSignature?](./tsbuffer-validator.flatinterfacetypeschema.indexsignature.md)
+
+
+</td><td>
+
+
+</td><td>
+
+InterfaceTypeSchema\['indexSignature'\]
+
+
+</td><td>
+
+_(Optional)_
+
+
+</td></tr>
+<tr><td>
+
+[properties](./tsbuffer-validator.flatinterfacetypeschema.properties.md)
+
+
+</td><td>
+
+
+</td><td>
+
+NonNullable&lt;InterfaceTypeSchema\['properties'\]&gt;
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[type](./tsbuffer-validator.flatinterfacetypeschema.type.md)
+
+
+</td><td>
+
+
+</td><td>
+
+InterfaceTypeSchema\['type'\]
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 

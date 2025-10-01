@@ -14,9 +14,37 @@ getFlatInterfaceSchema(schema: InterfaceTypeSchema | InterfaceReference): FlatIn
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  schema | InterfaceTypeSchema \| InterfaceReference |  |
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+schema
+
+
+</td><td>
+
+InterfaceTypeSchema \| InterfaceReference
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 
 **Returns:**
 

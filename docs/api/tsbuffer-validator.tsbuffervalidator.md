@@ -14,22 +14,163 @@ export declare class TSBufferValidator<Proto extends TSBufferProto = TSBufferPro
 
 ## Constructors
 
-|  Constructor | Modifiers | Description |
-|  --- | --- | --- |
-|  [(constructor)(proto, options)](./tsbuffer-validator.tsbuffervalidator._constructor_.md) |  | Constructs a new instance of the <code>TSBufferValidator</code> class |
+<table><thead><tr><th>
+
+Constructor
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[(constructor)(proto, options)](./tsbuffer-validator.tsbuffervalidator._constructor_.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Constructs a new instance of the `TSBufferValidator` class
+
+
+</td></tr>
+</tbody></table>
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [options](./tsbuffer-validator.tsbuffervalidator.options.md) |  | [TSBufferValidatorOptions](./tsbuffer-validator.tsbuffervalidatoroptions.md) | Default options |
-|  [proto](./tsbuffer-validator.tsbuffervalidator.proto.md) |  | Proto |  |
-|  [protoHelper](./tsbuffer-validator.tsbuffervalidator.protohelper.md) | <code>readonly</code> | [ProtoHelper](./tsbuffer-validator.protohelper.md) |  |
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[options](./tsbuffer-validator.tsbuffervalidator.options.md)
+
+
+</td><td>
+
+
+</td><td>
+
+[TSBufferValidatorOptions](./tsbuffer-validator.tsbuffervalidatoroptions.md)
+
+
+</td><td>
+
+Default options
+
+
+</td></tr>
+<tr><td>
+
+[proto](./tsbuffer-validator.tsbuffervalidator.proto.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Proto
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[protoHelper](./tsbuffer-validator.tsbuffervalidator.protohelper.md)
+
+
+</td><td>
+
+`readonly`
+
+
+</td><td>
+
+[ProtoHelper](./tsbuffer-validator.protohelper.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 
 ## Methods
 
-|  Method | Modifiers | Description |
-|  --- | --- | --- |
-|  [prune(value, schemaOrId, options)](./tsbuffer-validator.tsbuffervalidator.prune.md) |  | 修剪 Object，移除 Schema 中未定义的 Key 需要确保 value 类型合法 |
-|  [validate(value, schemaOrId, options)](./tsbuffer-validator.tsbuffervalidator.validate.md) |  | Validate whether the value is valid to the schema |
+<table><thead><tr><th>
+
+Method
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[prune(value, schemaOrId, options)](./tsbuffer-validator.tsbuffervalidator.prune.md)
+
+
+</td><td>
+
+
+</td><td>
+
+修剪 Object，移除 Schema 中未定义的 Key 需要确保 value 类型合法
+
+
+</td></tr>
+<tr><td>
+
+[validate(value, schemaOrId, options)](./tsbuffer-validator.tsbuffervalidator.validate.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Validate whether the value is valid to the schema
+
+
+</td></tr>
+</tbody></table>
 

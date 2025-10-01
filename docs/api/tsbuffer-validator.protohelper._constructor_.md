@@ -14,7 +14,35 @@ constructor(proto: TSBufferProto);
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  proto | TSBufferProto |  |
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+proto
+
+
+</td><td>
+
+TSBufferProto
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 

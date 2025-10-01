@@ -14,10 +14,51 @@ applyUnionProperties(schema: FlatInterfaceTypeSchema, unionProperties: string[])
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  schema | [FlatInterfaceTypeSchema](./tsbuffer-validator.flatinterfacetypeschema.md) |  |
-|  unionProperties | string\[\] |  |
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+schema
+
+
+</td><td>
+
+[FlatInterfaceTypeSchema](./tsbuffer-validator.flatinterfacetypeschema.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+unionProperties
+
+
+</td><td>
+
+string\[\]
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 
 **Returns:**
 

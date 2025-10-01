@@ -14,11 +14,71 @@ prune<T>(value: T, schemaOrId: string | TSBufferSchema, options?: Partial<Valida
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  value | T | value to be validated |
-|  schemaOrId | string \| TSBufferSchema | Schema or schema ID. |
-|  options | Partial&lt;[ValidateOptions](./tsbuffer-validator.validateoptions.md)<!-- -->&gt; | _(Optional)_ |
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+value
+
+
+</td><td>
+
+T
+
+
+</td><td>
+
+value to be validated
+
+
+</td></tr>
+<tr><td>
+
+schemaOrId
+
+
+</td><td>
+
+string \| TSBufferSchema
+
+
+</td><td>
+
+Schema or schema ID.
+
+
+</td></tr>
+<tr><td>
+
+options
+
+
+</td><td>
+
+Partial&lt;[ValidateOptions](./tsbuffer-validator.validateoptions.md)<!-- -->&gt;
+
+
+</td><td>
+
+_(Optional)_
+
+
+</td></tr>
+</tbody></table>
 
 **Returns:**
 

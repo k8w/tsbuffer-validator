@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.1.3] - 2025-09-30
+### Fixed
+- Fixed issue that `Pick<A|B>` to `Pick<A> | Pick<B>` would lead to `decodeJSON` error.
+
 ## [2.1.2] - 2023-12-28
 ### Fixed
 - Fixed memory leaking due to `parseMappedType` not cached properly. (Thanks @刺鸟)

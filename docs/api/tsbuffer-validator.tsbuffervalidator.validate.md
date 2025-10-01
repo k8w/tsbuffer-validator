@@ -14,11 +14,69 @@ validate(value: any, schemaOrId: keyof Proto | TSBufferSchema, options?: Partial
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  value | any | Value to be validated. |
-|  schemaOrId | keyof Proto \| TSBufferSchema |  |
-|  options | Partial&lt;[ValidateOptions](./tsbuffer-validator.validateoptions.md)<!-- -->&gt; | _(Optional)_ |
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+value
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+Value to be validated.
+
+
+</td></tr>
+<tr><td>
+
+schemaOrId
+
+
+</td><td>
+
+keyof Proto \| TSBufferSchema
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+options
+
+
+</td><td>
+
+Partial&lt;[ValidateOptions](./tsbuffer-validator.validateoptions.md)<!-- -->&gt;
+
+
+</td><td>
+
+_(Optional)_
+
+
+</td></tr>
+</tbody></table>
 
 **Returns:**
 

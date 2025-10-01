@@ -6,23 +6,117 @@
 
 ## Classes
 
-|  Class | Description |
-|  --- | --- |
-|  [ProtoHelper](./tsbuffer-validator.protohelper.md) |  |
-|  [TSBufferValidator](./tsbuffer-validator.tsbuffervalidator.md) | TSBuffer Schema Validator |
+<table><thead><tr><th>
+
+Class
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[ProtoHelper](./tsbuffer-validator.protohelper.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[TSBufferValidator](./tsbuffer-validator.tsbuffervalidator.md)
+
+
+</td><td>
+
+TSBuffer Schema Validator
+
+
+</td></tr>
+</tbody></table>
 
 ## Interfaces
 
-|  Interface | Description |
-|  --- | --- |
-|  [FlatInterfaceTypeSchema](./tsbuffer-validator.flatinterfacetypeschema.md) |  |
-|  [TSBufferValidatorOptions](./tsbuffer-validator.tsbuffervalidatoroptions.md) |  |
-|  [ValidateOptions](./tsbuffer-validator.validateoptions.md) | 单次validate的选项，会向下透传 |
+<table><thead><tr><th>
+
+Interface
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[FlatInterfaceTypeSchema](./tsbuffer-validator.flatinterfacetypeschema.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+<tr><td>
+
+[TSBufferValidatorOptions](./tsbuffer-validator.tsbuffervalidatoroptions.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+<tr><td>
+
+[ValidateOptions](./tsbuffer-validator.validateoptions.md)
+
+
+</td><td>
+
+单次validate的选项，会向下透传
+
+
+</td></tr>
+</tbody></table>
 
 ## Type Aliases
 
-|  Type Alias | Description |
-|  --- | --- |
-|  [PruneOutput](./tsbuffer-validator.pruneoutput.md) |  |
-|  [ValidateOutput](./tsbuffer-validator.validateoutput.md) |  |
+<table><thead><tr><th>
+
+Type Alias
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[PruneOutput](./tsbuffer-validator.pruneoutput.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+<tr><td>
+
+[ValidateOutput](./tsbuffer-validator.validateoutput.md)
+
+
+</td><td>
+
+
+
+</td></tr>
+</tbody></table>
 

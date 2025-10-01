@@ -13,19 +13,101 @@ export interface TSBufferValidatorOptions
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [cloneProto?](./tsbuffer-validator.tsbuffervalidatoroptions.cloneproto.md) |  | boolean | _(Optional)_ Clone the proto, don't change this if you don't know what it is. |
-|  [excessPropertyChecks](./tsbuffer-validator.tsbuffervalidatoroptions.excesspropertychecks.md) |  | boolean | <p>检查interface中是否包含Schema之外的字段</p><p>例1：</p>
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[cloneProto?](./tsbuffer-validator.tsbuffervalidatoroptions.cloneproto.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ Clone the proto, don't change this if you don't know what it is.
+
+
+</td></tr>
+<tr><td>
+
+[excessPropertyChecks](./tsbuffer-validator.tsbuffervalidatoroptions.excesspropertychecks.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+检查interface中是否包含Schema之外的字段
+
+例1：
+
 ```
 type AB = { a: string, b: string };
 let ab: AB = { a: 'x', b: 'x', c: 'x' }
 ```
-<p>字段 <code>c</code> 为 excess property，当 <code>excessPropertyChecks</code> 启用时将会报错。</p><p>例2：</p>
+字段 `c` 为 excess property，当 `excessPropertyChecks` 启用时将会报错。
+
+例2：
+
 ```
 type AB = { a: string} | { b: string };
 let ab: AB = { a: 'x', b: 'x', c: 'x' }
 ```
-<p>字段 <code>c</code> 为 excess property，当 <code>excessPropertyChecks</code> 启用时将会报错。</p><p>默认：<code>true</code></p> |
-|  [strictNullChecks](./tsbuffer-validator.tsbuffervalidatoroptions.strictnullchecks.md) |  | boolean | 同 <code>tsconfig.json</code> 中的 <code>strictNullChecks</code> 是否使用严格等于去判定 <code>undefined</code> 和 <code>null</code> |
+字段 `c` 为 excess property，当 `excessPropertyChecks` 启用时将会报错。
+
+默认：`true`
+
+
+</td></tr>
+<tr><td>
+
+[strictNullChecks](./tsbuffer-validator.tsbuffervalidatoroptions.strictnullchecks.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+同 `tsconfig.json` 中的 `strictNullChecks` 是否使用严格等于去判定 `undefined` 和 `null`
+
+
+</td></tr>
+</tbody></table>
 

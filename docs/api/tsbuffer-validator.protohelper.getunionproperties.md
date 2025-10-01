@@ -12,9 +12,37 @@ getUnionProperties(schema: UnionTypeSchema | IntersectionTypeSchema): string[];
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  schema | UnionTypeSchema \| IntersectionTypeSchema |  |
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+schema
+
+
+</td><td>
+
+UnionTypeSchema \| IntersectionTypeSchema
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 
 **Returns:**
 

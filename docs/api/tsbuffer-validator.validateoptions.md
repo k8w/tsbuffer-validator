@@ -15,7 +15,45 @@ export interface ValidateOptions extends TSBufferValidatorOptions
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [unionProperties?](./tsbuffer-validator.validateoptions.unionproperties.md) |  | string\[\] | _(Optional)_ Common properties from Union/Intersection type ( In case of they are treated as excess property and lead to validation error ) |
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[unionProperties?](./tsbuffer-validator.validateoptions.unionproperties.md)
+
+
+</td><td>
+
+
+</td><td>
+
+string\[\]
+
+
+</td><td>
+
+_(Optional)_ Common properties from Union/Intersection type ( In case of they are treated as excess property and lead to validation error )
+
+
+</td></tr>
+</tbody></table>
 

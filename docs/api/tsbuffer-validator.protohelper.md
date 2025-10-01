@@ -12,26 +12,201 @@ export declare class ProtoHelper
 
 ## Constructors
 
-|  Constructor | Modifiers | Description |
-|  --- | --- | --- |
-|  [(constructor)(proto)](./tsbuffer-validator.protohelper._constructor_.md) |  | Constructs a new instance of the <code>ProtoHelper</code> class |
+<table><thead><tr><th>
+
+Constructor
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[(constructor)(proto)](./tsbuffer-validator.protohelper._constructor_.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Constructs a new instance of the `ProtoHelper` class
+
+
+</td></tr>
+</tbody></table>
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [proto](./tsbuffer-validator.protohelper.proto.md) | <code>readonly</code> | TSBufferProto |  |
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[proto](./tsbuffer-validator.protohelper.proto.md)
+
+
+</td><td>
+
+`readonly`
+
+
+</td><td>
+
+TSBufferProto
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 
 ## Methods
 
-|  Method | Modifiers | Description |
-|  --- | --- | --- |
-|  [applyUnionProperties(schema, unionProperties)](./tsbuffer-validator.protohelper.applyunionproperties.md) |  | 将unionProperties 扩展到 InterfaceTypeSchema中（optional的any类型） 以此来跳过对它们的检查（用于Intersection/Union） |
-|  [getFlatInterfaceSchema(schema)](./tsbuffer-validator.protohelper.getflatinterfaceschema.md) |  | 将interface及其引用转换为展平的schema |
-|  [getUnionProperties(schema)](./tsbuffer-validator.protohelper.getunionproperties.md) |  |  |
-|  [isInterface(schema, excludeReference)](./tsbuffer-validator.protohelper.isinterface.md) |  |  |
-|  [isMappedType(schema)](./tsbuffer-validator.protohelper.ismappedtype.md) |  |  |
-|  [isTypeReference(schema)](./tsbuffer-validator.protohelper.istypereference.md) |  |  |
-|  [parseMappedType(schema)](./tsbuffer-validator.protohelper.parsemappedtype.md) |  |  |
-|  [parseReference(schema)](./tsbuffer-validator.protohelper.parsereference.md) |  | 将ReferenceTypeSchema层层转换为它最终实际引用的类型 |
+<table><thead><tr><th>
+
+Method
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[applyUnionProperties(schema, unionProperties)](./tsbuffer-validator.protohelper.applyunionproperties.md)
+
+
+</td><td>
+
+
+</td><td>
+
+将unionProperties 扩展到 InterfaceTypeSchema中（optional的any类型） 以此来跳过对它们的检查（用于Intersection/Union）
+
+
+</td></tr>
+<tr><td>
+
+[getFlatInterfaceSchema(schema)](./tsbuffer-validator.protohelper.getflatinterfaceschema.md)
+
+
+</td><td>
+
+
+</td><td>
+
+将interface及其引用转换为展平的schema
+
+
+</td></tr>
+<tr><td>
+
+[getUnionProperties(schema)](./tsbuffer-validator.protohelper.getunionproperties.md)
+
+
+</td><td>
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[isInterface(schema, excludeReference)](./tsbuffer-validator.protohelper.isinterface.md)
+
+
+</td><td>
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[isMappedType(schema)](./tsbuffer-validator.protohelper.ismappedtype.md)
+
+
+</td><td>
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[isTypeReference(schema)](./tsbuffer-validator.protohelper.istypereference.md)
+
+
+</td><td>
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[parseMappedType(schema)](./tsbuffer-validator.protohelper.parsemappedtype.md)
+
+
+</td><td>
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[parseReference(schema)](./tsbuffer-validator.protohelper.parsereference.md)
+
+
+</td><td>
+
+
+</td><td>
+
+将ReferenceTypeSchema层层转换为它最终实际引用的类型
+
+
+</td></tr>
+</tbody></table>
 
